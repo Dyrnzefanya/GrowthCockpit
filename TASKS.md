@@ -37,11 +37,11 @@
 
 ## Next phase
 
-Phase 1 is closed with PASS. Phase 2 — Authentication & Security requires a separate explicit instruction and its own precondition review; it has not begun.
+Phase 1 is complete with PASS. Phase 2 has not begun and requires a separate explicit instruction and its own precondition review.
 
 ## Phase 1 — UI/UX Foundation & Application Shell
 
-Status: **PASS — closed on 2026-09-11 (Asia/Jakarta).** Technical verification and the operator information-architecture acceptance gate are complete.
+Status: **PASS — final refined state approved on 2026-09-11 (Asia/Jakarta).** All technical gates and the final operator acceptance gate are satisfied. The approval below closes the refinement requested after `df631bc`.
 
 - [x] Phase 0 regression: lint, typecheck, four existing unit checks, browser smoke, production build passed before implementation. Its prior migration evidence is unchanged; no database files changed.
 - [x] FR-1.1 / FE-1.1 — Color, typography, spacing, radius, elevation, and focus tokens centralized; automated source check enforces token use.
@@ -60,14 +60,24 @@ Status: **PASS — closed on 2026-09-11 (Asia/Jakarta).** Technical verification
 - [x] INT / JOB / database — Not applicable; no integrations, jobs, tables, migrations, or data fetching added.
 - [x] TEST-1.1–1.7 — Route smoke, axe, responsive/keyboard, table fixtures (0/1/200), URL round-trip, all statuses, and token enforcement implemented.
 - [x] Visual review — Inspected actual desktop/mobile screenshots plus close-ups of empty/error/loading/controls; fixed mobile control sizing and close-button clearance. Verified internal table scrolling with all columns visible.
-- [x] Final checks — Lint, typecheck, formatting, 8 unit tests, 7 development browser tests, production build and production gallery/paint test pass locally. Browser route checks report no runtime or hydration errors. All sidebar links fit 1280×720; date validation recovers when either date is corrected. Working-tree secret scanning also handles tracked files moved/deleted by the user.
-- [x] Definition of Done — On 2026-09-11 (Asia/Jakarta), the operator explicitly confirmed review of the application shell, component gallery, route structure, and navigation hierarchy, and stated: “I approve the Phase 1 navigation and information architecture.” Source: the operator's Phase 1 closure instruction in this project conversation. No structural changes were requested.
+- [x] Final checks — Lint, typecheck, formatting, 8 unit tests, 10 development browser tests, production build and production gallery/paint test pass locally. Browser route checks report no runtime or hydration errors. All sidebar links fit 1280×720; date validation recovers when either date is corrected. Working-tree secret scanning also handles tracked files moved/deleted by the user.
+- [x] Definition of Done — Final operator approval of the refined application was explicitly granted on 2026-09-11 (Asia/Jakarta). Source: the operator's latest Phase 1 closure instruction in this project conversation: “The Phase 1 operator acceptance gate is now APPROVED.” No further changes were requested.
 
-All eight Phase 1 acceptance criteria are satisfied by the recorded technical evidence. Operator approval closes the final human gate. The approved primary navigation is Today, Performance, Leads, Funnel, Experiments, Playbook, Workflows, Reports, Integrations, and Settings. `/login` remains outside primary application navigation. This acceptance records the existing architecture; it introduces no new architectural decision.
+All eight Phase 1 acceptance criteria and the Definition of Done are satisfied by technical evidence and final human acceptance. The primary navigation remains Today, Performance, Leads, Funnel, Experiments, Playbook, Workflows, Reports, Integrations, and Settings, grouped under Workspace / Operations / Administration. `/login` remains outside primary navigation.
 
-Closure verification: application and test source files remain unchanged since the passing development browser run and production build/test. Closure changes only this control document. Rechecked unit tests, formatting, secret scanning, and Git diff/scope; retained the passing lint, typecheck, build, accessibility, responsive, and production-gallery evidence above without unnecessary reruns. No business-layer or migration changes were introduced. The operator's pre-existing prompt-file move is preserved outside the Phase 1 implementation commit.
+Historical closure verification (`df631bc`): source files were unchanged from the tested implementation; unit tests, formatting, secret scanning, and Git scope were rechecked before committing. No business-layer or migration changes were introduced. The operator's pre-existing prompt-file move was preserved outside the commit.
 
 Remote CI remains externally unverified as accepted during Phase 0 because no remote repository is configured. No public deployment was made. Future issues below remain deferred; Phase 2 has not begun.
+
+### Operator UI/UX refinement — 2026-09-11 (Asia/Jakarta)
+
+- **Feedback:** reduce the reporting band, remove the ambiguous “To · Jakarta” label, bring date controls into the page-title context, and avoid stretching the Performance connection message. Preserve sidebar groups, routes, brand, accessibility, phase messaging, and honest product states.
+- **Refined:** removed the reporting band and shortened the breadcrumb bar. The shared server-rendered `PageHeader` places a compact date-range button beside the title/actions on desktop and below the context on mobile. It opens the existing shadcn/Radix dialog with native From/To inputs; no dependency added. URL values, invalid-range recovery, Apply, Reset, Escape cancellation, and focus return remain functional. Asia/Jakarta is unchanged and appears in dialog context, separate from field labels.
+- **Layout:** added a standard `className` override to `SectionCard`; the Performance informational card uses `max-w-3xl`. The existing wide page container, responsive CSS grids, and full-width table pattern remain intact. No speculative dashboard widgets were added. Mobile native date fields retain a visible gap and at least 44px height.
+- **Browser evidence:** Playwright interacted with the actual rendered application at 1280, 1920, and 390px. Reviewed Today, Performance, Leads, Experiments, and development Gallery screenshots, plus mobile navigation and the open date dialog. Verified title placement, date controls, responsive wrapping, no document overflow, table scrolling, keyboard focus/trapping/return, invalid dates, reloads, cancellation, and reset. Screenshots are generated under `test-results/refinement-*` and `test-results/phase1-*` (ignored artifacts).
+- **Quality gates:** formatting, lint, typecheck, 8 unit tests, all 10 development Playwright tests, production build, secret scan, and the production gallery/paint test pass locally. Axe reports zero WCAG A/AA violations on the five representative routes and the open date dialog at all three widths. Production gallery returns 404; local paint budget passes. Git diff review confirms no navigation config, business-layer, migration, dependency, integration, or authentication changes.
+- **Operator gate — APPROVED:** the operator completed the final visual review and approved the application shell, navigation hierarchy, sidebar structure, page-header hierarchy, compact date-range control, responsive layout direction, integration card/grid pattern, honest not-connected/not-activated states, and overall Du Anyam Performance Marketing OS visual direction. This is final approval of the refined implementation, superseding the pending-review state.
+- **Final closure evidence:** no application or test source changes occurred after the passing refinement browser run and production build/test. Closure rechecked 8 unit tests, formatting, secret scanning, and Git diff/scope; the existing lint, typecheck, build, browser, accessibility, responsive, and production-gallery evidence remains valid. No Phase 2 functionality or fabricated product/performance data was introduced. The final commit includes the operator's existing Phase 1 prompt move into `Docs/Prompt/Done/`, verified as an unchanged-content archive move. Phase 2 remains unstarted.
 
 ## Known future decisions and issues
 

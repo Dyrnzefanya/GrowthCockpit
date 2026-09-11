@@ -201,7 +201,7 @@ export function RouteSkeleton({ route }: { route: string }) {
           </SectionCard>
         </div>
       ) : route === "/performance" ? (
-        <SectionCard title="Paid media performance">
+        <SectionCard title="Paid media performance" className="max-w-3xl">
           <NotConnectedState
             name="Meta Ads"
             phase={10}

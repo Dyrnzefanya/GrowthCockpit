@@ -49,7 +49,13 @@ test("TEST-1.1 all twelve routes are honest and reachable", async ({
   expect(errors).toEqual([]);
 });
 test("TEST-1.2 axe shell and representative routes", async ({ page }) => {
-  for (const path of ["/today", "/leads", "/experiments", "/dev/gallery"]) {
+  for (const path of [
+    "/today",
+    "/performance",
+    "/leads",
+    "/experiments",
+    "/dev/gallery",
+  ]) {
     await page.goto(path);
     const result = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
@@ -175,7 +181,7 @@ test("TEST-1.5 filter URL round-trip and invalid values", async ({ page }) => {
   await expect(form.getByLabel("From", { exact: true })).toHaveValue("");
   await form.getByLabel("Search", { exact: true }).fill("inquiry 001");
   await form.getByLabel("From", { exact: true }).fill("2026-09-20");
-  await form.getByLabel("To · Jakarta").fill("2026-09-11");
+  await form.getByLabel("To", { exact: true }).fill("2026-09-11");
   await form.getByRole("button", { name: "Apply" }).click();
   expect(
     await form

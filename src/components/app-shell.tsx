@@ -1,5 +1,5 @@
 "use client";
-import { useState, type ReactNode, Suspense } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -18,7 +18,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { FilterBar } from "@/components/filter-bar";
 
 function Brand() {
   return (
@@ -115,7 +114,7 @@ export function AppShell({
       </aside>
       <div className="workspace-body">
         <header className="border-b bg-card">
-          <div className="flex min-h-20 flex-wrap items-center justify-between gap-4 px-5 py-3 lg:px-8">
+          <div className="flex min-h-14 flex-wrap items-center justify-between gap-4 px-5 py-2 lg:px-8">
             <div className="flex items-center gap-3">
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
@@ -177,19 +176,6 @@ export function AppShell({
               />
               {label}
             </span>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3 lg:px-8">
-            <span className="text-xs text-muted-foreground">
-              Reporting window{" "}
-              <span className="ml-2 hidden sm:inline">
-                No date range selected by default
-              </span>
-            </span>
-            <Suspense
-              fallback={<span className="text-xs">Loading date range…</span>}
-            >
-              <FilterBar datesOnly />
-            </Suspense>
           </div>
         </header>
         <main id="main-content" tabIndex={-1} className="page-container">

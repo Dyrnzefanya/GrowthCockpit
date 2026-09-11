@@ -1,7 +1,9 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { ArrowDown, ArrowUp, Minus, CircleHelp } from "lucide-react";
 import { StatusBadge, type Status } from "@/components/status-badge";
 import type { MetricView } from "@/types/metric-view";
+import { DateRangeControl } from "@/components/filter-bar";
+import { cn } from "@/lib/utils";
 export function PageHeader({
   title,
   description,
@@ -16,7 +18,7 @@ export function PageHeader({
   return (
     <header className="mb-6 space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1 basis-64">
           <h1 className="break-words text-2xl tracking-tight">{title}</h1>
           {description && (
             <p className="mt-1 max-w-prose text-muted-foreground">
@@ -24,7 +26,16 @@ export function PageHeader({
             </p>
           )}
         </div>
-        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+        <div className="flex max-w-full flex-wrap items-center gap-2">
+          <Suspense
+            fallback={
+              <span className="text-sm text-muted-foreground">Date range</span>
+            }
+          >
+            <DateRangeControl />
+          </Suspense>
+          {actions}
+        </div>
       </div>
       {filters}
     </header>
@@ -35,14 +46,21 @@ export function SectionCard({
   description,
   action,
   children,
+  className,
 }: {
   title: string;
   description?: string;
   action?: ReactNode;
   children: ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="min-w-0 overflow-hidden rounded-lg border bg-card shadow-sm">
+    <section
+      className={cn(
+        "min-w-0 overflow-hidden rounded-lg border bg-card shadow-sm",
+        className,
+      )}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-4">
         <div>
           <h2 className="text-sm">{title}</h2>
