@@ -1,0 +1,22 @@
+# Dependencies and builds
+node_modules/
+.next/
+next-env.d.ts
+out/
+coverage/
+playwright-report/
+test-results/
+
+# Environment files
+.env*
+!.env.example
+
+# Supabase local state
+supabase/.branches/
+supabase/.temp/
+
+# Editors, operating systems, and logs
+.DS_Store
+Thumbs.db
+*.log
+*.tsbuildinfo
