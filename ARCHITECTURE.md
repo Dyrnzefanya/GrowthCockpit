@@ -26,6 +26,10 @@ Dependencies flow from app entry points through services to domain, repositories
 
 Phase 0 provides App Router, React, Tailwind CSS, and default shadcn/ui configuration plus a plain placeholder. Phase 1 establishes the design system and responsive shell before feature work. Later features are vertical slices through the established layers. The frontend presents decisions and workflows; it does not calculate authoritative business outcomes.
 
+Phase 1 implementation: `src/styles/tokens.css` owns the light-mode token system. `src/components/ui/` contains shadcn/Radix primitives; shared operational components sit in `src/components/`. `src/config/navigation.ts` is the shared navigation and breadcrumb source. The `(app)` and `(auth)` route groups are ready for Phase 2 protection without route restructuring.
+
+Static skeleton content is rendered on the server. The shared shell's navigation/drawer, date-range form, and gallery interaction examples are client islands. URL parameters hold filters; no business data is fetched. `/dev/gallery` checks server-only `APP_ENV` on every request and returns 404 outside development. The gallery's illustrative records are never imported by product route skeletons.
+
 ## Backend and database strategy
 
 Route handlers and scheduled endpoints are thin boundaries. Services coordinate use cases. Domain modules implement deterministic logic. Repositories are the only layer that accesses Supabase. Schema changes are forward-only SQL migrations. Every future table in `public` must enable RLS and define policies in the same migration.

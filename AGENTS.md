@@ -21,7 +21,11 @@
 
 ## Current scope
 
-Phase 0 establishes the repository, toolchain, boundaries, control documents, validated environment contract, CI, test harnesses, and initial Supabase extensions/function migration. It contains no product feature, visual design system, authentication, operational workflow, integration, job, business rule, or product table.
+Phase 1 establishes the UI tokens, shadcn primitives, operational components, application shell, and honest route skeletons. No authentication, operational workflow, integration, job, business rule, or product table is implemented. Do not begin Phase 2 until Phase 1 passes and the user explicitly requests it.
+
+UI conventions: use `src/styles/tokens.css` and semantic Tailwind utilities; use shared components instead of feature-specific replacements. Illustrative data belongs only under the server-gated development gallery. Route pages remain Server Components unless they need interaction. Keep filters and date ranges in URL parameters. Above 500 rows, tables require injected server pagination.
+
+Verification also includes `npm run test:e2e` (axe, interactions, responsive screenshots) and `npm run test:production` after a production-mode build (gallery exclusion and local paint budget). No Phase 1 build may be publicly deployed; host deployment protection is required before Phase 2.
 
 ## Required phase report
 

@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 export const secretPatterns = [
@@ -39,6 +39,8 @@ function main() {
   const findings = [];
 
   for (const file of trackedAndUntrackedFiles()) {
+    // Git also lists tracked paths deleted or moved in the working tree.
+    if (!existsSync(file)) continue;
     const content = readFileSync(file);
     if (content.includes(0)) continue;
 

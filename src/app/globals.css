@@ -1,10 +1,117 @@
 @import "tailwindcss";
+@import "../styles/tokens.css";
 
-html {
-  color-scheme: light;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    color-scheme: light;
+  }
+  body {
+    @apply m-0 bg-background font-sans text-sm leading-relaxed text-foreground antialiased;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: var(--focus-width) solid var(--color-ring);
+    outline-offset: var(--focus-offset);
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold leading-snug;
+  }
+  svg {
+    @apply shrink-0;
+  }
+  ::selection {
+    @apply bg-accent text-accent-foreground;
+  }
 }
-
-body {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .workspace {
+    @apply min-h-dvh;
+  }
+  .page-container {
+    @apply mx-auto w-full min-w-0 px-5 py-6 lg:px-8;
+    max-width: var(--content-width);
+  }
+  .sidebar {
+    @apply fixed inset-y-0 left-0 z-30 hidden flex-col bg-rail text-rail-foreground lg:flex;
+    width: var(--sidebar-width);
+  }
+  .workspace-body {
+    @apply min-w-0;
+  }
+  .nav-link {
+    @apply flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm text-rail-muted hover:bg-rail-active hover:text-rail-foreground lg:min-h-9 lg:py-1.5;
+  }
+  .nav-link[aria-current="page"] {
+    @apply bg-rail-active font-semibold text-rail-foreground;
+  }
+  .nav-link:focus-visible {
+    @apply outline-rail-foreground;
+  }
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-card focus:p-3;
+  }
+  .state-panel {
+    @apply flex min-w-0 items-start gap-3 px-5 py-4;
+  }
+  .state-icon {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground;
+  }
+  .field {
+    @apply grid min-w-0 gap-1.5;
+  }
+  .native-control {
+    @apply min-h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm;
+  }
+  .table-scroll {
+    @apply w-full overflow-x-auto;
+  }
+  .table-scroll table {
+    @apply w-full border-collapse text-left text-sm;
+  }
+  .table-scroll th {
+    @apply whitespace-nowrap border-y bg-muted px-4 py-3 font-medium text-muted-foreground;
+  }
+  .table-scroll td {
+    @apply border-b px-4 py-3;
+  }
+}
+@media (min-width: 64rem) {
+  .workspace-body {
+    margin-left: var(--sidebar-width);
+  }
+}
+@media (max-width: 40rem) {
+  input,
+  select,
+  textarea {
+    font-size: var(--text-base) !important;
+  }
+  button:not([role="switch"]):not([role="checkbox"]):not([role="radio"]),
+  [role="button"] {
+    min-height: calc(var(--spacing) * 11);
+  }
+  label:has([role="switch"], [role="checkbox"], [role="radio"]) {
+    min-height: calc(var(--spacing) * 11);
+  }
+  [data-slot="sheet-content"] > button,
+  [data-slot="dialog-close"] {
+    min-width: calc(var(--spacing) * 11);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }
