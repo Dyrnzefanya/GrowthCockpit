@@ -2,7 +2,7 @@
 
 ## Authority and system shape
 
-The Master PRD in `PRD.md` is authoritative. Du Anyam Performance Marketing OS is a single Next.js application deployed on Vercel with Supabase for PostgreSQL, authentication, and storage. The browser uses only the Supabase URL and anonymous key. Privileged database access and all external API access remain server-side.
+The Master PRD in `PRD.md` is authoritative, with the explicit operator API-key clarification recorded in D-007. Du Anyam Performance Marketing OS is a single Next.js application deployed on Vercel with Supabase for PostgreSQL, authentication, and storage. The browser uses only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Privileged database access and all external API access remain server-side.
 
 The PM OS owns operational business logic. HubSpot is the CRM source of truth for contact and lifecycle data. Supabase is the PM OS operational database and analytics mirror. External systems transport or store data; they do not define PM OS business rules.
 
@@ -21,6 +21,8 @@ The PM OS owns operational business logic. HubSpot is the CRM source of truth fo
 | `src/config`       | Static configuration and validation schemas                    | Secrets or feature logic                                   |
 
 Dependencies flow from app entry points through services to domain, repositories, and integrations. Server-only modules use `import "server-only"`. Client code may import only the public environment module.
+
+Normal server requests also use the publishable key together with the authenticated user's session, preserving RLS. `SUPABASE_SECRET_KEY` is consumed only by the guarded privileged admin client (plus isolated Node test infrastructure), never by user settings/auth repositories as an authorization shortcut. Modern keys are passed to the installed SDK without custom transport or JWT conversion. `APP_ENV`, `APP_BASE_URL` and `APP_TIMEZONE` remain server-only; all six core variables are mandatory. Legacy variable names are not aliases.
 
 ## Frontend strategy
 

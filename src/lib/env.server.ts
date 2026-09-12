@@ -6,7 +6,7 @@ import { env } from "@/lib/env";
 export const serverEnv = parseEnvironment(serverEnvSchema, {
   ...env,
   APP_ENV: process.env.APP_ENV,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
   APP_BASE_URL: process.env.APP_BASE_URL,
   APP_TIMEZONE: process.env.APP_TIMEZONE,
   INGEST_HMAC_SECRET: process.env.INGEST_HMAC_SECRET,

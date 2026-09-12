@@ -2,12 +2,22 @@ import { z } from "zod";
 
 export const publicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z
+    .string()
+    .regex(
+      /^sb_publishable_[A-Za-z0-9_-]+$/,
+      "Expected a Supabase publishable key.",
+    ),
 });
 
 export const serverEnvSchema = publicEnvSchema.extend({
   APP_ENV: z.enum(["development", "preview", "production"]),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  SUPABASE_SECRET_KEY: z
+    .string()
+    .regex(
+      /^sb_secret_[A-Za-z0-9_-]+$/,
+      "Expected a server-only Supabase secret key.",
+    ),
   APP_BASE_URL: z.url(),
   APP_TIMEZONE: z.literal("Asia/Jakarta"),
   INGEST_HMAC_SECRET: z.string().min(1).optional(),

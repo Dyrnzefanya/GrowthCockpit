@@ -54,7 +54,7 @@ test("TEST-2.1 protected routes reject anonymous and forged requests", async ({
   ).toBeVisible();
   const anon = createClient(
     testEnvironment.NEXT_PUBLIC_SUPABASE_URL,
-    testEnvironment.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    testEnvironment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     { auth: { persistSession: false } },
   );
   expect(

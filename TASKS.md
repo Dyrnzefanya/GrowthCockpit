@@ -92,7 +92,7 @@ Status: **FAIL / gate incomplete — all local technical gates pass; protected d
 - [x] FR-2.9 / BE-2.5 — owner authorization centralized in `can(action)`; role metadata is not trusted or user-writable.
 - [x] FR-2.10 / BE-2.6 — real server-derived environment badge; generated database types; guarded admin client. Client bundle scan is a required final gate below.
 - [x] NFR-2.1–2.3 — `getUser()` validation on protected requests and independent protected layout/actions; generic auth failures; HttpOnly, Secure, SameSite=Lax cookies. Proxy overwrites the route header rather than trusting client input.
-- [ ] INT-2.1 — first protected deployment and auth verification on its URL. Supabase development and protected Vercel project details were requested but are not available; no remote was configured or deployed.
+- [ ] INT-2.1 — first protected deployment and auth verification on its URL. Supabase project ref is now supplied and the operator reports an imported Vercel project with a failed initial build; deployed configuration and authentication remain unverified. See the modern API-key recovery entry below.
 - [x] JOB-2 — none. Phase 3+ business features, integrations, jobs, role UI, password-reset flows, AI and n8n remain unimplemented. Synthetic identities exist only in local tests; no fake product/performance data was added.
 
 ### Technical and browser evidence
@@ -122,7 +122,7 @@ Status: **FAIL / gate incomplete — all local technical gates pass; protected d
 - [x] No service-role key in browser output.
 - [x] Four required commands pass: lint, typecheck, unit tests, build.
 
-**Definition of Done is not yet satisfied:** a fresh browser must authenticate on the protected deployed environment. Local success cannot substitute for INT-2.1, remote signup-console verification, or this deployed-browser requirement. Deployment steps and evidence requirements are in `INTEGRATIONS.md`; no remote CI success is claimed.
+**Definition of Done is not yet satisfied:** a fresh browser must authenticate on the protected deployed environment. Local success cannot substitute for INT-2.1, remote signup-console verification, or this deployed-browser requirement. Deployment steps and evidence requirements are in `INTEGRATIONS.md`; GitHub CI evidence is recorded separately below.
 
 ### Skills and implementation review
 
@@ -158,6 +158,23 @@ The operator explicitly selected `https://github.com/Dyrnzefanya/GrowthCockpit` 
 Before publication, scanned the existing Git history and publishable working-tree files for secret patterns and the configured privileged Supabase key. No findings; `.env.local` remains ignored. The only tracked environment file is the existing blank `.env.example` contract. Repository secret scanning and `git diff --check` pass. Existing Phase 2 local gate evidence above is retained; this publication does not mark the deployed-auth gate complete. GitHub Actions status will be checked against the pushed commit and reported to the operator.
 
 The earlier deployment-attempt findings above are historical evidence. GitHub repository selection is now resolved; Supabase/Vercel connections and deployed acceptance verification remain outstanding. Phase 3 remains unstarted.
+
+## Phase 2 modern API-key alignment and deployment recovery — 2026-09-12
+
+**Status: local recovery gates PASS; Phase 2 remains FAIL / deployed gate incomplete.** Operator selected Supabase development ref `oonxnzogzzciszojract` and reported Vercel build failure from missing/invalid environment variables. No remote secret provided in the conversation was copied into commands, source, documentation or local environment files. The operator must rotate that disclosed privileged key and enter the replacement directly in Vercel.
+
+- [x] Inspected `.env.example`, schemas/modules, all three Supabase factories, proxy/auth flow, tests, CI/build assumptions, installed SDK/Next.js guidance, PRD and control documents before modification. Legacy public key was used by browser/server session clients; the legacy privileged key was confined to the admin factory and Node test infrastructure.
+- [x] D-007 records the operator-approved replacement: public `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; server-only `SUPABASE_SECRET_KEY`, `APP_ENV`, `APP_BASE_URL`, `APP_TIMEZONE`. No legacy fallback or `NEXT_PUBLIC_APP_ENV`. The installed SDK/SSR supports the current key model without an upgrade.
+- [x] Updated environment validation, client wiring, CI's local key exports, fixtures and browser-secret scan. Public validation rejects secret/legacy key types; all six required core variables fail clearly by name when missing. Regression tests verify the public parse result excludes server configuration.
+- [x] Formatting, lint, typecheck and 13 unit tests pass. All 13 development Playwright tests pass using the local CLI's actual modern keys, including real invitation/magic-link auth, settings audit, signup rejection, redirects, secure cookies, two tabs, missing profiles, accessibility and responsive regression.
+- [x] Production build, browser-key scan and production Playwright test pass with the new contract. Authenticated Today, sign-out, protected Settings redirection, production gallery exclusion and the local paint budget remain verified.
+- [x] Local schema lint, RLS/provisioning/audit SQL tests and migration listing pass; only versions 0001–0003 are applied. No migration, policy, auth/proxy/service behavior, component or navigation change. No remote database reset or migration attempt.
+- [x] Repository secret scan, npm audit (zero vulnerabilities) and complete diff/scope review pass. Modern local test keys were supplied only in process environments; existing local credential files were not rewritten. The operator's concurrent prompt archive move is preserved outside this recovery change.
+- [x] GitHub origin remains `Dyrnzefanya/GrowthCockpit`; the initial Phase 2 implementation commit `2a19b04d80cbe383705b57cb374372aa76c53c12` is pushed. Its [CI run 34673007011](https://github.com/Dyrnzefanya/GrowthCockpit/actions/runs/34673007011) completed successfully. The modern-key revision requires its own CI run after publication; prior CI is not evidence for the new revision.
+- [ ] Operator configures the six variables in Vercel, removes legacy entries, enables required deployment protection and provides the actual target URL. Exact names, visibility, value sources and target scopes are in `INTEGRATIONS.md`.
+- [ ] After operator confirmation: verify remote Supabase identity/access, safely apply only pending existing migrations, inspect remote policies/provisioning and Auth configuration, then verify the actual protected deployment, login/logout/magic links, redirects, session persistence/two tabs and deployed browser assets. Local success is not deployed evidence.
+
+No Phase 3 feature, integration, business rule, table or dependency was introduced. Stop for manual environment configuration; do not mark Phase 2 PASS yet.
 
 ## Known future decisions and issues (preserved)
 

@@ -1,5 +1,15 @@
 # Architectural Decisions
 
+## D-007 — Current Supabase API keys (Phase 2 deployment recovery)
+
+**Status:** Accepted, explicitly authorized by the operator. This updates the key names in D-001, D-006 and the legacy examples in PRD NFR-G4/section 38; all other security and data-ownership rules remain authoritative. The only public application variables are now `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. `SUPABASE_SECRET_KEY`, `APP_ENV`, `APP_BASE_URL` and `APP_TIMEZONE` remain server-only. `NEXT_PUBLIC_APP_ENV` remains prohibited. There is no silent legacy-key fallback.
+
+Installed `@supabase/supabase-js` 2.116.0 explicitly handles modern key formats and `@supabase/ssr` 0.12.7 forwards the configured key to that SDK. This matches [Supabase API-key guidance](https://supabase.com/docs/guides/getting-started/api-keys) and [SSR client guidance](https://supabase.com/docs/guides/auth/server-side/creating-a-client). No package upgrade is required. Environment validation checks the key's public/secret format, fails with variable names rather than values, and does not claim to verify remote key validity.
+
+Browser and server session clients use the publishable key; normal operations still carry the authenticated user's session and remain subject to grants/RLS. Only the guarded server admin client consumes the privileged secret. Database roles (`anon`, `authenticated`, `service_role`) and existing migrations/policies do not change. Tests use only the local CLI's modern publishable/secret keys; no remote privileged credential is copied into source, documentation or local files.
+
+All six core variables must be configured for a Vercel build/runtime. `APP_ENV` describes the actual Vercel target (`preview` or `production`); a Production-target deployment using the development Supabase project still uses `production`, keeping the development gallery inaccessible. `APP_BASE_URL` is that target's canonical HTTPS application origin; the business timezone stays `Asia/Jakarta`. Future integration variables remain unset until their owning phase.
+
 ## D-006 — Phase 2 authentication and settings foundation
 
 **Status:** Accepted implementation choice within PRD §17. Use invite-only email magic links, mandatory email verification, and `@supabase/ssr` 0.12.7 with `@supabase/supabase-js` 2.116.0. Auth runs on the server with HttpOnly, Secure, SameSite=Lax cookies; the anonymous browser client does not manage the session. `src/proxy.ts` is the installed Next.js 16 replacement for middleware. Protected data reads and server actions independently validate the session. `/auth/confirm` is the sole new public callback, authenticated by a single-use Supabase email token; redirect destinations are restricted to internal application paths.
@@ -22,7 +32,7 @@ Use the required shadcn/ui Radix primitives for accessible overlays and controls
 
 ## D-001 — Public environment contract
 
-**Status:** Accepted
+**Status:** Accepted; API-key variable names are superseded by D-007. The server-only APP_ENV decision remains unchanged.
 
 **Phase:** 0
 

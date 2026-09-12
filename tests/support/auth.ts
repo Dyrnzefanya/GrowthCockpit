@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { testEnvironment } from "./environment";
 export const admin = createClient(
   testEnvironment.NEXT_PUBLIC_SUPABASE_URL,
-  testEnvironment.SUPABASE_SERVICE_ROLE_KEY,
+  testEnvironment.SUPABASE_SECRET_KEY,
   { auth: { persistSession: false, autoRefreshToken: false } },
 );
 export async function invitedSession(page: Page, next = "/today") {

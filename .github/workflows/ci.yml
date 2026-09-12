@@ -24,10 +24,10 @@ jobs:
         shell: bash
         run: |
           npx supabase status -o json > "$RUNNER_TEMP/supabase.json"
-          echo "::add-mask::$(jq -r .SERVICE_ROLE_KEY "$RUNNER_TEMP/supabase.json")"
+          echo "::add-mask::$(jq -r .SECRET_KEY "$RUNNER_TEMP/supabase.json")"
           echo "NEXT_PUBLIC_SUPABASE_URL=$(jq -r .API_URL "$RUNNER_TEMP/supabase.json")" >> "$GITHUB_ENV"
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(jq -r .ANON_KEY "$RUNNER_TEMP/supabase.json")" >> "$GITHUB_ENV"
-          echo "SUPABASE_SERVICE_ROLE_KEY=$(jq -r .SERVICE_ROLE_KEY "$RUNNER_TEMP/supabase.json")" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(jq -r .PUBLISHABLE_KEY "$RUNNER_TEMP/supabase.json")" >> "$GITHUB_ENV"
+          echo "SUPABASE_SECRET_KEY=$(jq -r .SECRET_KEY "$RUNNER_TEMP/supabase.json")" >> "$GITHUB_ENV"
           rm "$RUNNER_TEMP/supabase.json"
       - run: npm run db:lint
       - run: npm run test:db

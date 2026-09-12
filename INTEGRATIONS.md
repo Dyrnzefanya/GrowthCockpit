@@ -32,7 +32,26 @@ These external checks are pending. No protected remote deployment or Supabase co
 
 Deployment-only verification on 2026-09-12 confirmed that this checkout still has no GitHub remote, linked Supabase development project, or linked Vercel project; Supabase CLI is unauthenticated and no browser session is connected. GitHub CLI authentication is available, but the target repository is not identified. Both configured application/Supabase origins are localhost. The evidence and all remaining remote gates are recorded in the Phase 2 deployment verification attempt in `TASKS.md`. Project identifiers/URLs and normal account sign-ins are required to continue; do not place credentials in project documents or chat.
 
-## GitHub publication
+## Phase 2 modern-key environment setup
+
+The operator selected Supabase development project `oonxnzogzzciszojract`, URL `https://oonxnzogzzciszojract.supabase.co`, and reported an imported Vercel project whose first build fails environment validation. This is operator-reported context, not a verified remote deployment. D-007 aligns the installed SDK and application with publishable/secret API keys. No remote key value is recorded here.
+
+In the existing Vercel project's **Settings > Environment Variables**, configure the following for each target being deployed. Select **Production** for the main-branch Production deployment and **Preview** for preview deployments, with target-specific values. Add **Development** only if using Vercel's local development environment; use an isolated local Supabase stack for automated tests.
+
+| Variable                               | Visibility  | Value source / scope                                                                                                                                                                                       |
+| -------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | PUBLIC      | Supabase project URL above; use the development project for this Phase 2 deployment.                                                                                                                       |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | PUBLIC      | That project's Settings > API Keys > Publishable key.                                                                                                                                                      |
+| `SUPABASE_SECRET_KEY`                  | SERVER-ONLY | That project's Settings > API Keys > Secret key; enter manually as a sensitive variable in Vercel. Rotate the privileged key disclosed in chat before using it.                                            |
+| `APP_ENV`                              | SERVER-ONLY | `production` for Vercel Production, `preview` for Preview, `development` for local Development. Do not set a deployed target to development merely because its Supabase project is a development database. |
+| `APP_BASE_URL`                         | SERVER-ONLY | The canonical HTTPS application origin for that Vercel target, from its Domains/deployment page; localhost origin for local development.                                                                   |
+| `APP_TIMEZONE`                         | SERVER-ONLY | `Asia/Jakarta` for every target.                                                                                                                                                                           |
+
+Remove legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` entries after switching the application revision. Do not create `NEXT_PUBLIC_APP_ENV` or any public secret variable. Future integration variables remain absent. Public values are inlined at build time, so save the environment configuration and redeploy the updated revision. Enable the required host deployment protection before testing. Deployed build/auth verification waits for operator confirmation and the actual Vercel URL.
+
+After that confirmation, verify the remote Supabase project identity, link it, inspect migration history and apply only pending existing migrations 0001–0003 without a remote reset. Verify remote RLS/provisioning and Auth settings. Configure Supabase Auth > URL Configuration with the deployed Site URL and the specific localhost/deployed `/auth/confirm` callback URLs (including their permitted query parameters); preserve disabled self-signup, enabled email and email confirmation. The versioned invitation/magic-link templates remain unchanged. Do not substitute new/remote API secrets for CLI management authentication or database connection credentials.
+
+## GitHub publication status
 
 GitHub target subsequently supplied by the operator: `https://github.com/Dyrnzefanya/GrowthCockpit`. This checkout's `origin` now points to that repository, with `main` preserving the existing local history. This resolves repository selection only; Supabase/Vercel setup and deployed verification remain pending as listed above.
 
