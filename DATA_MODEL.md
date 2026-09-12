@@ -10,7 +10,7 @@ There are no application tables. `supabase/migrations/0001_extensions.sql` enabl
 
 Settings are workspace-wide: authenticated users can read rows and update only `value`. A trigger stamps `updated_by=auth.uid()` and the shared timestamp trigger stamps `updated_at`; clients cannot forge either field. Anon has no table grants or policies. Zod validates settings reads and application writes; unknown keys warn and are ignored, while malformed known values use documented defaults. Operational validation remains in the application, not a database business-rules function.
 
-`0003_identity_defaults.sql` is a forward-only completion of the documented defaults, leaving the already-applied identity migration unchanged. Thirteen settings are seeded; future qualification, attribution, experiment, job, follow-up and metric behavior remains inactive. Generated TypeScript types reflect the applied local schema. Next phase migrations must continue after version 0003.
+`0003_identity_defaults.sql` is a forward-only completion of the documented defaults, leaving the already-applied identity migration unchanged. Thirteen settings are seeded; future qualification, attribution, experiment, job, follow-up and metric behavior remains inactive. Generated TypeScript types reflect the applied local schema. `0004_identity_backfill.sql` subsequently repaired profiles for Auth accounts created before schema deployment, without changing these policies. Phase 3 continues at 0005.
 
 ## Binding principles (unchanged by Phase 2)
 
@@ -38,3 +38,12 @@ Settings are workspace-wide: authenticated users can read rows and update only `
 | 13    | Retention, audit, and production hardening changes               |
 
 The exact tables, columns, constraints, indexes, RLS policies, and migration order remain those specified by `PRD.md`; this document does not override them.
+
+## Phase 3 state
+
+- `0005_workflows.sql`: `workflow_templates`, `workflow_runs`, `workflow_items`, `notes`, indexes, timestamp triggers and authenticated RLS policies. No anonymous grants. Notes require `created_by=auth.uid()` on insert and have no normal update/delete grant. Workflow records are shared operational workspace data, as specified by the PRD; normal application writes use the authenticated session, never the privileged client.
+- Unique `(template_id, run_date)` and `(run_id, step_key)` enforce idempotency. Run/item snapshots preserve history across edits and deactivation (D-008). `materialize_workflow` inserts a run and its items atomically; `commit_workflow_item` checks the run revision and atomically persists the application-computed item and status. Both are security invoker, have fixed empty search paths, and deny anonymous/public execution.
+- `0006_workflow_seeds.sql`: only the three real procedural templates. It inserts no runs, notes, campaigns, metrics or fabricated operator activity.
+- Generated TypeScript types reflect local migrations 0001-0006. Phase 3 migrations are applied locally only; the remote development project remains at Phase 2 migration 0004 until deployment is authorized and its outstanding host protection gate is verified.
+
+The local SQL test runs transactionally and rolls back synthetic identities/workflows/notes. Browser fixtures are guarded to loopback Supabase and clean up their own data. No remote reset is permitted.

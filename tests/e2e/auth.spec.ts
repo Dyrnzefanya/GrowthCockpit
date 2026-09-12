@@ -19,6 +19,7 @@ test("TEST-2.1 protected routes reject anonymous and forged requests", async ({
     "/experiments",
     "/playbook",
     "/workflows",
+    "/workflows/templates",
     "/reports",
     "/integrations",
     "/settings",
@@ -74,6 +75,7 @@ test("TEST-2.1 protected routes reject anonymous and forged requests", async ({
   await expect(page.getByRole("status")).toContainText(
     "If your account is invited",
   );
+  await expect(page).toHaveTitle("Du Anyam Performance Marketing OS");
   expect(
     (
       await new AxeBuilder({ page })

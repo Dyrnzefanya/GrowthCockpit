@@ -1,5 +1,17 @@
 # Architectural Decisions
 
+## D-008 — Phase 3 handoff and workflow consistency
+
+The operator explicitly authorizes Phase 3 while Phase 2 retains five residual verification items in TASKS.md. This overrides sequencing only; it does not weaken authentication/security or mark unverified gates PASS.
+
+Add the four PRD Phase 3 tables in `0005_workflows`, followed by `0006_workflow_seeds`; versions 0001–0004 are already applied. Keep normal operations on authenticated session clients with RLS. Small security-invoker RPCs provide atomic run/items insertion and compare-and-swap item/run writes. They persist application-computed values and enforce storage consistency; cadence, date selection, progress, and status rules remain exclusively in the domain layer. This avoids partial runs and lost concurrent updates without a new database client or service-role shortcut.
+
+Snapshot required/help/order with each item and template name/version with each run, alongside the PRD label snapshot: edits must not reinterpret an existing checklist. History is retained; deactivation is the template removal operation. A run with no required steps completes when all its optional steps are done; otherwise required steps determine completion. Progress is the share of those completion-driving steps that are done. Templates require at least one step. Monthly cadence uses the first Monday–Friday date (no holiday calendar is specified); weekly cadence uses the selected weekdays. Existing runs remain accessible after deactivation; missing past days are never materialised.
+
+Use native `Intl.DateTimeFormat` with explicit Asia/Jakarta and UTC calendar-only arithmetic for the four named date helpers instead of adding `date-fns-tz` and its peer dependency. This is a deliberate implementation substitution, tested at midnight, ISO week/year boundaries, leap years, month edges and under different process timezones. No new runtime dependency. New product UI copy is Bahasa Indonesia, inside the existing approved English navigation/shell.
+
+Phase 3 production verification exposed same-render GET memoization: the read after materialization reused the earlier empty run list. Workflow reads used by mutation/retry coordination (`readRuns`, `readRun`, `readTemplates`) supply independent AbortController signals to opt out of request memoization. This preserves read-after-write consistency without altering the shared authentication client or disabling caching application-wide. Verified against installed Next.js `dedupe-fetch.js` and [official fetch documentation](https://nextjs.org/docs/app/api-reference/functions/fetch). The production regression requires the checklist on its first visit, before performance reload samples.
+
 ## D-007 — Current Supabase API keys (Phase 2 deployment recovery)
 
 **Status:** Accepted, explicitly authorized by the operator. This updates the key names in D-001, D-006 and the legacy examples in PRD NFR-G4/section 38; all other security and data-ownership rules remain authoritative. The only public application variables are now `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. `SUPABASE_SECRET_KEY`, `APP_ENV`, `APP_BASE_URL` and `APP_TIMEZONE` remain server-only. `NEXT_PUBLIC_APP_ENV` remains prohibited. There is no silent legacy-key fallback.

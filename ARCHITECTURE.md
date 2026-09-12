@@ -46,4 +46,12 @@ Phase 0 creates no product tables. Its only database change enables `pgcrypto` a
 
 Asia/Jakarta is the business timezone. Currency storage, conversion, attribution, lead/contact meaning, funnel calculation, and decision rules follow the PRD and are implemented only in their owning phases. Scheduled jobs run only in production after their phase is complete. n8n is not part of the current runtime.
 
-One phase must pass its documented gate before work begins on the next phase.
+One phase must pass its documented gate before work begins on the next phase, except the explicit Phase 2 handoff authorizing Phase 3 while retaining its five external verification gaps (D-008).
+
+## Phase 3 Today / Daily Workflow
+
+`domain/dates` uses explicit Asia/Jakarta formatting and UTC calendar arithmetic for date-only operations; `domain/workflows` owns cadence, snapshots, completion and status. Today uses the server clock, independent of the global reporting range, and never backfills missed dates. The monthly schedule uses the first Monday-Friday date; no holiday calendar is assumed.
+
+Authenticated services coordinate lazy run materialization, checklist changes, quick notes and template edits. Repositories use the existing user-session client and RLS. Security-invoker RPCs provide atomic persistence only: unique template/date materialization and compare-and-swap item/run writes. Cadence, required-step completion and timestamps are calculated in application domain/services. Conflicts retry using freshly read state, at most three attempts. Template saves compare their version to reject stale edits.
+
+Today and workflows pages remain Server Components. Interactive shared checklist/template components render data and submit validated server actions; no component reads Supabase or decides authoritative run status. History is restricted to the last 30 business dates with server pagination (10 rows); dated notes use 20-row pages. Historical run labels, help, order, required flags and template name/version are snapshots. Removing a template step affects future runs only; deactivating a template preserves existing runs. Failed writes retain drafts and display retry feedback. No scheduler, integration or Phase 4 capability is introduced.

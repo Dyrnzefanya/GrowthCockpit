@@ -19,7 +19,9 @@ execFileSync(
     "ON_ERROR_STOP=1",
   ],
   {
-    input: readFileSync("supabase/tests/identity.sql"),
+    input: ["identity", "workflows"]
+      .map((name) => readFileSync(`supabase/tests/${name}.sql`, "utf8"))
+      .join("\n"),
     stdio: ["pipe", "inherit", "inherit"],
   },
 );

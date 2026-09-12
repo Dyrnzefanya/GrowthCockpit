@@ -61,6 +61,47 @@ export type Database = {
         }
         Relationships: []
       }
+      notes: {
+        Row: {
+          body: string
+          context_id: string | null
+          context_type: string
+          created_at: string
+          created_by: string
+          id: string
+          note_date: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          context_id?: string | null
+          context_type?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          note_date: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          context_id?: string | null
+          context_type?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          note_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -88,12 +129,173 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_items: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          help_snapshot: string
+          id: string
+          is_done: boolean
+          label_snapshot: string
+          notes: string
+          position: number
+          required_snapshot: boolean
+          run_id: string
+          step_key: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          help_snapshot?: string
+          id?: string
+          is_done?: boolean
+          label_snapshot: string
+          notes?: string
+          position: number
+          required_snapshot: boolean
+          run_id: string
+          step_key: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          help_snapshot?: string
+          id?: string
+          is_done?: boolean
+          label_snapshot?: string
+          notes?: string
+          position?: number
+          required_snapshot?: boolean
+          run_id?: string
+          step_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_items_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_runs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          run_date: string
+          started_at: string | null
+          status: string
+          template_id: string
+          template_name_snapshot: string
+          template_version: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          run_date: string
+          started_at?: string | null
+          status?: string
+          template_id: string
+          template_name_snapshot: string
+          template_version: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          run_date?: string
+          started_at?: string | null
+          status?: string
+          template_id?: string
+          template_name_snapshot?: string
+          template_version?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_runs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_templates: {
+        Row: {
+          cadence: string
+          created_at: string
+          id: string
+          is_active: boolean
+          key: string
+          name: string
+          steps: Json
+          updated_at: string
+          version: number
+          weekdays: number[] | null
+        }
+        Insert: {
+          cadence: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          name: string
+          steps: Json
+          updated_at?: string
+          version?: number
+          weekdays?: number[] | null
+        }
+        Update: {
+          cadence?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          name?: string
+          steps?: Json
+          updated_at?: string
+          version?: number
+          weekdays?: number[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      commit_workflow_item: {
+        Args: {
+          p_completed: string
+          p_done: boolean
+          p_expected: string
+          p_item_completed: string
+          p_item_id: string
+          p_note: string
+          p_run_id: string
+          p_started: string
+          p_status: string
+        }
+        Returns: undefined
+      }
+      materialize_workflow: {
+        Args: {
+          p_date: string
+          p_items: Json
+          p_template_id: string
+          p_version: number
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

@@ -37,7 +37,72 @@
 
 ## Next phase
 
-Phase 0 and Phase 1 remain PASS. Phase 2 is now explicitly requested and implemented locally; its protected deployment gate remains pending. Phase 3 is not authorized and must not begin.
+Phase 0 and Phase 1 remain PASS. Phase 3 is now explicitly authorized by the operator's Phase 2 handoff. Phase 2's pending external verification is preserved below and is not silently marked PASS. No Phase 4 work is authorized.
+
+## Phase 2 handoff / Phase 3 authorization
+
+The operator confirms the Phase 2 implementation, deployment, remote database/RLS verification, production login, migrations, security gates and GitHub CI are successful. Commit `b942f21e3032e8b240b976799295888a8b3357d4` passed [CI 34689617155](https://github.com/Dyrnzefanya/GrowthCockpit/actions/runs/34689617155). The last attempted native Windows browser inspection was stopped by Computer Use because it could not confidently determine the browser URL. This is an external verification limitation, not a known application defect. The operator explicitly authorizes Phase 3 with the following checks retained as NOT VERIFIED:
+
+- [ ] Authenticated deployed session persistence.
+- [ ] Deployed logout / two-tab browser behavior.
+- [ ] Authenticated deployed settings round-trip.
+- [ ] Authenticated deployed browser-asset inspection.
+- [ ] Vercel Deployment Protection verification.
+
+Historical Phase 2 closure-attempt entries below remain evidence of those attempts; their statements prohibiting Phase 3 are superseded only by this explicit handoff. Auth/security architecture remains binding.
+
+## Phase 3 - Today / Daily Workflow OS
+
+**Status: FAIL at the final phase gate / implementation ready for operator workday acceptance.** No real-workday operator use is evidenced. Technical verification below is local; Phase 3 has not been deployed or pushed. The five Phase 2 residual checks above remain NOT VERIFIED. Phase 4 is unstarted.
+
+### Implementation and traceability
+
+| Requirements                             | Implemented evidence                                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| FR-3.1 / BE-3.1                          | Forward migrations `0005_workflows` and `0006_workflow_seeds`; Daily Ops weekdays (pacing, inquiries, stale MQL, source health, one observation), Weekly Review Monday (review, learning, focus), Monthly Review first weekday (routine review, procedure review, focus). Manual checks only; no integrations or fabricated performance data.                      |
+| FR-3.2 / TEST-3.1                        | Lazy atomic materialization with unique template/date and run/step constraints; five concurrent reads plus five reloads produce exactly one run and two snapshotted items. No historical backfill.                                                                                                                                                                 |
+| FR-3.3-3.5 / BE-3.3 / NFR-3.1 / TEST-3.4 | `updateWorkflowItem` handles the required toggleItem/setItemNote behaviors through one validated write path; domain `recomputeRunStatus` derives status. Completion timestamps set/clear; optional-step semantics in D-008. Compare-and-swap retries fresh state and atomically updates item/run. Optimistic rollback and visible retry tested by aborting a save. |
+| FR-3.6-3.8 / TEST-3.2 / TEST-3.5         | Template create/edit, keyboard reorder, future-step removal and template deactivation; snapshots preserve old label/help/required/order/name/version. Deactivated schedules produce no future run; existing runs remain visible.                                                                                                                                   |
+| FR-3.9 / BE-3.4                          | Dated quick notes, idempotent save retry, date filter and pagination. Draft retained on failure; controls disabled during pending saves to avoid losing edits. Privacy guidance excludes credentials and customer PII.                                                                                                                                             |
+| FR-3.10 / FE-3.4                         | Last 30 WIB dates, completion percentages, server pagination, sorting and run drill-down at `/workflows`.                                                                                                                                                                                                                                                          |
+| FR-3.11 / BE-3.2 / TEST-3.3              | Four date helpers plus ISO week and date arithmetic; 23:50 WIB, midnight, full week, leap February, December and ISO year boundaries. Also passed with UTC and America/Los_Angeles process timezones.                                                                                                                                                              |
+| FE-3.1-3.3 / FE-3.5 / TEST-3.6           | Today greeting/date/week, shared checklist and notes components, template editor; existing shell/date range/navigation unchanged. Completed state and notes survive reload and a separate Chromium browser with a separate approved workspace user.                                                                                                                |
+| NFR-3.2                                  | Local production with 90 historical runs/items: three warm reload-to-visible-checklist samples of 331, 361 and 664 ms, all under 1500 ms. First visit also renders newly materialized checklist. Unthrottled local evidence, not a deployed latency claim.                                                                                                         |
+| INT / JOB                                | Not applicable. No scheduler, external integration, job or Phase 4+ feature.                                                                                                                                                                                                                                                                                       |
+
+### Technical evidence
+
+- [x] Local database rebuilt from empty with migrations 0001-0006; schema lint reports no errors. Existing applied migrations 0001-0004 were not edited. No remote reset or schema change.
+- [x] Identity plus workflow SQL tests pass transactionally and roll back: provisioning, profile isolation, role/audit restrictions, note authorship, RLS, no anon table/RPC access, no normal delete grants, atomic snapshots/materialization and stale-write rejection.
+- [x] Generated database types regenerated from the rebuilt schema; a second generation matched byte-for-byte. Supabase CLI emitted a non-blocking MaxListeners warning during generation; command completed successfully.
+- [x] Formatting, lint, TypeScript, 22 unit/service tests (8 files), production build, repository secret scan, exact privileged-key browser artifact scan and npm audit (zero vulnerabilities) pass.
+- [x] All 14 development Playwright cases pass. After the repository fix, 11 non-auth cases passed in the full run; the auth suite initially raced streamed page metadata before axe, so it now explicitly asserts the title and all 3 auth cases passed on targeted rerun. Coverage includes existing Phase 1/2 regressions, auth/session/settings, axe, keyboard, URL filters, drawer, table and responsive checks. Phase 3 browser test also covers empty day, materialization failure/retry with notes usable, optimistic recovery, saved notes, snapshots, deactivation, five reloads and another browser.
+- [x] Production Playwright: 2 tests pass; gallery remains 404, protected logout behavior and local paint budget pass, plus the 90-day Today check above.
+- [x] Actual rendered desktop 1280/1920 and mobile 390 screenshots inspected, with live interactions and axe checks. No clipping/overflow in tested layouts. Template reorder works by keyboard; shared shell focus/drawer tests pass. Screenshot tooling uses `caret: initial` so it does not inject attributes before React hydrates; final Phase 3 console check finds no hydration warnings.
+- [x] Full changed-file and boundary review: no new dependency, public route handler, auth architecture change, external API, privileged application write or fabricated metric. Test-only fixtures are loopback guarded and cleaned up. New components compose Phase 1 SectionCard, DataTable, StatusBadge, ErrorState, EmptyState and input/button primitives; no design-system replacement or new token scheme.
+
+### Acceptance criteria
+
+- [x] `/today` shows the correct checklist for the current WIB weekday - seeded schedules and full-week domain tests; actual no-checklist Sunday verified before creating the local test template.
+- [x] Five refreshes create exactly one run per template per day - concurrent reads, reloads and direct local row-count checks.
+- [x] Completed steps and notes survive reload and a different browser - independent browser/account readback and update.
+- [x] Editing a template does not alter a historical run's labels - SQL plus browser snapshot verification.
+- [x] `/workflows` shows 30-day history with completion percentages - date-bounded repository query and browser drill-down.
+- [x] A day with no applicable template renders an explicit state - actual Sunday browser check plus model test; notes remain usable.
+- [x] Four verification commands pass - lint, typecheck, unit tests and build.
+- [ ] Definition of Done: operator runs the daily checklist through the app on at least one real workday without database intervention. Automated fixtures are not this evidence.
+
+### Review findings resolved
+
+The production regression initially found newly created runs missing on their first render: same-render GET memoization reused the earlier empty query. D-008 records the targeted repository fix using independent AbortController signals for reads involved in materialization/retry. The first-visit production test now passes without a preparatory reload. Other earlier failures were test timing/locator issues; they were corrected and rerun, not waived.
+
+### Delivery and remaining work
+
+Phase 3 requirements are `Verified` in the PRD traceability matrix; the Master requirements and future-phase text are unchanged. D-008 records migration numbering, snapshot/consistency decisions and the native date-helper substitution. AGENTS, ARCHITECTURE and DATA_MODEL reflect the authorized Phase 3 slice.
+
+This revision is a local Phase 3 checkpoint, not a deployment or remote CI result. Baseline Phase 2 CI remains the historical evidence linked above; Phase 3 CI needs a future push. Before publishing to Vercel, verify the outstanding host protection requirement and apply only the pending forward migrations to the intended development database. Then obtain the real-workday operator evidence, close Phase 3, and wait for explicit Phase 4 authorization. Do not relabel the five Phase 2 residual checks as passed.
+
+Skills/tools actually used: Ponytail for minimal implementation; UI UX Pro Max guidance for accessible operational controls (its installed search script is unavailable, so no design-search result is claimed); installed Next.js documentation and official fetch guidance for memoization; Supabase CLI/PostgreSQL/Docker, Vitest, Playwright/axe, TypeScript/ESLint/Prettier, Git and repository security scripts for implementation and verification. No Superpowers skill was available or invoked.
 
 ## Phase 1 — UI/UX Foundation & Application Shell
 

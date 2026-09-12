@@ -33,6 +33,8 @@ describe("Phase 2 security contracts", () => {
       "/leads/abc?from=2026-09-01",
     );
     expect(safeNext("/settings")).toBe("/settings");
+    expect(safeNext("/workflows/templates")).toBe("/workflows/templates");
+    expect(safeNext("/workflows/templates/../../auth/confirm")).toBe("/today");
   });
   it("TEST-2.4 validates writes and safely defaults malformed, missing, and unknown settings", () => {
     expect(preferenceInput.safeParse({ timezone: "UTC" }).success).toBe(false);

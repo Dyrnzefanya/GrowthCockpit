@@ -1,5 +1,5 @@
 const destinations =
-  /^\/(today|performance|leads(?:\/[^/?#]+)?|funnel|experiments|playbook|workflows|reports|integrations|settings|dev\/gallery)(?:[?#]|$)/;
+  /^\/(today|performance|leads(?:\/[^/?#]+)?|funnel|experiments|playbook|workflows(?:\/templates)?|reports|integrations|settings|dev\/gallery)(?:[?#]|$)/;
 export function safeNext(value: unknown): string {
   if (
     typeof value !== "string" ||

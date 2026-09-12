@@ -29,9 +29,10 @@ test("TEST-1.1 all twelve routes are honest and reachable", async ({
     const response = await page.goto("/" + route);
     expect(response?.status(), route).toBe(200);
     await expect(page.locator("h1")).toHaveCount(1);
-    if (route !== "login")
+    if (route !== "login" && route !== "workflows")
       await expect(page.locator("main")).toContainText(/Phase \d/);
-    await expect(page.locator("tbody tr")).toHaveCount(0);
+    if (route !== "workflows")
+      await expect(page.locator("tbody tr")).toHaveCount(0);
     if (route !== "login") {
       const settings = page
         .getByRole("navigation", { name: "Primary navigation" })
@@ -39,9 +40,9 @@ test("TEST-1.1 all twelve routes are honest and reachable", async ({
       await expect(settings).toBeInViewport();
     }
     await page.screenshot({
+      caret: "initial",
       path: info.outputPath(route.replaceAll("/", "-") + ".png"),
       fullPage: true,
-      caret: "initial",
     });
   }
   const missing = await page.goto("/does-not-exist");
@@ -81,6 +82,7 @@ test("TEST-1.3 responsive navigation, focus, and screenshots", async ({
       ),
     ).toBe(true);
     await page.screenshot({
+      caret: "initial",
       path: info.outputPath("today-" + width + ".png"),
       fullPage: true,
     });
@@ -89,6 +91,7 @@ test("TEST-1.3 responsive navigation, focus, and screenshots", async ({
       const drawer = page.getByRole("dialog");
       await expect(drawer).toBeVisible();
       await page.screenshot({
+        caret: "initial",
         path: info.outputPath("navigation-mobile.png"),
         fullPage: true,
       });
@@ -160,12 +163,14 @@ test("TEST-1.4 table sorting, pagination, visibility, empty, loading and drawer"
     ),
   ).toBe(true);
   await page.screenshot({
+    caret: "initial",
     path: info.outputPath("gallery-mobile.png"),
     fullPage: true,
   });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({
+    caret: "initial",
     path: info.outputPath("gallery-desktop.png"),
     fullPage: true,
   });

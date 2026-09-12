@@ -21,7 +21,7 @@
 
 ## Current scope
 
-Phase 0 and Phase 1 have passed. Phase 2 is explicitly authorized: invite-only Supabase authentication, profiles, app_settings, RLS, protected routes, login/logout, and validated profile/preferences. Preserve the approved Phase 1 shell. No operational workflow, external integration, job, business feature, or additional domain table is in scope. Do not begin Phase 3 until Phase 2 passes, including its protected deployment gate, and the user explicitly requests Phase 3.
+Phase 3 is explicitly authorized by the operator's Phase 2 handoff despite the documented external browser-verification limitation. Phase 2 residual checks remain pending in TASKS.md; this is not a retroactive PASS. Preserve authentication, authorization, RLS, cookie, and secret boundaries. Implement only Today, workflow templates/runs/items, notes, and workflow history. No Phase 4, integrations, jobs, lead queues, alerts, or decision engine. Phase 3 still requires its own acceptance evidence and operator real-workday use gate.
 
 UI conventions: use `src/styles/tokens.css` and semantic Tailwind utilities; use shared components instead of feature-specific replacements. Illustrative data belongs only under the server-gated development gallery. Route pages remain Server Components unless they need interaction. Keep filters and date ranges in URL parameters. Above 500 rows, tables require injected server pagination.
 

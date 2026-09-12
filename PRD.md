@@ -2465,17 +2465,17 @@ Status values: `Planned` · `In Progress` · `Implemented` · `Verified`. The co
 | FR-2.8 | 2 | settings fallback | TEST-2.4 | Planned |
 | FR-2.9 | 2 | lib/auth/can | TEST-2.5 | Planned |
 | FR-2.10 | 2 | env badge / bundle | TEST-2.6 | Planned |
-| FR-3.1 | 3 | seed migration | TEST-3.2 | Planned |
-| FR-3.2 | 3 | services/workflows | TEST-3.1 | Planned |
-| FR-3.3 | 3 | checklist component | TEST-3.6 | Planned |
-| FR-3.4 | 3 | checklist notes | TEST-3.6 | Planned |
-| FR-3.5 | 3 | recomputeRunStatus | TEST-3.4 | Planned |
-| FR-3.6 | 3 | label_snapshot | TEST-3.5 | Planned |
-| FR-3.7 | 3 | template editor | TEST-3.6 | Planned |
-| FR-3.8 | 3 | deactivation | TEST-3.2 | Planned |
-| FR-3.9 | 3 | services/notes | TEST-3.6 | Planned |
-| FR-3.10 | 3 | /workflows | TEST-3.6 | Planned |
-| FR-3.11 | 3 | domain/dates | TEST-3.3 | Planned |
+| FR-3.1 | 3 | seed migration | TEST-3.2 | Verified |
+| FR-3.2 | 3 | services/workflows | TEST-3.1 | Verified |
+| FR-3.3 | 3 | checklist component | TEST-3.6 | Verified |
+| FR-3.4 | 3 | checklist notes | TEST-3.6 | Verified |
+| FR-3.5 | 3 | recomputeRunStatus | TEST-3.4 | Verified |
+| FR-3.6 | 3 | label_snapshot | TEST-3.5 | Verified |
+| FR-3.7 | 3 | template editor | TEST-3.6 | Verified |
+| FR-3.8 | 3 | deactivation | TEST-3.2 | Verified |
+| FR-3.9 | 3 | services/notes | TEST-3.6 | Verified |
+| FR-3.10 | 3 | /workflows | TEST-3.6 | Verified |
+| FR-3.11 | 3 | domain/dates | TEST-3.3 | Verified |
 | FR-4.1 | 4 | services/playbook | TEST-4.5 | Planned |
 | FR-4.2 | 4 | slug generator | TEST-4.1 | Planned |
 | FR-4.3 | 4 | markdown renderer | TEST-4.4 | Planned |

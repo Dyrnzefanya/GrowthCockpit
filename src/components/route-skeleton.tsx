@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ArrowUpRight, Plus, Upload } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { navigation } from "@/config/navigation";
 import {
   PageHeader,
@@ -9,53 +8,6 @@ import {
 import { EmptyState, NotConnectedState } from "@/components/states";
 import { Button } from "@/components/ui/button";
 
-const todaySections = [
-  {
-    title: "Alerts",
-    description: "Important changes across your workspace.",
-    empty: "Alerts are not active yet",
-    detail: "Open alerts will appear here, grouped by severity.",
-    phase: 9,
-  },
-  {
-    title: "Priority actions",
-    description: "What to work on next, and why.",
-    empty: "Recommendations are not active yet",
-    detail:
-      "Evidence-backed priorities will appear when the decision engine is ready.",
-    phase: 11,
-  },
-  {
-    title: "Daily checklist",
-    description: "A repeatable rhythm for focused work.",
-    empty: "Your daily routine starts here",
-    detail: "Weekday-aware checklists will keep the essentials in view.",
-    phase: 3,
-  },
-  {
-    title: "Quick notes",
-    description: "Capture context while it is fresh.",
-    empty: "Notes are not active yet",
-    detail:
-      "Date-linked notes will carry your observations into the weekly report.",
-    phase: 3,
-  },
-  {
-    title: "Experiment review queue",
-    description: "Make time to learn from what you test.",
-    empty: "No experiments to review yet",
-    detail: "Running experiments due for review will appear here.",
-    phase: 5,
-  },
-  {
-    title: "Lead follow-up queue",
-    description: "Keep qualified inquiries moving.",
-    empty: "Lead follow-up is not active yet",
-    detail:
-      "Overdue follow-ups and inquiries missing attribution will appear here.",
-    phase: 6,
-  },
-] as const;
 const nouns: Record<
   string,
   { section: string; title: string; description: string }
@@ -119,53 +71,7 @@ export function RouteSkeleton({ route }: { route: string }) {
           ) : undefined
         }
       />
-      {route === "/today" ? (
-        <div className="space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-5 py-3">
-            <p className="text-xs text-muted-foreground">
-              Workspace setup <span className="mx-2">/</span> Sections activate
-              as their capabilities become available.
-            </p>
-            <Link
-              href="/integrations"
-              className="inline-flex items-center gap-1 text-xs font-medium text-primary"
-            >
-              View connections
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          </div>
-          <div className="grid gap-5 xl:grid-cols-2">
-            {todaySections.map((section) => (
-              <SectionCard
-                key={section.title}
-                title={section.title}
-                description={section.description}
-                action={
-                  <span className="text-xs text-muted-foreground">
-                    Phase {section.phase}
-                  </span>
-                }
-              >
-                <EmptyState
-                  title={section.empty}
-                  description={section.detail}
-                  phase={section.phase}
-                />
-              </SectionCard>
-            ))}
-          </div>
-          <SectionCard
-            title="Data health"
-            description="Source status and the last successful sync."
-          >
-            <EmptyState
-              title="Source health is not available yet"
-              description="Connection monitoring arrives in Phase 7; HubSpot, Slack, and Meta populate it in Phases 8–10."
-              phase={7}
-            />
-          </SectionCard>
-        </div>
-      ) : route === "/integrations" ? (
+      {route === "/integrations" ? (
         <div className="grid gap-5 xl:grid-cols-2">
           {[
             {
