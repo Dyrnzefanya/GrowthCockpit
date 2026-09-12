@@ -16,6 +16,10 @@ All six core variables must be configured for a Vercel build/runtime. `APP_ENV` 
 
 Local public signup is disabled through versioned Supabase configuration. Remote dashboard signup, email templates, redirect allowlists, SMTP, and host deployment protection require verification on the supplied development projects; local evidence is not remote evidence.
 
+Remote configuration evidence (2026-09-12): authenticated CLI readback confirms public signup disabled and Email provider enabled on development project `oonxnzogzzciszojract`. After operator-managed custom SMTP setup, both checked-in token-hash email templates were applied and matched remote contents on a second, no-change CLI invocation. Site URL and callback allowlists match the canonical Vercel origin `https://growthcockpitdyrn.vercel.app` and the documented localhost callbacks. This verifies configuration only; delivered-email authentication and other deployment gates remain pending in `TASKS.md`.
+
+Deployment sequencing repair (2026-09-12): remote inspection found Auth provisioned before migrations, leaving the existing account without a profile. Forward-only `0004_identity_backfill` fills missing profiles for existing Auth users using exactly the provisioning trigger's name normalization and database defaults; it leaves existing profiles unchanged and never trusts role metadata. This completes FR-2.4 for accounts predating the trigger without changing authorization or introducing a new feature.
+
 CLI 2.117 maps `auth.email.enable_signup` to email-provider enablement; it stays true so invited users can sign in. The global `auth.enable_signup=false` maps to `GOTRUE_DISABLE_SIGNUP=true` and blocks registration; the browser test verifies this directly.
 
 `app_settings` is operational workspace configuration: authenticated read/write RLS matches the PRD's single-operator operational baseline. Database triggers set audit metadata; profile role and settings identity/description are not browser-writable. Provisioning ignores user-supplied role metadata and assigns the PRD default owner role. `can(action)` centralizes authorization; future role-specific behavior is deferred.

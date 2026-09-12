@@ -55,6 +55,12 @@ After that confirmation, verify the remote Supabase project identity, link it, i
 
 GitHub target subsequently supplied by the operator: `https://github.com/Dyrnzefanya/GrowthCockpit`. This checkout's `origin` now points to that repository, with `main` preserving the existing local history. This resolves repository selection only; Supabase/Vercel setup and deployed verification remain pending as listed above.
 
+## Current Phase 2 remote evidence — 2026-09-12
+
+The historical connection blockers above are superseded: GitHub is connected, Supabase CLI is authenticated and linked to `oonxnzogzzciszojract`, and the operator reports successful production login at `https://growthcockpitdyrn.vercel.app`. Remote Auth URLs, signup restriction and token-hash email templates are verified after operator-managed SMTP configuration. Existing Phase 0–2 migrations plus the documented missing-profile repair `0004_identity_backfill` are applied remotely; RLS/provisioning/audit SQL tests pass with rollback. No remote database reset was used.
+
+Remaining deployment gates are explicitly listed in the latest `TASKS.md` closure attempt: authenticated session/logout/two-tab/settings verification, complete deployed browser-secret evidence and Vercel host-protection verification. No authenticated operator browser is connected to the agent. Local browser fixtures still refuse remote execution; no production identity or secret was copied into local test infrastructure. Phase 2 is not closed.
+
 ## Deferred integration decisions
 
 - Phase 7: scheduler/fallback behavior; scheduler-wide outage detection ownership; A10/A12 reference correction; canonical retry/dead-letter terminology; `pg_cron`/`pg_net` versus the extension whitelist.

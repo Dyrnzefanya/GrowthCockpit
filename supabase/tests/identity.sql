@@ -3,6 +3,7 @@ insert into auth.users(id, email, raw_user_meta_data) values
 ('11111111-1111-4111-8111-111111111111', 'rls-a@example.test', '{"role":"viewer","full_name":"RLS A"}'),
 ('22222222-2222-4222-8222-222222222222', 'rls-b@example.test', '{}');
 do $$ begin
+  if exists(select 1 from auth.users u where not exists(select 1 from public.profiles p where p.id=u.id)) then raise exception 'Auth account missing profile after migrations'; end if;
   if (select count(*) from public.profiles where id in ('11111111-1111-4111-8111-111111111111','22222222-2222-4222-8222-222222222222')) <> 2 then raise exception 'Provisioning failed'; end if;
   if (select role from public.profiles where id='11111111-1111-4111-8111-111111111111') <> 'owner' then raise exception 'Untrusted role metadata was used'; end if;
   if exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and not c.relrowsecurity) then raise exception 'RLS missing'; end if;
