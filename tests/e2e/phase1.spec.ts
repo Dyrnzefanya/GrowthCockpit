@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../support/auth";
 import AxeBuilder from "@axe-core/playwright";
 const routes = [
   "today",
@@ -17,6 +17,8 @@ const routes = [
 test("TEST-1.1 all twelve routes are honest and reachable", async ({
   page,
 }, info) => {
+  // Thirteen navigations now include real Auth verification on a cold dev server.
+  test.setTimeout(60_000);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
@@ -27,7 +29,8 @@ test("TEST-1.1 all twelve routes are honest and reachable", async ({
     const response = await page.goto("/" + route);
     expect(response?.status(), route).toBe(200);
     await expect(page.locator("h1")).toHaveCount(1);
-    await expect(page.locator("main")).toContainText(/Phase \d/);
+    if (route !== "login")
+      await expect(page.locator("main")).toContainText(/Phase \d/);
     await expect(page.locator("tbody tr")).toHaveCount(0);
     if (route !== "login") {
       const settings = page

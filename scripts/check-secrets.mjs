@@ -3,6 +3,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 export const secretPatterns = [
+  ["Supabase secret key", /sb_secret_[A-Za-z0-9_-]{20,}/g],
+  [
+    "JWT credential",
+    /eyJ[A-Za-z0-9_-]{15,}\.eyJ[A-Za-z0-9_-]{15,}\.[A-Za-z0-9_-]{20,}/g,
+  ],
   ["OpenAI key", /sk-[A-Za-z0-9_-]{20,}/g],
   ["Slack token", /xoxb-[A-Za-z0-9-]{20,}/g],
   ["personal access token", /(?:github_pat_|pat-)[A-Za-z0-9_-]{20,}/g],

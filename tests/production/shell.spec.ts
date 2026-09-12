@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../support/auth";
 test("production blocks the gallery and serves the shell within the paint budget", async ({
   page,
 }, info) => {
@@ -28,4 +28,9 @@ test("production blocks the gallery and serves the shell within the paint budget
     }),
     contentType: "application/json",
   });
+  await page.getByRole("button", { name: "Account", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await page.goto("/settings");
+  await expect(page).toHaveURL(/\/login\?next=%2Fsettings$/);
 });

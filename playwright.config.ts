@@ -1,15 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+import { testEnvironment } from "./tests/support/environment";
 
 delete process.env.NO_COLOR;
-
-const testEnvironment = {
-  APP_BASE_URL: "http://127.0.0.1:3000",
-  APP_ENV: "development",
-  APP_TIMEZONE: "Asia/Jakarta",
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: "phase-0-anon-key",
-  NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
-  SUPABASE_SERVICE_ROLE_KEY: "phase-0-service-role-key",
-};
 
 export default defineConfig({
   testDir: "./tests/e2e",

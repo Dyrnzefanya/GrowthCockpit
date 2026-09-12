@@ -21,11 +21,11 @@
 
 ## Current scope
 
-Phase 1 establishes the UI tokens, shadcn primitives, operational components, application shell, and honest route skeletons. No authentication, operational workflow, integration, job, business rule, or product table is implemented. Do not begin Phase 2 until Phase 1 passes and the user explicitly requests it.
+Phase 0 and Phase 1 have passed. Phase 2 is explicitly authorized: invite-only Supabase authentication, profiles, app_settings, RLS, protected routes, login/logout, and validated profile/preferences. Preserve the approved Phase 1 shell. No operational workflow, external integration, job, business feature, or additional domain table is in scope. Do not begin Phase 3 until Phase 2 passes, including its protected deployment gate, and the user explicitly requests Phase 3.
 
 UI conventions: use `src/styles/tokens.css` and semantic Tailwind utilities; use shared components instead of feature-specific replacements. Illustrative data belongs only under the server-gated development gallery. Route pages remain Server Components unless they need interaction. Keep filters and date ranges in URL parameters. Above 500 rows, tables require injected server pagination.
 
-Verification also includes `npm run test:e2e` (axe, interactions, responsive screenshots) and `npm run test:production` after a production-mode build (gallery exclusion and local paint budget). No Phase 1 build may be publicly deployed; host deployment protection is required before Phase 2.
+Verification also includes `npm run test:e2e` (real local auth, axe, interactions, responsive screenshots), `npm run test:db` (local RLS/provisioning/audit), `npm run secrets:client`, and `npm run test:production` after a production-mode build (gallery exclusion and local paint budget). Browser fixtures refuse remote Supabase and create/delete synthetic local identities. Never run them against a real workspace. Host deployment protection must be enabled before any deployment; local evidence cannot satisfy the Phase 2 deployed-auth gate.
 
 ## Required phase report
 

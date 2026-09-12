@@ -37,7 +37,7 @@
 
 ## Next phase
 
-Phase 1 is complete with PASS. Phase 2 has not begun and requires a separate explicit instruction and its own precondition review.
+Phase 0 and Phase 1 remain PASS. Phase 2 is now explicitly requested and implemented locally; its protected deployment gate remains pending. Phase 3 is not authorized and must not begin.
 
 ## Phase 1 — UI/UX Foundation & Application Shell
 
@@ -79,7 +79,87 @@ Remote CI remains externally unverified as accepted during Phase 0 because no re
 - **Operator gate — APPROVED:** the operator completed the final visual review and approved the application shell, navigation hierarchy, sidebar structure, page-header hierarchy, compact date-range control, responsive layout direction, integration card/grid pattern, honest not-connected/not-activated states, and overall Du Anyam Performance Marketing OS visual direction. This is final approval of the refined implementation, superseding the pending-review state.
 - **Final closure evidence:** no application or test source changes occurred after the passing refinement browser run and production build/test. Closure rechecked 8 unit tests, formatting, secret scanning, and Git diff/scope; the existing lint, typecheck, build, browser, accessibility, responsive, and production-gallery evidence remains valid. No Phase 2 functionality or fabricated product/performance data was introduced. The final commit includes the operator's existing Phase 1 prompt move into `Docs/Prompt/Done/`, verified as an unchanged-content archive move. Phase 2 remains unstarted.
 
-## Known future decisions and issues
+## Phase 2 — Authentication & Security Foundation
+
+Status: **FAIL / gate incomplete — all local technical gates pass; protected deployed authentication remains unverified.** Date: 2026-09-12, Asia/Jakarta. This does not revoke the Phase 0/1 completion evidence.
+
+### Scope and requirements
+
+- [x] Read the Master PRD, active Phase 2 and referenced security/data/frontend sections, and control documents. Verified the previous phase's clean `main` baseline at `a333ab2073ec510a8022d30af48c2b5b1921bafa` and reran its technical gates before implementation.
+- [x] FR-2.1–2.5 / BE-2.2–2.3 / FE-2.1–2.2, FE-2.4 — invite-only email magic links, verified server session, protected app routes, safe internal `next`, trigger provisioning, account sign-out, and two-tab session-loss handling. No signup UI or automatic user creation on sign-in.
+- [x] FR-2.6 / BE-2.1 — identity migration and RLS on both tables; no anon access; profile isolation and restricted column grants. Forward migration 0003 completes all documented settings defaults without editing applied 0002.
+- [x] FR-2.7–2.8 / BE-2.4 / FE-2.3 — Settings profile/preferences, Zod rejection, input preservation, audited setting writes, known-key fallback and unknown-key warning, recoverable missing-profile state.
+- [x] FR-2.9 / BE-2.5 — owner authorization centralized in `can(action)`; role metadata is not trusted or user-writable.
+- [x] FR-2.10 / BE-2.6 — real server-derived environment badge; generated database types; guarded admin client. Client bundle scan is a required final gate below.
+- [x] NFR-2.1–2.3 — `getUser()` validation on protected requests and independent protected layout/actions; generic auth failures; HttpOnly, Secure, SameSite=Lax cookies. Proxy overwrites the route header rather than trusting client input.
+- [ ] INT-2.1 — first protected deployment and auth verification on its URL. Supabase development and protected Vercel project details were requested but are not available; no remote was configured or deployed.
+- [x] JOB-2 — none. Phase 3+ business features, integrations, jobs, role UI, password-reset flows, AI and n8n remain unimplemented. Synthetic identities exist only in local tests; no fake product/performance data was added.
+
+### Technical and browser evidence
+
+- [x] TEST-2.1 — every protected skeleton, detail and gallery path rejects anonymous requests, including forged middleware/route headers.
+- [x] TEST-2.2 — settings destination survives real email sign-in; hostile/external `next` values and malformed callbacks cannot escape the application. Unit cases cover encoded backslashes, control characters and traversal.
+- [x] TEST-2.3 — executable SQL transaction test verifies profile A/B isolation, no cross-user writes, no role escalation, no audit forgery, provisioning and anonymous denial; transaction rolls back synthetic data.
+- [x] TEST-2.4 — malformed/unknown/missing settings safely default; Zod rejects invalid writes; a rejected profile form preserves input; missing profile shows a recoverable state.
+- [x] TEST-2.5 — Playwright accepts a real Supabase invitation token, requests and follows a magic-link email captured by local Mailpit, saves profile/preferences, verifies audit metadata and cookie flags, then signs out and checks both tabs.
+- [x] TEST-2.6 — `npm run secrets:client` scans `.next/static` and confirms the configured service-role key is absent from browser artifacts.
+- [x] Lint, strict typecheck, formatting, 11 unit tests, all 13 development Playwright tests, production build and repository secret scan passed. npm audit reported zero vulnerabilities. Secret scanning includes Supabase secret-key and JWT shapes as well as the existing patterns.
+- [x] Clean `npm ci` passed: 535 packages installed, 536 audited, zero vulnerabilities. The first attempt met a Windows file lock while CLI was running; the retry after CLI completion passed. Existing ESLint 9 is deprecated upstream but retained within the pinned Next.js-compatible baseline; no unrequested toolchain upgrade.
+- [x] Clean local reset applied 0001, 0002 and 0003; schema lint and SQL RLS/provisioning/audit tests passed afterwards. Regenerated types are byte-for-byte identical to the pre-reset output. The CLI emitted a non-fatal `MaxListenersExceededWarning` during type generation; exit status was zero and schema/type checks passed.
+- [x] Production-mode browser test passed: genuine invited session reaches Today, environment badge is PROD, gallery returns 404, no gallery content/link is served, local first-contentful-paint is within 1.5 seconds, sign-out clears access and Settings returns to login with `next`. Production startup was a fresh Next server on local port 3100; this is not a deployed-environment claim.
+- [x] Browser interaction and visual inspection: Settings at 1280, 1920 and 390px; functional Login; keyboard account-menu open/Escape/focus return; no overflow. All Phase 1 responsive/date/table/dialog tests pass. Axe finds zero violations on Login, Settings and representative shell/gallery routes. Mobile breadcrumb composition was shortened to accommodate Account while retaining the approved navigation groups.
+- [x] Local signup configuration verified in the running Auth container: `GOTRUE_DISABLE_SIGNUP=true` and email provider enabled. Direct self-signup fails. This is **not** Supabase dashboard evidence.
+- [x] Fixed issues found by tests: canonical callback origin to preserve cookies, menu form unmount before logout, invalid-input reset, and mobile header wrapping. The 13-navigation regression test allows 60 seconds for cold development compilation and real Auth requests; its assertions remain unchanged.
+
+### Acceptance and Definition of Done
+
+- [ ] Login/logout/`next` round-trip verified on a **deployed** protected URL.
+- [x] Self-signup impossible locally; remote dashboard evidence remains pending.
+- [x] Profile automatically provisioned for an invited identity.
+- [x] RLS enabled on both tables, no anon grants/policies, isolation tested.
+- [x] Settings validation, round-trip and audit fields verified locally.
+- [x] External redirects rejected.
+- [x] No service-role key in browser output.
+- [x] Four required commands pass: lint, typecheck, unit tests, build.
+
+**Definition of Done is not yet satisfied:** a fresh browser must authenticate on the protected deployed environment. Local success cannot substitute for INT-2.1, remote signup-console verification, or this deployed-browser requirement. Deployment steps and evidence requirements are in `INTEGRATIONS.md`; no remote CI success is claimed.
+
+### Skills and implementation review
+
+Ponytail was read and applied for minimal scope, native forms and existing UI primitives. Installed Next.js authentication/proxy/Server Action guidance and official Supabase Auth/SSR guidance informed implementation. No installed Supabase/PostgreSQL/authentication/security/Superpowers skill was found or claimed. Used local Supabase CLI, Docker/PostgreSQL, Vitest, Playwright/axe, rendered screenshots, ESLint/TypeScript/Prettier, npm audit and Git review. D-006 records the actual auth/settings choices; existing business issues are not resolved speculatively.
+
+Final scope review covers tracked changes and new files: auth clients/helpers, proxy/callback, account service/forms, settings schema/repository/page, migrations/templates/SQL test, generated types, local auth test fixtures, CI/test/security scripts and updated control documents. Supabase data access is confined to repositories, the sole role comparison is in `can()`, and no domain/integration implementation or navigation configuration changed. Changes remain uncommitted on `main`; no remote exists. Evidence screenshots and browser reports remain in ignored `test-results/` and `playwright-report/`.
+
+## Phase 2 deployment verification attempt — 2026-09-12, 07:33 WIB
+
+**Result: FAIL / externally blocked.** The deployment-only closure instruction was reviewed against Phase 2 INT-2.1, its acceptance criteria and Definition of Done. No application, migration, dependency or architecture change was needed or made during this attempt.
+
+| Requested verification                                                                 | Concrete evidence                                                                                                                                                                                                                                                                                    | Result                                                              |
+| -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 1. GitHub remote and pushed Phase 2 state                                              | `git remote -v` returns no remote. Branch is `main`; HEAD remains Phase 1 commit `a333ab2073ec510a8022d30af48c2b5b1921bafa`. Phase 2 changes remain uncommitted.                                                                                                                                     | Blocked: target repository required                                 |
+| 2. Committed GitHub Actions execution                                                  | GitHub CLI is authenticated as `Dyrnzefanya`. Connector repository search for `Dyrn-Digitaldashboard` returned no result; the active account's repository listing did not identify the intended project. The edited CI workflow exists locally, but no matching remote commit/run can be identified. | Not executed remotely                                               |
+| 3–5. Supabase development project and invite-only Auth                                 | No `supabase/.temp/project-ref`; `supabase projects list -o json` fails because no access token is provided. Local Supabase origin remains `http://127.0.0.1:54321`.                                                                                                                                 | Remote project, Auth settings and signup rejection unverified       |
+| 6. Protected Vercel deployment                                                         | No `.vercel/project.json`, no Vercel CLI on PATH, no auth file in the checked standard Windows CLI locations, no Vercel connector, and browser inventory reports no connected browser.                                                                                                               | Deployment and host protection unverified                           |
+| 7–8. Deployed environment contract and redirect URLs                                   | Local `APP_BASE_URL=http://127.0.0.1:3000`, `APP_ENV=development`. Only URL origins and environment classification were inspected; secret values were not printed.                                                                                                                                   | Deployed variables and Supabase site/redirect allowlists unverified |
+| 9–13, 16. Deployed login/logout, protected routes, persistence, redirects and two tabs | No deployed URL or authenticated account access was supplied. Existing local browser fixtures intentionally refuse remote Supabase.                                                                                                                                                                  | Not executed on a deployment                                        |
+| 14. Secrets absent from deployed browser assets                                        | Repository secret scan passes again. No deployed browser assets are available to inspect; prior local production-bundle scan remains passing evidence only for that build.                                                                                                                           | Remote asset scan pending                                           |
+| 15. Development-project RLS                                                            | Local migration and RLS evidence remains unchanged. No remote development project connection is available.                                                                                                                                                                                           | Remote RLS verification pending                                     |
+
+Rechecked `git diff --check` and repository secret scanning: both pass. No changes were found in the existing domain/integration implementation paths or navigation configuration. The existing full local quality-gate results above remain the implementation evidence; no redundant application test suite was run for this documentation-only attempt.
+
+The operator was asked for the intended GitHub repository, Supabase development project reference, protected Vercel project/deployment URL, and account connections through normal sign-in flows (no secrets in chat). No answer was available during this attempt. No substitute repository, account, or public deployment was selected. No push, remote CI run, remote migration, deployment or final closure commit occurred. The working tree remains dirty with the Phase 2 implementation and evidence updates.
+
+**Next required action:** identify/connect those existing targets, then execute the checklist in `INTEGRATIONS.md` and record the remote commit/run/deployment evidence. Phase 2 stays FAIL until all mandatory remote gates pass; Phase 3 remains unstarted and not ready.
+
+## Phase 2 GitHub publication — 2026-09-12
+
+The operator explicitly selected `https://github.com/Dyrnzefanya/GrowthCockpit` and authorized committing the existing Phase 2 implementation/documentation and pushing `main`. Verified the local branch is `main`, the target repository has no existing refs, and configured that URL as `origin`. Existing Phase 0/1 commits remain the ancestors of the Phase 2 implementation commit; no history rewrite or force push is required.
+
+Before publication, scanned the existing Git history and publishable working-tree files for secret patterns and the configured privileged Supabase key. No findings; `.env.local` remains ignored. The only tracked environment file is the existing blank `.env.example` contract. Repository secret scanning and `git diff --check` pass. Existing Phase 2 local gate evidence above is retained; this publication does not mark the deployed-auth gate complete. GitHub Actions status will be checked against the pushed commit and reported to the operator.
+
+The earlier deployment-attempt findings above are historical evidence. GitHub repository selection is now resolved; Supabase/Vercel connections and deployed acceptance verification remain outstanding. Phase 3 remains unstarted.
+
+## Known future decisions and issues (preserved)
 
 - **Phase 6:** inquiry identity, contactability, and deduplication; lead-only views before Phase 10 spend data.
 - **Phase 7:** scheduler/fallback; scheduler-wide outage detection; A10/A12 reference; retry/dead-letter terminology; `pg_cron`/`pg_net` versus extension whitelist.

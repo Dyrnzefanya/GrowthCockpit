@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { testEnvironment } from "./tests/support/environment";
 delete process.env.NO_COLOR;
 export default defineConfig({
   testDir: "./tests/production",
@@ -13,12 +14,10 @@ export default defineConfig({
     reuseExistingServer: false,
     env: {
       ...process.env,
+      ...testEnvironment,
       APP_ENV: "production",
       APP_BASE_URL: "http://127.0.0.1:3100",
       APP_TIMEZONE: "Asia/Jakarta",
-      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: "phase-0-anon-key",
-      SUPABASE_SERVICE_ROLE_KEY: "phase-0-service-role-key",
     },
   },
 });

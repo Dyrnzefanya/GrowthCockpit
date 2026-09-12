@@ -18,6 +18,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { signOut } from "@/services/account";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 function Brand() {
   return (
@@ -114,8 +121,8 @@ export function AppShell({
       </aside>
       <div className="workspace-body">
         <header className="border-b bg-card">
-          <div className="flex min-h-14 flex-wrap items-center justify-between gap-4 px-5 py-2 lg:px-8">
-            <div className="flex items-center gap-3">
+          <div className="flex min-h-14 items-center justify-between gap-2 px-5 py-2 lg:px-8">
+            <div className="flex min-w-0 items-center gap-3">
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger asChild>
                   <Button
@@ -146,15 +153,15 @@ export function AppShell({
                 className="hidden size-4 text-muted-foreground lg:block"
                 aria-hidden="true"
               />
-              <nav aria-label="Breadcrumb">
+              <nav aria-label="Breadcrumb" className="min-w-0">
                 <ol className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <li>
+                  <li className="hidden sm:block">
                     <Link href="/today">Workspace</Link>
                   </li>
-                  <li>
+                  <li className="hidden sm:block">
                     <ChevronRight className="size-3" aria-hidden="true" />
                   </li>
-                  <li>
+                  <li className="truncate">
                     {active?.label ??
                       (path === "/dev/gallery"
                         ? "Component gallery"
@@ -169,13 +176,37 @@ export function AppShell({
                 </ol>
               </nav>
             </div>
-            <span className="inline-flex items-center gap-1.5 rounded-sm border bg-muted px-2 py-1 text-xs font-semibold">
-              <span
-                className="size-1.5 rounded-full bg-muted-foreground"
-                aria-hidden="true"
-              />
-              {label}
-            </span>
+            <div className="flex shrink-0 items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-sm border bg-muted px-2 py-1 text-xs font-semibold">
+                <span
+                  className="size-1.5 rounded-full bg-muted-foreground"
+                  aria-hidden="true"
+                />
+                {label}
+              </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="sm" variant="ghost">
+                    Account
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings">Profile & preferences</Link>
+                  </DropdownMenuItem>
+                  <form action={signOut}>
+                    <DropdownMenuItem
+                      asChild
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      <button type="submit" className="w-full">
+                        Sign out
+                      </button>
+                    </DropdownMenuItem>
+                  </form>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </header>
         <main id="main-content" tabIndex={-1} className="page-container">

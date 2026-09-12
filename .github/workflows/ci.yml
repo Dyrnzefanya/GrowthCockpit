@@ -11,9 +11,6 @@ jobs:
       APP_BASE_URL: http://127.0.0.1:3000
       APP_ENV: production
       APP_TIMEZONE: Asia/Jakarta
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: phase-0-anon-key
-      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
-      SUPABASE_SERVICE_ROLE_KEY: phase-0-service-role-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,10 +18,27 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Start isolated local Supabase
+        run: npx supabase start > /dev/null
+      - name: Set local test credentials without printing them
+        shell: bash
+        run: |
+          npx supabase status -o json > "$RUNNER_TEMP/supabase.json"
+          echo "::add-mask::$(jq -r .SERVICE_ROLE_KEY "$RUNNER_TEMP/supabase.json")"
+          echo "NEXT_PUBLIC_SUPABASE_URL=$(jq -r .API_URL "$RUNNER_TEMP/supabase.json")" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(jq -r .ANON_KEY "$RUNNER_TEMP/supabase.json")" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY=$(jq -r .SERVICE_ROLE_KEY "$RUNNER_TEMP/supabase.json")" >> "$GITHUB_ENV"
+          rm "$RUNNER_TEMP/supabase.json"
+      - run: npm run db:lint
+      - run: npm run test:db
+      - run: npm run db:types && git diff --exit-code -- src/types/database.generated.ts
+      - run: npm run format:check
+      - run: npm run secrets:check
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - run: npm run secrets:client
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run test:production

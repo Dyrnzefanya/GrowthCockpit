@@ -1,8 +1,12 @@
-import Link from "next/link";
 import { Layers3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-export default function Login() {
+import { LoginForm } from "@/components/account-forms";
+import { safeNext } from "@/lib/auth/redirect";
+export default async function Login({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; error?: string }>;
+}) {
+  const params = await searchParams;
   return (
     <section className="w-full max-w-sm space-y-6 rounded-lg border bg-card p-8 shadow-sm">
       <div className="flex items-center gap-3 text-primary">
@@ -10,42 +14,19 @@ export default function Login() {
         <span className="text-lg font-semibold">du anyam</span>
       </div>
       <div>
-        <h1 className="text-2xl">Welcome to your workspace</h1>
+        <h1 className="text-2xl">Sign in to your workspace</h1>
         <p className="mt-2 text-muted-foreground">Performance Marketing OS</p>
       </div>
-      <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-        Sign-in is not active yet. Account access will be available in Phase 2.
+      <p className="text-muted-foreground">
+        Invite-only access. Use your invited email address to receive a secure
+        sign-in link.
       </p>
-      <div className="space-y-4">
-        <label className="field" htmlFor="email">
-          Email
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@duanyam.com"
-            disabled
-          />
-        </label>
-        <label className="field" htmlFor="password">
-          Password
-          <Input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            disabled
-          />
-        </label>
-        <Button className="w-full" disabled>
-          Sign in
-        </Button>
-      </div>
-      <Link
-        href="/today"
-        className="block text-sm font-medium text-primary underline underline-offset-4"
-      >
-        Explore the workspace structure
-      </Link>
+      {params.error && (
+        <p role="alert" className="text-critical">
+          This sign-in link could not be used. Request a new link.
+        </p>
+      )}
+      <LoginForm next={safeNext(params.next)} />
     </section>
   );
 }

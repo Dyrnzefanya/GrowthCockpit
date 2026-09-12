@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../support/auth";
 
 test("opens the workspace through the root redirect", async ({ page }) => {
   await page.goto("/");

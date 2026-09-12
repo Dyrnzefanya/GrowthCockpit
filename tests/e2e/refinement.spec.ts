@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "../support/auth";
 import AxeBuilder from "@axe-core/playwright";
 
 for (const width of [1280, 1920, 390]) {

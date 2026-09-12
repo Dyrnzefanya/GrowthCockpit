@@ -32,6 +32,10 @@ Static skeleton content is rendered on the server. The shared shell's navigation
 
 ## Backend and database strategy
 
+Phase 2 adds invite-only magic-link authentication. `src/proxy.ts` refreshes cookies and verifies the user with Supabase Auth on each protected request. The `(app)` layout and settings actions independently require a verified user. Cookies are HttpOnly, Secure and SameSite=Lax; the browser Supabase client is anonymous and does not manage sessions. The server-only admin client is never imported by browser components. Auth transport and database queries stay in repositories, actions coordinate in services, and forms render input/state only. `can(action)` is the sole role check.
+
+`/auth/confirm` validates the Supabase one-time email token and restricts `next` to internal application routes. All redirect origins come from the trusted server-only `APP_BASE_URL`. Protected responses are private/no-store. Settings inputs are Zod-validated; invalid input remains visible and failed writes do not report success. Missing profiles and malformed settings have recoverable UI states. No future feature is activated by seeding its documented configuration default.
+
 Route handlers and scheduled endpoints are thin boundaries. Services coordinate use cases. Domain modules implement deterministic logic. Repositories are the only layer that accesses Supabase. Schema changes are forward-only SQL migrations. Every future table in `public` must enable RLS and define policies in the same migration.
 
 Phase 0 creates no product tables. Its only database change enables `pgcrypto` and `citext` and defines the shared `public.set_updated_at()` trigger function.
