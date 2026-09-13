@@ -41,7 +41,7 @@ Phase 6 only is authorized. Phases 0, 1, 3–5 passed engineering gates; the Pha
 
 ## Phase 6 — Lead & Funnel Core
 
-**Status: PASS — ENGINEERING COMPLETE (local gates verified 2026-09-14). Operational UAT: PENDING. GitHub CI: pending publication of this revision.** Baseline `1a32371b1c762557a94a54aed7812dd432e6bea6` passed [GitHub CI 34734963692](https://github.com/Dyrnzefanya/GrowthCockpit/actions/runs/34734963692); the baseline unit suite was rerun (33 tests). Contact = person. Lead = inquiry event. One contact may have multiple leads.
+**Status: PASS — ENGINEERING COMPLETE (local and GitHub CI gates verified 2026-09-14). Operational UAT: PENDING.** Implementation `3675e32c2f3914cadced152fbfcc6812d29f6d11` is pushed to `main` and passed [GitHub CI 34772945562](https://github.com/Dyrnzefanya/GrowthCockpit/actions/runs/34772945562). Baseline `1a32371b1c762557a94a54aed7812dd432e6bea6` passed [GitHub CI 34734963692](https://github.com/Dyrnzefanya/GrowthCockpit/actions/runs/34734963692); the baseline unit suite was rerun (33 tests). Contact = person. Lead = inquiry event. One contact may have multiple leads.
 
 ### Resolved operator decisions and implementation plan
 
@@ -77,7 +77,7 @@ Phase 6 only is authorized. Phases 0, 1, 3–5 passed engineering gates; the Pha
 - [x] Final whole-app Playwright: 18/18 pass, including local invite-only auth/logout/two-tab regression, Phase 3–5 flows, Phase 6 persistence, 20-row timeline navigation, settings audit/history preservation, and shell interactions. axe reports zero WCAG A/AA violations on representative routes.
 - [x] Actual rendered lead registry/new/import/detail, funnel and Today reviewed at 390/1280/1920 px. Native keyboard controls and override dialog focus work; document overflow checks pass. Tables scroll within their own region. Fixed misleading new/import breadcrumbs. Funnel/activity and timeline paginate on the server; totals cover the entire filter scope.
 - [x] Formatting, lint, strict typecheck, production build, repository secret scan and actual-key browser bundle scan pass. Final diff review preserves the approved shell, authenticated authorization boundaries and Phase 6-only scope. No Phase 7 integration, automatic ingest, job, alert, decision engine or fake product data is introduced.
-- [ ] Exact-revision GitHub CI — verify after committing and pushing the reviewed implementation. Operator-owned prompt-file moves remain excluded from the commit.
+- [x] Exact-revision GitHub CI — implementation `3675e32c2f3914cadced152fbfcc6812d29f6d11`, run `34772945562`, completed successfully on 2026-09-14 WIB. Installation, local migrations/schema/RLS, generated-type consistency, formatting, secret scans, lint, typecheck, unit/branch coverage, build, whole-app browser and production browser gates all passed. Operator-owned prompt-file moves remain excluded from the commit.
 - Diff review notes three trailing-blank-line warnings in already-applied migrations 0010, 0011 and 0015. They are cosmetic and are retained to honor migration immutability; no schema or behavior issue remains.
 
 Installed Ponytail and UI UX Pro Max instructions were used to keep native forms, shared table/shell components and operational hierarchy. UI UX Pro Max's search script is absent; no generated design-system result is claimed. No installed Superpowers/PostgreSQL/Supabase/domain-modeling skill was found. Actual tools: Next.js installed docs, Supabase CLI/PostgreSQL/Docker, Vitest/V8 coverage, Playwright/axe, Git/gh, and official CSV/RLS documentation.
