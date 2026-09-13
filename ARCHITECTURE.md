@@ -1,5 +1,15 @@
 # Architecture
 
+## Phase 6 vertical slice
+
+Lead pages/actions → session and `can("lead:write")` → Zod input → domain normalization/resolution/q1/attribution → repository snapshot and atomic commit. Manual entry and CSV import share `prepare`/`planLeads` and the same commit path. Deal coordination is colocated in the lead service/repository because the transaction also links its inquiry; no additional service abstraction is needed. Override and deal updates reject stale revisions. User-facing errors omit PII; diagnostic logs contain only database error codes.
+
+The five CRM mirrors follow PRD §15.5/Phase 6: authenticated reads through RLS, privileged repository writes only after server authorization. This exception does not change settings, auth, workflow, playbook, or experiment access patterns. SQL enforces constraints, atomicity, uniqueness and immutable history; q1, the 24-hour dedupe window, SLA workdays and metric equations remain pure application domain rules.
+
+Native forms and the approved shell serve the 20-row server-paginated lead registry, inquiry editor, timeline/override/manual-deal detail, in-memory CSV workflow, cohort/activity funnel and Today follow-up queue. URL parameters own filters. Settings expose only Phase 6 qualification inputs in addition to existing profile/preferences. Spend-dependent metrics remain unavailable. No integration, scheduler, automatic ingest, Phase 7 feature or campaign modification is implemented.
+
+Campaign/activity tables and stage history also use 20-row server pages. Funnel totals are computed from all paged database facts before the presentation page is selected, so pagination never changes metric denominators. Timeline pagination prevents the database API's row cap from silently omitting older changes.
+
 ## Authority and system shape
 
 The Master PRD in `PRD.md` is authoritative, with the explicit operator API-key clarification recorded in D-007. Du Anyam Performance Marketing OS is a single Next.js application deployed on Vercel with Supabase for PostgreSQL, authentication, and storage. The browser uses only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Privileged database access and all external API access remain server-side.

@@ -37,7 +37,59 @@
 
 ## Next phase
 
-Phases 0, 1, 3, 4, and 5 have passed their engineering gates. Phase 5 is `PASS — ENGINEERING COMPLETE`; its real-experiment operational UAT remains pending. PRD §35 gives Phase 6 dependencies on Phases 1 and 2, with Phase 3 required for its Today section, and does not make Phase 5's real-world observation a hard dependency. Phase 6 is therefore ready but unstarted and requires an explicit instruction.
+Phase 6 only is authorized. Phases 0, 1, 3–5 passed engineering gates; the Phase 2 handoff and all Phase 2–5 operational evidence remain open below. The operator resolved the two Phase 6 domain questions. No Phase 7 implementation is authorized.
+
+## Phase 6 — Lead & Funnel Core
+
+**Status: PASS — ENGINEERING COMPLETE (local gates verified 2026-09-14). Operational UAT: PENDING. GitHub CI: pending publication of this revision.** Baseline `1a32371b1c762557a94a54aed7812dd432e6bea6` passed [GitHub CI 34734963692](https://github.com/Dyrnzefanya/GrowthCockpit/actions/runs/34734963692); the baseline unit suite was rerun (33 tests). Contact = person. Lead = inquiry event. One contact may have multiple leads.
+
+### Resolved operator decisions and implementation plan
+
+- [x] Operator D-009: matching normalized person/product uses a rolling 24-hour window, inclusive at exactly 24 hours. Different products remain separate. More than 24 hours after the last matching observation creates a new inquiry. No calendar bucket.
+- [x] Operator D-010: retain missing/invalid email and phone with `contact_id=null` and `DQ_NO_CONTACT`; never create a placeholder person or merge missing identities. Repository decision IDs D-009/D-010 were occupied, so both operator decisions are recorded together in D-011.
+- [x] Plan executed: decisions/persistence → forward migrations → pure domain/tests → authorized atomic repositories/services → registry/manual/detail/CSV/funnel/Today → database/browser/performance/security review. D-012 records dependency and transaction choices before their introduction.
+- [x] Migrations 0010–0011 implement the two PRD migration responsibilities. Forward corrections 0012–0015 preserve applied migration immutability: batch persistence, bounded RPC JIT settings and single snapshot aggregation. No Phase 7 schema is created.
+
+### Engineering gates — requirement traceability
+
+| Requirements                                        | Implementation and evidence                                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-6.1–6.3, BE-6.1/6.5/6.6, FE-6.2                  | Five CRM tables; Zod manual input; email-then-phone and domain-then-name resolution; unknown attribution retained; anonymous inquiry retained per operator clarification. Domain and browser tests.                                                                                                                     |
+| FR-6.4–6.5, TEST-6.3–6.5                            | Deterministic contact/product/UTC-anchor dedupe key plus rolling observations; separate request/CSV replay hashes; normalized identity conflicts fail safely. Exactly 24h duplicate, >24h repeat, different products, anonymous rows and first-touch preservation tested.                                               |
+| FR-6.6–6.7, BE-6.3, NFR-6.2, TEST-6.1               | Pure q1 with ordered DQ_NO_CONTACT/DQ_TEST/DQ_NONCOMMERCIAL/DQ_COMPETITOR/DQ_OUT_OF_SCOPE; MQL requires Q_CONTACTABLE/Q_BUSINESS/Q_INTENT/Q_SIZE. Settings-backed lists/quantity threshold; existing verdict snapshots are immutable. Browser saves/restores threshold and confirms only a new inquiry changes verdict. |
+| FR-6.8–6.9, FE-6.4, TEST-6.6                        | Mandatory-reason override, source=manual, actor/time/history; compare-and-swap rejects stale edits; append-only SQL trigger. No automatic requalification.                                                                                                                                                              |
+| FR-6.10–6.11, BE-6.7, FE-6.5, TEST-6.9              | UTF-8 CSV upload → column mapping → dry-run created/updated/skipped/errors → atomic commit → report. 5 MB/5,000-row bounds; server revalidation/fingerprint; no stored CSV. Reimport is unchanged.                                                                                                                      |
+| FR-6.12–6.13, FE-6.1/6.3                            | 20-row server pagination; URL status/channel/platform/campaign/WIB dates/attribution/owner filters; detail shows contact/company/requirement, first/last touch, flags, audit timeline and linked deal.                                                                                                                  |
+| FR-6.14, BE-6.8                                     | Manual deal create/edit and lead linkage in one revision-checked transaction; numeric(18,2), currency, stage and close dates, attribution evidence. No HubSpot writes.                                                                                                                                                  |
+| FR-6.15–6.16, BE-6.2/6.4, FE-6.6, TEST-6.7/6.8/6.10 | Cohort/activity fact views, maturity disclosure, campaign quality, coverage and centralized §24.1 formulas. Unknown denominators/mixed currency return unavailable. CPL/CPQL/CPSQL/CAC/ROAS show — until spend exists.                                                                                                  |
+| FE-6.7                                              | Today uses real new inquiries, missing attribution and MQL/SQL workday SLA reasons; bounded visible queue and registry link. No scheduler.                                                                                                                                                                              |
+| NFR-6.1/6.3, TEST-6.11                              | Real browser create → qualify → repeat/dedupe → override → deal → funnel; 5,000-row import/replay; 50,000-row production page measurement; responsive/axe checks.                                                                                                                                                       |
+
+### Engineering evidence
+
+- [x] Clean local reset applies migrations 0001–0015. Schema lint passes; generated database types regenerated.
+- [x] SQL RLS/permissions: anonymous CRM/view access denied; authenticated writes and privileged RPC execution denied; first/last-touch and stage history protected. Invalid final stage insertion rolls back the whole batch. Five concurrent snapshot writers produce one commit and four stale-write rejections.
+- [x] Hand-calculated fixture: four inquiries, three MQL including one SQL, two deals (one won/one lost), three attributed leads, IDR 1,000,000 won revenue. MQL rate 75%; SQL/MQL 1/3; win rate 50%; coverage 75%. SQL transition on September 10 18:00 UTC belongs to September 11 WIB activity, while its outcome remains in the September 1 acquisition cohort.
+- [x] Unit/service suite: 50 tests pass. Coverage gate measures 159/159 branches across q1, attribution normalization, lead rules and metric/funnel calculations. Server-paged campaign/activity output retains whole-cohort totals; later timeline pages remain accessible.
+- [x] Final local browser import of 5,000 mapped inquiry-export rows and replay passed; measured commit 8.489 seconds (prior runs 13.7–16.6 seconds), all below 60 seconds. The UI exposes pending progress and per-row results. Server filters/page-two navigation and unchanged reimport pass. Fixtures are isolated locally and removed.
+- [x] Final production-mode browser: all three gates pass. At 50,000 leads, first-page samples are 357/320/356 ms (≤800 ms). Today 90-day history samples are 230/308/593 ms (≤1,500 ms). Gallery exclusion, shell and logout regression pass.
+- [x] Production build, lint, strict TypeScript, npm audit (zero vulnerabilities) passed. One build attempt during local database reset lacked CLI-derived test environment values and correctly failed environment validation; rerunning with the recovered local contract passed. No validation was weakened.
+- [x] Final whole-app Playwright: 18/18 pass, including local invite-only auth/logout/two-tab regression, Phase 3–5 flows, Phase 6 persistence, 20-row timeline navigation, settings audit/history preservation, and shell interactions. axe reports zero WCAG A/AA violations on representative routes.
+- [x] Actual rendered lead registry/new/import/detail, funnel and Today reviewed at 390/1280/1920 px. Native keyboard controls and override dialog focus work; document overflow checks pass. Tables scroll within their own region. Fixed misleading new/import breadcrumbs. Funnel/activity and timeline paginate on the server; totals cover the entire filter scope.
+- [x] Formatting, lint, strict typecheck, production build, repository secret scan and actual-key browser bundle scan pass. Final diff review preserves the approved shell, authenticated authorization boundaries and Phase 6-only scope. No Phase 7 integration, automatic ingest, job, alert, decision engine or fake product data is introduced.
+- [ ] Exact-revision GitHub CI — verify after committing and pushing the reviewed implementation. Operator-owned prompt-file moves remain excluded from the commit.
+- Diff review notes three trailing-blank-line warnings in already-applied migrations 0010, 0011 and 0015. They are cosmetic and are retained to honor migration immutability; no schema or behavior issue remains.
+
+Installed Ponytail and UI UX Pro Max instructions were used to keep native forms, shared table/shell components and operational hierarchy. UI UX Pro Max's search script is absent; no generated design-system result is claimed. No installed Superpowers/PostgreSQL/Supabase/domain-modeling skill was found. Actual tools: Next.js installed docs, Supabase CLI/PostgreSQL/Docker, Vitest/V8 coverage, Playwright/axe, Git/gh, and official CSV/RLS documentation.
+
+### Technical acceptance criteria
+
+All nine PRD technical acceptance criteria pass with the evidence above: manual qualification with reasons; duplicate prevention/repeat inquiry; mapped inquiry CSV export and unchanged reimport; hand-calculated funnel; visible cohort/maturity; unavailable spend metrics; complete paginated actor/source timeline; no anon lead access; required lint/typecheck/unit/build commands. MVP Core engineering is complete. Real operator adoption and the unresolved Phase 2 deployed checks remain pending.
+
+### Operational / UAT gate
+
+- [ ] Operator enters/imports real leads and answers “how many MQLs did we get last week, and from where?” within the application. Synthetic SQL/browser fixtures are not this evidence. Under the operator's standing closure policy, this is an operational adoption gate, not an engineering failure.
+- Remote Phase 3–6 migrations are not applied in this turn; no manual remote deployment or integration configuration occurs. Git publication can trigger the repository's existing deployment automation and must not be represented as remote database verification.
 
 ## Operational Validation Backlog
 
@@ -51,6 +103,7 @@ These items require deployed browser access, real operator use, real business da
 - [ ] Phase 3 — use the daily checklist through at least one real working day without database intervention.
 - [ ] Phase 4 — replace at least one procedure previously kept in chat or a spreadsheet with a published Playbook article.
 - [ ] Phase 5 — record and complete one real operator experiment after the system enters operational use.
+- [ ] Phase 6 — enter/import real inquiries and use the funnel to answer last week's MQL count and sources without leaving the app.
 
 ## Phase 5 — Experiment OS closure
 

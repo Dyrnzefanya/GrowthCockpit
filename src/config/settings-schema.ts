@@ -1,7 +1,23 @@
 import { z } from "zod";
+export const qualificationKeys = [
+  "qualification.min_quantity",
+  "qualification.free_email_domains",
+  "qualification.internal_domains",
+  "qualification.competitor_domains",
+] as const;
+export const qualificationKey = z.enum(qualificationKeys);
 export const settingsSchema = z.object({
   "workspace.timezone": z.literal("Asia/Jakarta"),
   "qualification.min_quantity": z.number().int().positive(),
+  "qualification.free_email_domains": z
+    .array(z.string().trim().toLowerCase().max(254))
+    .max(500),
+  "qualification.internal_domains": z
+    .array(z.string().trim().toLowerCase().max(254))
+    .max(500),
+  "qualification.competitor_domains": z
+    .array(z.string().trim().toLowerCase().max(254))
+    .max(500),
   "hubspot.write_lifecycle_stage": z.boolean(),
   "attribution.revenue_rule": z.enum([
     "lead_last_touch",
@@ -21,6 +37,18 @@ export const settingsSchema = z.object({
 export const settingsDefaults: z.infer<typeof settingsSchema> = {
   "workspace.timezone": "Asia/Jakarta",
   "qualification.min_quantity": 50,
+  "qualification.free_email_domains": [
+    "gmail.com",
+    "yahoo.com",
+    "yahoo.co.id",
+    "hotmail.com",
+    "outlook.com",
+    "icloud.com",
+    "live.com",
+    "aol.com",
+  ],
+  "qualification.internal_domains": [],
+  "qualification.competitor_domains": [],
   "hubspot.write_lifecycle_stage": false,
   "attribution.revenue_rule": "lead_last_touch",
   "health.min_coverage": 0.7,

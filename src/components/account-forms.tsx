@@ -4,9 +4,80 @@ import {
   sendLoginLink,
   saveProfile,
   savePreferences,
+  saveQualification,
 } from "@/services/account";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  qualificationKeys,
+  type settingsDefaults,
+} from "@/config/settings-schema";
+function QualificationField({
+  name,
+  value,
+}: {
+  name: (typeof qualificationKeys)[number];
+  value: number | string[];
+}) {
+  const [message, action, pending] = useActionState(saveQualification, "");
+  const labels = {
+    "qualification.min_quantity": "Minimum jumlah untuk Q_SIZE",
+    "qualification.free_email_domains": "Domain email gratis",
+    "qualification.internal_domains": "Domain internal (DQ_TEST)",
+    "qualification.competitor_domains": "Domain kompetitor (DQ_COMPETITOR)",
+  };
+  return (
+    <form action={action} className="space-y-3">
+      <input type="hidden" name="key" value={name} />
+      <label className="field" htmlFor={name}>
+        {labels[name]}
+        {typeof value === "number" ? (
+          <input
+            className="native-control"
+            id={name}
+            name="value"
+            type="number"
+            min="1"
+            step="1"
+            required
+            defaultValue={value}
+          />
+        ) : (
+          <textarea
+            className="native-control min-h-24"
+            id={name}
+            name="value"
+            defaultValue={value.join("\n")}
+            maxLength={128000}
+          />
+        )}
+      </label>
+      <Button disabled={pending} variant="outline">
+        Simpan {labels[name]}
+      </Button>
+      <p role="status" className="text-sm">
+        {message}
+      </p>
+    </form>
+  );
+}
+export function QualificationForm({
+  values,
+}: {
+  values: typeof settingsDefaults;
+}) {
+  return (
+    <div className="space-y-5 p-5">
+      <p className="text-sm text-muted-foreground">
+        q1 · Perubahan hanya untuk inquiry baru. Domain: satu per baris, tanpa
+        https://. Daftar kosong tidak mencocokkan domain apa pun.
+      </p>
+      {qualificationKeys.map((name) => (
+        <QualificationField key={name} name={name} value={values[name]} />
+      ))}
+    </div>
+  );
+}
 export function LoginForm({ next }: { next: string }) {
   const [message, action, pending] = useActionState(sendLoginLink, "");
   return (

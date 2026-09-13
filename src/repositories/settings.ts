@@ -1,6 +1,10 @@
 import "server-only";
 import { serverClient } from "@/lib/supabase/server";
-import { parseSettings, settingsSchema } from "@/config/settings-schema";
+import {
+  parseSettings,
+  settingsSchema,
+  qualificationKey,
+} from "@/config/settings-schema";
 export async function readProfile(id: string) {
   const { data, error } = await (
     await serverClient()
@@ -50,4 +54,17 @@ export async function updateTimezone(value: unknown) {
     .select("key")
     .single();
   if (error) throw new Error("Preferences could not be saved.");
+}
+export async function updateQualification(key: unknown, value: unknown) {
+  const name = qualificationKey.parse(key);
+  const parsed = settingsSchema.shape[name].parse(value);
+  const { error } = await (
+    await serverClient()
+  )
+    .from("app_settings")
+    .update({ value: parsed })
+    .eq("key", name)
+    .select("key")
+    .single();
+  if (error) throw new Error("Settings could not be saved.");
 }

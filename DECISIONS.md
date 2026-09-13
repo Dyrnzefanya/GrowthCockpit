@@ -1,5 +1,29 @@
 # Architectural Decisions
 
+## D-011 — Phase 6 authoritative inquiry identity decisions
+
+**Status:** Accepted by the operator (their D-009/D-010 labels; repository IDs D-009/D-010 already describe Playbook and Experiments).
+
+Contact = person. Lead = inquiry event. One contact may have multiple leads. A matching normalized contact and product is a duplicate when its timestamp is no more than 24 hours after the previous matching inquiry, inclusive at exactly 24 hours. This is a rolling timestamp window, never a calendar bucket. Different products remain separate. Store suppressed submission timestamps on the existing lead so they can advance the rolling window; replaying the same submission does not advance time. Chronologically sort import rows before resolution. If an out-of-order submission would join two already-distinct records or precede a nearby stored inquiry, refuse the ambiguous write with CONFLICT rather than merge history.
+
+Retain inquiries without usable email/phone with contact_id=null and DQ_NO_CONTACT. Never fabricate a person or merge missing identities. Submission replay keys protect retries and identical CSV rows independently of contact identity. No future reconciliation system is implemented.
+
+`dedupe_key` deterministically serializes resolved contact ID, normalized product and the inquiry's UTC anchor timestamp. Rolling observation matching decides membership in that window; no fixed bucket is used. An identityless inquiry uses its submission hash in place of contact ID. Separate SHA-256 submission keys cover manual request UUID retries and canonical CSV row content plus identical-row occurrence ordinal.
+
+## D-012 — Phase 6 persistence and CSV boundaries
+
+Local verification required forward migrations 0012–0015: set-based batch inserts replace per-row statements; JIT is disabled only within the two bounded JSON RPCs; the assembled snapshot is materialized once before fingerprinting to avoid repeated aggregation. The API statement timeout remains unchanged. Existing applied migrations remain immutable. A 5,000-row browser import/reimport is the regression gate. Qualification configuration uses the existing authenticated settings/audit path; changes affect future verdicts only. Tests measure 100% branches across qualification, normalization, lead rules and metric/funnel calculations.
+
+Verification adds exact-pinned @vitest/coverage-v8 matching Vitest 5.0.0, as a development-only dependency, to measure the PRD's 100% branch gate for qualification and metric formulas. Existing Vitest assertions alone do not measure uncovered branches. csv-parse 7.0.2 is exact-pinned; its browser ESM parser is shared by the import preview and server revalidation. No parser or coverage package is loaded by unrelated product routes. Shared DataTable gains an explicit page size and non-sortable identity columns so server pagination remains accurate.
+
+**Status:** Accepted implementation choices within PRD Phase 6.
+
+Use migrations 0010_crm_core and 0011_funnel_views because 0001–0009 are occupied. Create only companies, contacts, leads, lead_stage_events, and deals. Authenticated sessions read through RLS; session-verified, authorized server services write through the existing privileged client inside repositories, as required for mirrors in §15.5. A scoped snapshot and compare-and-swap batch RPC provide atomic persistence for application-computed resolution, deduplication, qualification and stage changes; SQL owns constraints/transactions, not qualification or metric formulas. Serialize CRM batch commits with an advisory lock and retry conflicts with a fresh snapshot. This single-workspace serialization can become per-identity locks if measured contention warrants it.
+
+Store first-touch fields write-once, per-inquiry last touch immutable, qualification evidence/version/settings snapshots, explicit manual overrides, submission keys and observed inquiry timestamps. Leave the future webhook foreign key for Phase 7. Leads have an optional app profile owner distinct from HubSpot owner identifiers. Manual deals are local records and never trigger CRM writes. Preserve numeric(18,2) money and currency from §15; mixed currency is unavailable, not silently summed or converted. Views return aggregate facts only; ratios are exclusively computed by domain/metrics/formulas.ts. Spend facts stay null until Phase 10.
+
+Use csv-parse for standards-compliant quoted/escaped/newline CSV parsing, bounded to UTF-8, 5,000 rows and 5 MB in memory. Increase the server-action body cap only to support this bounded import. Reject structurally invalid CSV before writing; report every row error and commit nothing until all rows are valid. The server re-parses and recomputes the plan at commit and checks the preview fingerprint. CSV content is never saved to storage or logs. Canonical row content (including occurrence timestamp) supplies replay identity; identical rows replay, missing person identities do not merge across distinct inquiries. Contact exports still require mapping an actual inquiry timestamp; no contact-creation date is silently reinterpreted as an inquiry.
+
 ## D-010 — Phase 5 experiment lifecycle, priority, and concurrency
 
 **Status:** Accepted

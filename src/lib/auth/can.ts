@@ -8,7 +8,8 @@ export async function can(
     | "workflow:write"
     | "note:write"
     | "playbook:write"
-    | "experiment:write",
+    | "experiment:write"
+    | "lead:write",
 ) {
   const user = await requireUser();
   const profile = await readProfile(user.id);

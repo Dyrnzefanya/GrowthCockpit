@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  experimental: { serverActions: { bodySizeLimit: "6mb" } },
   logging: { incomingRequests: false },
   async headers() {
     return [

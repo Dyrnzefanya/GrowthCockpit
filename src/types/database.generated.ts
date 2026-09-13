@@ -61,6 +61,253 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          created_at: string
+          domain: string | null
+          external_id: string | null
+          hubspot_company_id: string | null
+          id: string
+          industry: string | null
+          name: string
+          name_key: string
+          segment: string | null
+          source_system: string
+          source_updated_at: string | null
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string | null
+          external_id?: string | null
+          hubspot_company_id?: string | null
+          id?: string
+          industry?: string | null
+          name: string
+          name_key: string
+          segment?: string | null
+          source_system?: string
+          source_updated_at?: string | null
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string | null
+          external_id?: string | null
+          hubspot_company_id?: string | null
+          id?: string
+          industry?: string | null
+          name?: string
+          name_key?: string
+          segment?: string | null
+          source_system?: string
+          source_updated_at?: string | null
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          email: string | null
+          external_id: string | null
+          ft_at: string | null
+          ft_campaign: string | null
+          ft_content: string | null
+          ft_landing_page: string | null
+          ft_medium: string | null
+          ft_referrer: string | null
+          ft_source: string | null
+          ft_term: string | null
+          full_name: string | null
+          hubspot_contact_id: string | null
+          hubspot_owner_id: string | null
+          id: string
+          lifecycle_stage: string | null
+          lifecycle_stage_at: string | null
+          phone_e164: string | null
+          source_system: string
+          source_updated_at: string | null
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          email?: string | null
+          external_id?: string | null
+          ft_at?: string | null
+          ft_campaign?: string | null
+          ft_content?: string | null
+          ft_landing_page?: string | null
+          ft_medium?: string | null
+          ft_referrer?: string | null
+          ft_source?: string | null
+          ft_term?: string | null
+          full_name?: string | null
+          hubspot_contact_id?: string | null
+          hubspot_owner_id?: string | null
+          id?: string
+          lifecycle_stage?: string | null
+          lifecycle_stage_at?: string | null
+          phone_e164?: string | null
+          source_system?: string
+          source_updated_at?: string | null
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          email?: string | null
+          external_id?: string | null
+          ft_at?: string | null
+          ft_campaign?: string | null
+          ft_content?: string | null
+          ft_landing_page?: string | null
+          ft_medium?: string | null
+          ft_referrer?: string | null
+          ft_source?: string | null
+          ft_term?: string | null
+          full_name?: string | null
+          hubspot_contact_id?: string | null
+          hubspot_owner_id?: string | null
+          id?: string
+          lifecycle_stage?: string | null
+          lifecycle_stage_at?: string | null
+          phone_e164?: string | null
+          source_system?: string
+          source_updated_at?: string | null
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deals: {
+        Row: {
+          amount: number | null
+          attributed_campaign: string | null
+          attribution_allocations: Json
+          attribution_rule_version: string | null
+          close_date: string | null
+          company_id: string | null
+          contact_id: string | null
+          created_at: string
+          currency: string
+          expected_close_date: string | null
+          external_id: string | null
+          hubspot_deal_id: string | null
+          id: string
+          lead_id: string | null
+          name: string
+          owner_hubspot_id: string | null
+          pipeline: string
+          source_system: string
+          source_updated_at: string | null
+          stage_category: string
+          stage_key: string
+          stage_label: string
+          synced_at: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount?: number | null
+          attributed_campaign?: string | null
+          attribution_allocations?: Json
+          attribution_rule_version?: string | null
+          close_date?: string | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          expected_close_date?: string | null
+          external_id?: string | null
+          hubspot_deal_id?: string | null
+          id?: string
+          lead_id?: string | null
+          name: string
+          owner_hubspot_id?: string | null
+          pipeline: string
+          source_system?: string
+          source_updated_at?: string | null
+          stage_category: string
+          stage_key: string
+          stage_label: string
+          synced_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount?: number | null
+          attributed_campaign?: string | null
+          attribution_allocations?: Json
+          attribution_rule_version?: string | null
+          close_date?: string | null
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          currency?: string
+          expected_close_date?: string | null
+          external_id?: string | null
+          hubspot_deal_id?: string | null
+          id?: string
+          lead_id?: string | null
+          name?: string
+          owner_hubspot_id?: string | null
+          pipeline?: string
+          source_system?: string
+          source_updated_at?: string | null
+          stage_category?: string
+          stage_key?: string
+          stage_label?: string
+          synced_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiment_results: {
         Row: {
           conclusion: string
@@ -203,6 +450,236 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "experiments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_stage_events: {
+        Row: {
+          actor: string
+          changed_at: string
+          created_at: string
+          from_status: string | null
+          id: string
+          lead_id: string
+          note: string
+          source: string
+          to_status: string
+          updated_at: string
+        }
+        Insert: {
+          actor: string
+          changed_at: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          lead_id: string
+          note: string
+          source: string
+          to_status: string
+          updated_at?: string
+        }
+        Update: {
+          actor?: string
+          changed_at?: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          lead_id?: string
+          note?: string
+          source?: string
+          to_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_stage_events_actor_fkey"
+            columns: ["actor"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_stage_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          ad_id: string | null
+          adset_id: string | null
+          attribution_missing: boolean
+          campaign_id: string | null
+          channel: string
+          click_id: string | null
+          click_id_type: string
+          company_id: string | null
+          contact_id: string | null
+          created_at: string
+          deal_id: string | null
+          dedupe_key: string
+          disqualified_at: string | null
+          duplicate_suspect: boolean
+          estimated_quantity: number | null
+          external_id: string | null
+          id: string
+          inquiry_at: string
+          inquiry_date: string
+          inquiry_observations: string[]
+          landing_page: string | null
+          lt_campaign: string | null
+          lt_content: string | null
+          lt_medium: string | null
+          lt_source: string | null
+          lt_term: string | null
+          manual_override: boolean
+          message: string | null
+          out_of_scope: boolean
+          owner_id: string | null
+          platform: string
+          product_interest: string | null
+          product_key: string
+          qualification_reason: string
+          qualification_rule_version: string
+          qualification_settings: Json
+          qualification_status: string
+          qualified_at: string | null
+          referrer: string | null
+          required_by_date: string | null
+          source_system: string
+          source_updated_at: string | null
+          sql_at: string | null
+          submission_keys: string[]
+          synced_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          ad_id?: string | null
+          adset_id?: string | null
+          attribution_missing: boolean
+          campaign_id?: string | null
+          channel: string
+          click_id?: string | null
+          click_id_type?: string
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          dedupe_key: string
+          disqualified_at?: string | null
+          duplicate_suspect?: boolean
+          estimated_quantity?: number | null
+          external_id?: string | null
+          id?: string
+          inquiry_at: string
+          inquiry_date: string
+          inquiry_observations: string[]
+          landing_page?: string | null
+          lt_campaign?: string | null
+          lt_content?: string | null
+          lt_medium?: string | null
+          lt_source?: string | null
+          lt_term?: string | null
+          manual_override?: boolean
+          message?: string | null
+          out_of_scope?: boolean
+          owner_id?: string | null
+          platform: string
+          product_interest?: string | null
+          product_key?: string
+          qualification_reason: string
+          qualification_rule_version: string
+          qualification_settings: Json
+          qualification_status: string
+          qualified_at?: string | null
+          referrer?: string | null
+          required_by_date?: string | null
+          source_system?: string
+          source_updated_at?: string | null
+          sql_at?: string | null
+          submission_keys: string[]
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ad_id?: string | null
+          adset_id?: string | null
+          attribution_missing?: boolean
+          campaign_id?: string | null
+          channel?: string
+          click_id?: string | null
+          click_id_type?: string
+          company_id?: string | null
+          contact_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          dedupe_key?: string
+          disqualified_at?: string | null
+          duplicate_suspect?: boolean
+          estimated_quantity?: number | null
+          external_id?: string | null
+          id?: string
+          inquiry_at?: string
+          inquiry_date?: string
+          inquiry_observations?: string[]
+          landing_page?: string | null
+          lt_campaign?: string | null
+          lt_content?: string | null
+          lt_medium?: string | null
+          lt_source?: string | null
+          lt_term?: string | null
+          manual_override?: boolean
+          message?: string | null
+          out_of_scope?: boolean
+          owner_id?: string | null
+          platform?: string
+          product_interest?: string | null
+          product_key?: string
+          qualification_reason?: string
+          qualification_rule_version?: string
+          qualification_settings?: Json
+          qualification_status?: string
+          qualified_at?: string | null
+          referrer?: string | null
+          required_by_date?: string | null
+          source_system?: string
+          source_updated_at?: string | null
+          sql_at?: string | null
+          submission_keys?: string[]
+          synced_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_deal_fk"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -481,9 +958,83 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vw_attribution_coverage: {
+        Row: {
+          attributed: number | null
+          inquiry_date: string | null
+          leads: number | null
+        }
+        Relationships: []
+      }
+      vw_funnel_activity_daily: {
+        Row: {
+          event_date: string | null
+          source: string | null
+          to_status: string | null
+          transitions: number | null
+        }
+        Relationships: []
+      }
+      vw_funnel_daily: {
+        Row: {
+          attributed: number | null
+          currency: string | null
+          deals: number | null
+          disqualified: number | null
+          inquiry_date: string | null
+          leads: number | null
+          lost: number | null
+          lt_campaign: string | null
+          missing_revenue: number | null
+          mql: number | null
+          open_deals: number | null
+          past_expected_close: number | null
+          past_expected_closed: number | null
+          platform: string | null
+          revenue: string | null
+          spend: number | null
+          sql: number | null
+          won: number | null
+        }
+        Relationships: []
+      }
+      vw_lead_quality_by_campaign: {
+        Row: {
+          attributed: number | null
+          currency: string | null
+          deals: number | null
+          disqualified: number | null
+          inquiry_date: string | null
+          leads: number | null
+          lost: number | null
+          lt_campaign: string | null
+          missing_revenue: number | null
+          mql: number | null
+          open_deals: number | null
+          past_expected_close: number | null
+          past_expected_closed: number | null
+          platform: string | null
+          revenue: string | null
+          spend: number | null
+          sql: number | null
+          won: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      commit_deal: {
+        Args: { p_deal: Json; p_lead_revision: string; p_revision: string }
+        Returns: undefined
+      }
+      commit_lead_batch: {
+        Args: { p_plan: Json; p_revision: string; p_scope: Json }
+        Returns: undefined
+      }
+      commit_lead_override: {
+        Args: { p_event: Json; p_id: string; p_patch: Json; p_revision: string }
+        Returns: undefined
+      }
       commit_workflow_item: {
         Args: {
           p_completed: string
@@ -519,6 +1070,7 @@ export type Database = {
         }
         Returns: string
       }
+      crm_snapshot: { Args: { p_scope: Json }; Returns: Json }
       immutable_text_array: { Args: { value: string[] }; Returns: string }
       materialize_workflow: {
         Args: {

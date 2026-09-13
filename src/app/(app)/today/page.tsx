@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { LeadQueue } from "@/components/lead-queue";
 import { PageHeader, SectionCard } from "@/components/operational";
 import { EmptyState } from "@/components/states";
 import {
@@ -170,12 +172,14 @@ export default async function Page({
             </nav>
           </SectionCard>
         </div>
+        <Suspense fallback={<p role="status">Memuat lead follow-up…</p>}>
+          <LeadQueue />
+        </Suspense>
         <SectionCard
           title="Bagian berikutnya"
           description="Bagian ini belum aktif; tidak ada data yang dibuat-buat."
         >
           <ul className="grid gap-3 p-5 text-sm text-muted-foreground sm:grid-cols-2">
-            <li>Lead follow-up queue · Phase 6</li>
             <li>Data health · Phase 7</li>
             <li>Alerts · Phase 9</li>
             <li>Priority actions · Phase 11</li>

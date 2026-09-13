@@ -170,7 +170,11 @@ export function AppShell({
                   {path.startsWith("/leads/") && (
                     <li className="flex items-center gap-2">
                       <ChevronRight className="size-3" aria-hidden="true" />
-                      Inquiry detail
+                      {path === "/leads/new"
+                        ? "Inquiry baru"
+                        : path === "/leads/import"
+                          ? "Import CSV"
+                          : "Inquiry detail"}
                     </li>
                   )}
                 </ol>

@@ -1,5 +1,19 @@
 # Data Model
 
+## Phase 6 CRM / inquiry core
+
+Migrations 0010–0015 create the five Phase 6 tables and four security-invoker fact views, then forward-only corrections to bounded batch/snapshot execution. Applied migrations are never edited. No Phase 7 source-event table, ingest endpoint, or spend table exists.
+
+- `companies`: domain-first/name-second resolution; domain uniqueness and normalized name index.
+- `contacts`: a person with at least one valid normalized channel supplied by the domain. Partial email/phone uniqueness, optional company, immutable first-touch evidence.
+- `leads`: inquiry timestamp and WIB business date, optional contact/company, product identity, immutable last touch, q1 verdict/reasons/settings snapshot, qualification dates, manual override flag, actor owner, missing-attribution flag, optional deal. Submission keys prevent replay; observation timestamps implement the operator's rolling inclusive 24-hour dedupe rule. Missing identity never denotes a shared person.
+- `lead_stage_events`: append-only status history with from/to, timestamp, actor, source, and reason. Neither UPDATE nor DELETE is permitted through product roles.
+- `deals`: local manual pipeline/stage/category, exact money/currency, expected/actual close date, audit actor and immutable attribution allocation evidence. No HubSpot writes occur.
+
+Authenticated sessions read shared CRM rows through RLS. Anon has no grants. Authenticated clients cannot mutate mirrors or execute write/snapshot RPCs. Session-verified, authorized services use the guarded admin repository; atomic RPCs persist application decisions and compare revisions. A failed final history write rolls back all earlier batch changes. Settings remain normal authenticated RLS writes with protected audit metadata.
+
+`vw_funnel_daily` assigns current outcomes to original inquiry dates; `vw_funnel_activity_daily` counts events on their actual WIB transition dates. `vw_lead_quality_by_campaign` and `vw_attribution_coverage` provide lead-side facts. Ratios live exclusively in domain/metrics; MQL includes current SQL, win rate uses won/(won+lost), mixed-currency revenue is unavailable, and spend remains null. CSV upload content is never persisted. Phase 6 migrations are verified locally; no remote database migration is performed in this phase.
+
 ## Phase 0 state
 
 There are no application tables. `supabase/migrations/0001_extensions.sql` enables `pgcrypto` and `citext` and creates the reusable `public.set_updated_at()` trigger function. Product schemas begin in their PRD-defined phases.
@@ -18,7 +32,7 @@ Settings are workspace-wide: authenticated users can read rows and update only `
 - HubSpot is authoritative for CRM contacts and lifecycle state. Supabase holds the PM OS operational record and analytics mirror.
 - Database identifiers are UUIDs generated with `gen_random_uuid()` unless the PRD specifies an external identifier.
 - Timestamps use `timestamptz`; business dates use Asia/Jakarta calendar semantics.
-- Money is stored as integer minor units plus an ISO currency code. Conversion uses the PRD-defined rate and preserves source amount, source currency, converted amount, target currency, rate, and rate date. Missing conversion data stays unavailable.
+- Money is stored as `numeric(18,2)` plus an ISO currency code (PRD §15.1–15.2). Application aggregation uses decimal strings/BigInt minor-unit arithmetic to avoid floating-point loss; that is not the storage format. Future conversion preserves the PRD source/rate fields. Missing conversion data stays unavailable.
 - Attribution records first and last touch as defined by the PRD. Unknown attribution remains unknown; it is never inferred without evidence.
 - Funnel facts derive from explicit lead events and lifecycle mappings. Unavailable events or metrics remain null/unavailable.
 - Every future public table receives RLS and policies in the migration that creates it.

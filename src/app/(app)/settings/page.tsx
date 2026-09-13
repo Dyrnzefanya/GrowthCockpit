@@ -1,6 +1,10 @@
 import { PageHeader, SectionCard } from "@/components/operational";
 import { EmptyState } from "@/components/states";
-import { ProfileForm, PreferencesForm } from "@/components/account-forms";
+import {
+  ProfileForm,
+  PreferencesForm,
+  QualificationForm,
+} from "@/components/account-forms";
 import { requireUser } from "@/services/session";
 import { readProfile, readSettings } from "@/repositories/settings";
 import { can } from "@/lib/auth/can";
@@ -58,6 +62,13 @@ export default async function Settings() {
               })}{" "}
               WIB
             </p>
+          )}
+        </SectionCard>
+        <SectionCard title="Kualifikasi lead">
+          {editable ? (
+            <QualificationForm values={settings.values} />
+          ) : (
+            <p className="p-5">Pengaturan hanya dapat dibaca.</p>
           )}
         </SectionCard>
         <SectionCard title="CRM mapping">

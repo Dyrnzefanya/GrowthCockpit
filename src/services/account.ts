@@ -4,12 +4,21 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { requestLogin, endSession } from "@/repositories/auth";
-import { updateProfile, updateTimezone } from "@/repositories/settings";
+import {
+  updateProfile,
+  updateTimezone,
+  updateQualification,
+} from "@/repositories/settings";
 import { requireUser } from "@/services/session";
 import { safeNext } from "@/lib/auth/redirect";
 import { can } from "@/lib/auth/can";
 import { serverEnv } from "@/lib/env.server";
-import { profileInput, preferenceInput } from "@/config/settings-schema";
+import {
+  profileInput,
+  preferenceInput,
+  qualificationKey,
+  settingsSchema,
+} from "@/config/settings-schema";
 export async function sendLoginLink(_previous: string, form: FormData) {
   const parsed = z.email().max(254).safeParse(form.get("email"));
   if (parsed.success) {
@@ -67,4 +76,29 @@ export async function savePreferences(_previous: string, form: FormData) {
   }
   revalidatePath("/settings");
   return "Preferences saved.";
+}
+export async function saveQualification(_previous: string, form: FormData) {
+  await requireUser();
+  if (!(await can("settings:update"))) return "Anda tidak memiliki izin.";
+  const key = qualificationKey.safeParse(form.get("key"));
+  if (!key.success) return "Pengaturan tidak valid.";
+  const raw = z.string().max(128000).safeParse(form.get("value"));
+  if (!raw.success) return "Nilai tidak valid. Tidak ada perubahan tersimpan.";
+  const value =
+    key.data === "qualification.min_quantity"
+      ? Number(raw.data)
+      : raw.data
+          .split(/[\n,]/)
+          .map((v) => v.trim())
+          .filter(Boolean);
+  const parsed = settingsSchema.shape[key.data].safeParse(value);
+  if (!parsed.success)
+    return "Nilai tidak valid. Tidak ada perubahan tersimpan.";
+  try {
+    await updateQualification(key.data, parsed.data);
+  } catch {
+    return "Pengaturan belum tersimpan. Coba lagi.";
+  }
+  revalidatePath("/settings");
+  return "Tersimpan. Berlaku untuk inquiry baru; riwayat tidak diubah.";
 }

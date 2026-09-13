@@ -19,11 +19,13 @@ export type Column<T> = {
   label: string;
   value: (row: T) => string | number;
   render?: (row: T) => ReactNode;
+  sortable?: boolean;
 };
 type Pagination = {
   page: number;
   total: number;
   onPageChange: (page: number) => void;
+  pageSize?: number;
 };
 export function DataTable<T>({
   rows,
@@ -77,7 +79,7 @@ export function DataTable<T>({
         })
       : filtered;
   const total = pagination?.total ?? sorted.length;
-  const pages = Math.max(1, Math.ceil(total / 10));
+  const pages = Math.max(1, Math.ceil(total / (pagination?.pageSize ?? 10)));
   const current = Math.min(pagination?.page ?? page, pages - 1);
   const displayed = pagination
     ? rows
@@ -151,6 +153,7 @@ export function DataTable<T>({
                       }
                     >
                       <button
+                        disabled={column.sortable === false}
                         className="flex items-center gap-2 text-left"
                         onClick={() => {
                           const direction =
