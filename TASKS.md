@@ -37,7 +37,30 @@
 
 ## Next phase
 
-Phase 0 and Phase 1 remain PASS. Phase 3 is **PASS — ENGINEERING COMPLETE**. Its operational one-real-workday UAT remains pending follow-up evidence and is not marked complete. Phase 2's pending external verification is preserved below and is not silently marked PASS. Phase 4 is ready but remains unstarted until explicitly requested.
+Phase 0, Phase 1, Phase 3 engineering, and Phase 4 engineering are PASS. Phase 4's operator procedure-replacement adoption/UAT remains pending follow-up evidence and is not marked complete. The operator classified that adoption evidence as non-blocking on 2026-09-13; Phase 5 declares dependencies only on Phases 1 and 2, plus Phase 3 for its Today section. Phase 2's pending external verification and Phase 3's operational one-real-workday UAT remain unchanged. Phase 5 is ready but is not authorized or started.
+
+## Phase 4 — implementation plan
+
+**Status: PASS — ENGINEERING COMPLETE. Operational Adoption/UAT: PENDING.** On 2026-09-13 the operator classified the procedure-replacement requirement as operational adoption evidence rather than an engineering defect. All Phase 4 implementation requirements, technical acceptance criteria, migrations, security checks, automated tests and documentation evidence pass. The adoption item remains open and is not falsely claimed.
+
+- [x] FR-4.1–4.8 / BE-4.1–4.2: one-table playbook migration, weighted full-text index/RPC, authenticated RLS/audit, slug/status domain rules, repository and service CRUD/search.
+- [x] FE-4.1–4.3: operational library, URL search/filters, safe reader/TOC, Markdown editor/preview, archive/delete and deep links.
+- [x] TEST-4.1–4.5 / NFR-4.1–4.2: collision, ranked body search, filters/status, hostile Markdown, RLS, 500-article query budget, browser CRUD/search/read/archive/accessibility/responsive evidence.
+- [x] Phase 4 engineering closure: gates, traceability, documentation and scope review complete.
+
+### Phase 4 engineering evidence
+
+- [x] Migrations 0001–0008 rebuild locally from empty. The Phase 4 migration creates one RLS-protected article table, weighted generated `tsvector`, GIN/filter indexes, audit trigger and authenticated search RPC. The seed migration publishes exactly five substantive articles: **SOP peluncuran kampanye** (SOP), **Checklist QA pelacakan** (checklist), **Checklist review mingguan** (checklist), **Pohon diagnosis ketika CPL meningkat** (decision tree), and **Referensi UTM dan penamaan kampanye** (reference).
+- [x] Transactional SQL tests prove five readable seeds, body-only retrieval, title-over-body ranking, default archive exclusion, explicit archive retrieval, duplicate rejection, audit actor protection, no anon table/RPC access, the GIN index, and search below 500 ms with 500 rolled-back fixtures.
+- [x] Domain/component tests prove title slugging and `-2` suffixes, publish version/timestamp behavior, tag normalisation, table-of-contents extraction outside code blocks, PostgreSQL timestamp revision parsing, GFM output, and removal of script/image/JavaScript URL injection.
+- [x] Browser E2E creates a draft, survives an aborted save with the full editor buffer, reads safe Markdown and TOC, publishes/version-checks, finds a body-only term, filters by type, resolves a collision to `-2`, archives, excludes the archive by default, and reaches it by explicit filter/deep link. Fixtures use only loopback Supabase and are removed.
+- [x] Actual rendered `/playbook` layouts at 1280, 1920 and 390 px were inspected. Search remains visible, filters stack on mobile, cards stay scan-friendly, keyboard focus works, no horizontal overflow occurs, and axe reports no WCAG A/AA violations on list, reader and editor routes.
+- [x] Full quality gates pass: formatting; ESLint; strict TypeScript/Next route generation; 26 unit/component/service tests in 9 files; clean local migration rebuild; schema lint; transactional identity/workflow/playbook SQL tests; production build; repository and client-bundle secret scans; npm audit with zero vulnerabilities; all 15 development Playwright cases; and both production Playwright cases. The targeted Phase 4 browser test passed again after its final type/category/tag, empty-result and delete assertions.
+- [x] Generated database types include migrations 0007–0008 and reproduce byte-for-byte. Supabase CLI emitted its existing non-blocking MaxListeners warning while exiting successfully.
+- [x] Scope review: no Phase 5 table, route behavior, experiment feature, external integration, scheduler, AI, collaboration, attachment or revision history. Product routes contain only the five real procedural seeds; browser/SQL synthetic records are local, guarded, rolled back or deleted.
+- [ ] PRD §35 Phase 4 Definition of Done: operator replaces at least one procedure previously kept in chat or a spreadsheet with a published article. Automated seed/test content is not claimed as this operator evidence.
+
+No remote database migration or deployment was performed for Phase 4, matching the local-first phase workflow. The pending adoption evidence does not block Phase 5: PRD §35 Phase 5 lists dependencies on Phases 1 and 2, plus Phase 3 only for its Today section. Phase 5 remains unstarted until explicitly requested.
 
 ## Phase 2 handoff / Phase 3 authorization
 

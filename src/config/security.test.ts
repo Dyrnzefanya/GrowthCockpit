@@ -34,6 +34,11 @@ describe("Phase 2 security contracts", () => {
     );
     expect(safeNext("/settings")).toBe("/settings");
     expect(safeNext("/workflows/templates")).toBe("/workflows/templates");
+    expect(safeNext("/playbook/new")).toBe("/playbook/new");
+    expect(safeNext("/playbook/sop-peluncuran/edit?from=search")).toBe(
+      "/playbook/sop-peluncuran/edit?from=search",
+    );
+    expect(safeNext("/playbook/../../auth/confirm")).toBe("/today");
     expect(safeNext("/workflows/templates/../../auth/confirm")).toBe("/today");
   });
   it("TEST-2.4 validates writes and safely defaults malformed, missing, and unknown settings", () => {

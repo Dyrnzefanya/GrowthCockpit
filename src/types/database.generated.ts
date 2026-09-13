@@ -102,6 +102,68 @@ export type Database = {
           },
         ]
       }
+      playbook_articles: {
+        Row: {
+          article_type: string
+          body_md: string
+          category: string
+          created_at: string
+          id: string
+          published_at: string | null
+          search_vector: unknown
+          slug: string
+          status: string
+          summary: string
+          tags: string[]
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          article_type: string
+          body_md: string
+          category: string
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          search_vector?: unknown
+          slug: string
+          status?: string
+          summary: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          article_type?: string
+          body_md?: string
+          category?: string
+          created_at?: string
+          id?: string
+          published_at?: string | null
+          search_vector?: unknown
+          slug?: string
+          status?: string
+          summary?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_articles_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -287,6 +349,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      immutable_text_array: { Args: { value: string[] }; Returns: string }
       materialize_workflow: {
         Args: {
           p_date: string
@@ -295,6 +358,32 @@ export type Database = {
           p_version: number
         }
         Returns: string
+      }
+      search_playbook: {
+        Args: {
+          p_category?: string
+          p_limit?: number
+          p_offset?: number
+          p_query?: string
+          p_status?: string
+          p_tag?: string
+          p_type?: string
+        }
+        Returns: {
+          article_type: string
+          category: string
+          id: string
+          published_at: string
+          rank: number
+          slug: string
+          status: string
+          summary: string
+          tags: string[]
+          title: string
+          total_count: number
+          updated_at: string
+          version: number
+        }[]
       }
     }
     Enums: {

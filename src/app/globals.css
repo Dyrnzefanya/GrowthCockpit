@@ -82,6 +82,49 @@
   .table-scroll td {
     @apply border-b px-4 py-3;
   }
+  .playbook-prose h1 {
+    @apply mb-5 text-2xl tracking-tight;
+  }
+  .playbook-prose h2 {
+    @apply mb-3 mt-8 scroll-mt-24 border-b pb-2 text-xl;
+  }
+  .playbook-prose h3 {
+    @apply mb-2 mt-6 scroll-mt-24 text-base;
+  }
+  .playbook-prose p,
+  .playbook-prose ul,
+  .playbook-prose ol,
+  .playbook-prose pre,
+  .playbook-prose blockquote {
+    @apply my-4;
+  }
+  .playbook-prose ul {
+    @apply list-disc pl-6;
+  }
+  .playbook-prose ol {
+    @apply list-decimal pl-6;
+  }
+  .playbook-prose li {
+    @apply my-1.5;
+  }
+  .playbook-prose a {
+    @apply text-primary underline underline-offset-2;
+  }
+  .playbook-prose code {
+    @apply rounded-sm bg-muted px-1 py-0.5 font-mono text-[0.875em];
+  }
+  .playbook-prose pre {
+    @apply overflow-x-auto rounded-md bg-rail p-4 text-rail-foreground;
+  }
+  .playbook-prose pre code {
+    @apply bg-transparent p-0;
+  }
+  .playbook-prose blockquote {
+    @apply border-l-4 border-primary pl-4 text-muted-foreground;
+  }
+  .playbook-prose input[type="checkbox"] {
+    @apply mr-2 size-4 accent-primary;
+  }
 }
 @media (min-width: 64rem) {
   .workspace-body {

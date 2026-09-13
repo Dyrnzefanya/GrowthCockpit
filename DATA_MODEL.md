@@ -47,3 +47,12 @@ The exact tables, columns, constraints, indexes, RLS policies, and migration ord
 - Generated TypeScript types reflect local migrations 0001-0006. Phase 3 migrations are applied locally only; the remote development project remains at Phase 2 migration 0004 until deployment is authorized and its outstanding host protection gate is verified.
 
 The local SQL test runs transactionally and rolls back synthetic identities/workflows/notes. Browser fixtures are guarded to loopback Supabase and clean up their own data. No remote reset is permitted.
+
+## Phase 4 state
+
+- `0007_playbook.sql`: `playbook_articles`, its constraints, audit/timestamp triggers, authenticated shared-workspace RLS, weighted stored `search_vector`, GIN/filter indexes, and the security-invoker ranked search RPC. Anonymous table/RPC access is revoked. Normal application operations use an authenticated user session; no service-role shortcut is used.
+- Slugs are unique and constrained to URL-safe lowercase values. Drafts start at version 0. Publishing increments the application-computed version and sets `published_at`; archiving preserves the last publication metadata. `updated_at` provides optimistic compare-and-swap protection for updates and deletes. The write trigger always stamps `updated_by=auth.uid()` so clients cannot forge audit ownership.
+- `0008_playbook_seeds.sql`: five published operational articles required by FR-4.8. Seeds have no operator identity and contain procedures only, not fabricated activity or performance data.
+- Generated TypeScript types reflect local migrations 0001-0008. Phase 3–4 migrations are applied locally only; the remote development project remains at Phase 2 migration 0004 until deployment is explicitly authorized.
+
+The playbook SQL test adds 500 synthetic rows inside a transaction, verifies weighted body search and the query budget, then rolls everything back. Browser fixtures are loopback-guarded and delete their own articles and invited identity.

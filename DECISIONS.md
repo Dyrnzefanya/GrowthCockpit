@@ -1,5 +1,19 @@
 # Architectural Decisions
 
+## D-009 — Phase 4 playbook storage, search, and safe Markdown
+
+**Status:** Accepted
+
+**Phase:** 4
+
+**Decision:** Add the single PRD `playbook_articles` table in forward migration `0007_playbook.sql`, followed by `0008_playbook_seeds.sql`; migration numbers 0001–0006 are already occupied. Categories remain a required text field and tags remain a text array. No category, revision, attachment, collaboration, or content-block table is added.
+
+PostgreSQL owns text indexing and ranking through a stored generated weighted `tsvector`, a GIN index, and one security-invoker read RPC. The RPC accepts only validated search/filter values and excludes archived articles unless explicitly requested. Application domain logic owns slug generation/collision suffixes and publishing semantics. Drafts start at version 0; every save whose resulting status is `published` is a publish and increments the version, including edits to an already-published article. Publishing sets `published_at`; later archive preserves it. Updates use the row's `updated_at` as a compare-and-swap revision so two editors cannot silently overwrite each other. Delete is a confirmed hard delete because the PRD explicitly requires delete and defers revision history.
+
+Use `react-markdown` 10.1.0 with `remark-gfm` 4.0.1, both exact-pinned. This is the minimum maintained parser combination that renders the PRD's headings, lists, tables, task checkboxes, and code without a home-grown Markdown parser. Raw HTML is never parsed (`skipHtml`); the renderer never uses `dangerouslySetInnerHTML`, and external input still passes Zod validation. This safely removes injected HTML without adding `rehype-raw` or a broader HTML sanitizer attack surface. Links retain the renderer's safe URL transformation. The cost is the parser bundle on playbook routes; route-level splitting contains it to those routes.
+
+**Alternatives rejected:** hand-written Markdown parsing is incomplete and unsafe; `remark-rehype` plus raw HTML and a sanitizer adds dependencies and an HTML path the product does not need; a generic CMS schema adds speculative structure prohibited by the PRD.
+
 ## D-008 — Phase 3 handoff and workflow consistency
 
 The operator explicitly authorizes Phase 3 while Phase 2 retains five residual verification items in TASKS.md. This overrides sequencing only; it does not weaken authentication/security or mark unverified gates PASS.

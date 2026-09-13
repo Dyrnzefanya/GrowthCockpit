@@ -3,7 +3,11 @@ import { requireUser } from "@/services/session";
 import { readProfile } from "@/repositories/settings";
 export async function can(
   action:
-    "profile:update" | "settings:update" | "workflow:write" | "note:write",
+    | "profile:update"
+    | "settings:update"
+    | "workflow:write"
+    | "note:write"
+    | "playbook:write",
 ) {
   const user = await requireUser();
   const profile = await readProfile(user.id);

@@ -2476,14 +2476,14 @@ Status values: `Planned` · `In Progress` · `Implemented` · `Verified`. The co
 | FR-3.9 | 3 | services/notes | TEST-3.6 | Verified |
 | FR-3.10 | 3 | /workflows | TEST-3.6 | Verified |
 | FR-3.11 | 3 | domain/dates | TEST-3.3 | Verified |
-| FR-4.1 | 4 | services/playbook | TEST-4.5 | Planned |
-| FR-4.2 | 4 | slug generator | TEST-4.1 | Planned |
-| FR-4.3 | 4 | markdown renderer | TEST-4.4 | Planned |
-| FR-4.4 | 4 | search vector | TEST-4.2 | Planned |
-| FR-4.5 | 4 | filters | TEST-4.5 | Planned |
-| FR-4.6 | 4 | publish action | TEST-4.3 | Planned |
-| FR-4.7 | 4 | archive handling | TEST-4.3 | Planned |
-| FR-4.8 | 4 | seed migration | manual | Planned |
+| FR-4.1 | 4 | services/playbook | TEST-4.5 | Verified |
+| FR-4.2 | 4 | slug generator | TEST-4.1 | Verified |
+| FR-4.3 | 4 | markdown renderer | TEST-4.4 | Verified |
+| FR-4.4 | 4 | search vector | TEST-4.2 | Verified |
+| FR-4.5 | 4 | filters | TEST-4.5 | Verified |
+| FR-4.6 | 4 | publish action | TEST-4.3 | Verified |
+| FR-4.7 | 4 | archive handling | TEST-4.3 | Verified |
+| FR-4.8 | 4 | seed migration | manual | Verified |
 | FR-5.1 | 5 | experiment form | TEST-5.6 | Planned |
 | FR-5.2 | 5 | code generator | TEST-5.2 | Planned |
 | FR-5.3 | 5 | domain/experiments/state | TEST-5.1 | Planned |
