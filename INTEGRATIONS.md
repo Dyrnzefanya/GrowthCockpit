@@ -63,6 +63,8 @@ Remaining deployment gates are explicitly listed in the latest `TASKS.md` closur
 
 ## Deferred integration decisions
 
+Phase 5 stores validated external reference identifiers and URLs only. It makes no network call, does not verify those references, and does not attach platform metrics. The Today experiment queue is an indexed database query, not a scheduler or integration.
+
 - Phase 7: scheduler/fallback behavior; scheduler-wide outage detection ownership; A10/A12 reference correction; canonical retry/dead-letter terminology; `pg_cron`/`pg_net` versus the extension whitelist.
 - Phase 8: manual qualification override behavior relative to HubSpot lifecycle authority.
 - Phase 9: Slack INFO routing.

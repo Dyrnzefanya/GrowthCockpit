@@ -49,18 +49,25 @@ const palette = {
   healthy: { className: "bg-healthy-soft text-healthy", Icon: CircleCheck },
   unknown: { className: "bg-unknown-soft text-unknown", Icon: CircleHelp },
 };
-export function StatusBadge({ status }: { status: Status }) {
+export function StatusBadge({
+  status,
+  label,
+}: {
+  status: Status;
+  label?: string;
+}) {
   const { className, Icon } = palette[statusSemantics[status]];
-  const label =
-    status === "mql" || status === "sql"
+  const text =
+    label ??
+    (status === "mql" || status === "sql"
       ? status.toUpperCase()
-      : status.replaceAll("_", " ");
+      : status.replaceAll("_", " "));
   return (
     <span
       className={`inline-flex max-w-full items-center gap-1.5 rounded-sm px-2 py-1 text-xs font-medium capitalize ${className}`}
     >
       <Icon className="size-3.5" aria-hidden="true" />
-      <span>{label}</span>
+      <span>{text}</span>
     </span>
   );
 }

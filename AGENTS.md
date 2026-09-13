@@ -17,11 +17,18 @@
 11. Do not fabricate unavailable metrics or data. Automatic campaign modification is prohibited.
 12. Deterministic rules precede AI. n8n is not runtime infrastructure; it may later orchestrate existing endpoints only after a concrete need is approved.
 13. Run `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` before declaring a phase complete. Run every phase-specific test as well.
-14. A phase passes only when all requirements, acceptance criteria, migration checks, and documentation updates have evidence and no critical issue remains.
+14. A phase is engineering-complete only when its implementation, technical acceptance criteria, tests, security/RLS checks, migrations/schema validation, build, applicable accessibility/performance checks, and documentation have evidence with no critical issue remaining.
+
+## Completion evidence policy
+
+- Track engineering Definition of Done separately from operational validation/UAT.
+- Operational evidence that requires real operator use, real business data, elapsed time, or production activity remains `PENDING` until it actually occurs. Never substitute fixtures or automated tests for that evidence.
+- Pending operational evidence does not make an engineering-complete phase fail or block the next engineering phase unless the PRD explicitly makes it a hard dependency.
+- An implementation defect, failed technical acceptance criterion, security/RLS failure, migration/schema failure, build failure, or explicit hard dependency still makes the phase fail.
 
 ## Current scope
 
-Phase 4 is PASS — ENGINEERING COMPLETE. Its operator procedure-replacement adoption/UAT remains pending evidence in TASKS.md and is not marked complete; the operator has classified it as non-blocking because Phase 5 has no dependency on real-world Playbook adoption. Preserve the Phase 2 residual checks and Phase 3 operational UAT as pending evidence. Phase 5 is ready but may begin only when explicitly requested.
+Phase 5 — Experiment OS is `PASS — ENGINEERING COMPLETE`. Its operational UAT—recording and completing one real operator experiment—remains `PENDING`; local synthetic verification is not claimed as that evidence. Preserve every Phase 2–5 item in the Operational Validation Backlog in `TASKS.md`. Phase 6 is ready but has not been authorized in this phase closure. Do not begin Phase 6 or add CRM/lead work, external integrations, jobs, AI, automated metrics, significance calculations, multivariate experiments, or automatic campaign changes without an explicit instruction.
 
 UI conventions: use `src/styles/tokens.css` and semantic Tailwind utilities; use shared components instead of feature-specific replacements. Illustrative data belongs only under the server-gated development gallery. Route pages remain Server Components unless they need interaction. Keep filters and date ranges in URL parameters. Above 500 rows, tables require injected server pagination.
 

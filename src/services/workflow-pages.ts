@@ -10,6 +10,7 @@ import {
 } from "@/repositories/workflows";
 import { readNotes } from "@/repositories/notes";
 import { toJakartaDate, todayHeading, shiftDate } from "@/domain/dates";
+import { experimentReviewQueue } from "@/services/experiments";
 type Search = Record<string, string | string[] | undefined>;
 const pageSchema = z.coerce.number().int().min(0).max(100000).catch(0);
 export async function todayModel(search: Search) {
@@ -20,9 +21,10 @@ export async function todayModel(search: Search) {
   const noteDate =
     parsedDate.success && parsedDate.data <= today ? parsedDate.data : today;
   const notePage = pageSchema.parse(search.note_page ?? 0);
-  const [runResult, noteResult] = await Promise.allSettled([
+  const [runResult, noteResult, experimentResult] = await Promise.allSettled([
     getOrCreateRunsForDate(now),
     readNotes(noteDate, notePage),
+    experimentReviewQueue(today),
   ]);
   const runs =
     runResult.status === "fulfilled"
@@ -38,6 +40,9 @@ export async function todayModel(search: Search) {
     notes: noteResult.status === "fulfilled" ? noteResult.value.notes : [],
     noteTotal: noteResult.status === "fulfilled" ? noteResult.value.total : 0,
     noteError: noteResult.status === "rejected",
+    experiments:
+      experimentResult.status === "fulfilled" ? experimentResult.value : [],
+    experimentError: experimentResult.status === "rejected",
   };
 }
 export async function historyModel(search: Search) {

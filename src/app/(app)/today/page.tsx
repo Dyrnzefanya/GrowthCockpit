@@ -56,6 +56,46 @@ export default async function Page({
                 />
               </SectionCard>
             )}
+            <SectionCard
+              title="Experiment review queue"
+              description="Eksperimen running dengan tanggal review hari ini atau sudah lewat."
+            >
+              {model.experimentError ? (
+                <WorkflowRetry title="Review eksperimen belum dapat dimuat." />
+              ) : model.experiments.length ? (
+                <ol className="divide-y">
+                  {model.experiments.map((experiment) => (
+                    <li key={experiment.id} className="space-y-2 p-5">
+                      <p className="font-mono text-xs text-muted-foreground">
+                        {experiment.code} · review {experiment.review_date}
+                      </p>
+                      <Link
+                        className="font-medium text-primary hover:underline"
+                        href={`/experiments/${experiment.id}`}
+                      >
+                        {experiment.title}
+                      </Link>
+                      <p className="text-sm text-muted-foreground">
+                        {experiment.variable} · KPI {experiment.primary_kpi}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <EmptyState
+                  title="Tidak ada eksperimen yang perlu direview"
+                  description="Eksperimen running akan muncul pada tanggal review dalam Asia/Jakarta."
+                  action={
+                    <Link
+                      className="text-primary underline"
+                      href="/experiments?status=running"
+                    >
+                      Lihat eksperimen running
+                    </Link>
+                  }
+                />
+              )}
+            </SectionCard>
           </div>
           <SectionCard
             title="Catatan cepat"
@@ -135,7 +175,6 @@ export default async function Page({
           description="Bagian ini belum aktif; tidak ada data yang dibuat-buat."
         >
           <ul className="grid gap-3 p-5 text-sm text-muted-foreground sm:grid-cols-2">
-            <li>Experiment review queue · Phase 5</li>
             <li>Lead follow-up queue · Phase 6</li>
             <li>Data health · Phase 7</li>
             <li>Alerts · Phase 9</li>

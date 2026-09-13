@@ -35,6 +35,14 @@ describe("Phase 2 security contracts", () => {
     expect(safeNext("/settings")).toBe("/settings");
     expect(safeNext("/workflows/templates")).toBe("/workflows/templates");
     expect(safeNext("/playbook/new")).toBe("/playbook/new");
+    expect(safeNext("/experiments/new")).toBe("/experiments/new");
+    expect(safeNext("/experiments/learnings?q=creative")).toBe(
+      "/experiments/learnings?q=creative",
+    );
+    expect(safeNext("/experiments/55555555-5555-4555-8555-555555555555")).toBe(
+      "/experiments/55555555-5555-4555-8555-555555555555",
+    );
+    expect(safeNext("/experiments/not-a-uuid")).toBe("/today");
     expect(safeNext("/playbook/sop-peluncuran/edit?from=search")).toBe(
       "/playbook/sop-peluncuran/edit?from=search",
     );

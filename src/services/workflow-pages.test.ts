@@ -7,6 +7,7 @@ const data = vi.hoisted(() => ({
   runs: vi.fn(),
   notes: vi.fn(),
   existing: vi.fn(),
+  experiments: vi.fn(),
 }));
 vi.mock("@/services/workflows", () => ({
   getOrCreateRunsForDate: data.runs,
@@ -14,6 +15,9 @@ vi.mock("@/services/workflows", () => ({
 }));
 vi.mock("@/repositories/workflows", () => ({ readRuns: data.existing }));
 vi.mock("@/repositories/notes", () => ({ readNotes: data.notes }));
+vi.mock("@/services/experiments", () => ({
+  experimentReviewQueue: data.experiments,
+}));
 import { todayModel } from "./workflow-pages";
 afterEach(() => {
   vi.useRealTimers();
@@ -24,6 +28,7 @@ it("an empty scheduled day stays empty and uses the Jakarta business date", asyn
   vi.setSystemTime(new Date("2026-09-12T16:50:00Z"));
   data.runs.mockResolvedValue([]);
   data.notes.mockResolvedValue({ notes: [], total: 0 });
+  data.experiments.mockResolvedValue([]);
   const model = await todayModel({
     note_date: "2099-01-01",
     note_page: "invalid",
@@ -40,6 +45,7 @@ it("a materialization failure preserves existing runs and the independent notes 
     notes: [{ body: "Saved observation" }],
     total: 1,
   });
+  data.experiments.mockResolvedValue([]);
   const model = await todayModel({});
   expect(model.runError).toBe(true);
   expect(model.runs).toEqual([{ id: "existing" }]);

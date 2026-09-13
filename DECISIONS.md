@@ -1,5 +1,19 @@
 # Architectural Decisions
 
+## D-010 — Phase 5 experiment lifecycle, priority, and concurrency
+
+**Status:** Accepted
+
+**Phase:** 5
+
+**Decision:** Add the PRD `experiments` and `experiment_results` tables in forward migration `0009_experiments.sql`; migration numbers 0001–0008 are already occupied. Keep lifecycle, scoring, duration, and sample guardrails in `src/domain/experiments/`. PostgreSQL enforces storage constraints and provides three narrow, fixed-search-path security-definer functions: an advisory-locked code allocator for race-safe `EXP-YYYY-NNN` codes, a draft editor, and a row-locked compare-and-swap transition writer so an experiment and its completion result change atomically across concurrent tabs. Every function explicitly requires `auth.uid()` and is executable only by authenticated users. Reads use the authenticated session client and RLS; writes are initiated through the same session and these functions rather than a privileged application client.
+
+The PRD requires backlog priority to be computed from `priority`, `confidence`, and `effort` but does not define the equation or the range for `priority`. Use `(priority × confidence) / effort`, with all three inputs constrained to integers 1–5 and the displayed score rounded to two decimals. This preserves the three named inputs, rewards value and confidence, penalizes effort, is deterministic, and needs no extra setting or dependency. Ties sort by creation time and code. Review dates are business `date` values; day differences use the existing timezone-independent calendar helpers. The minimum-duration and sample rules warn rather than block. If the observed count is below the configured threshold, completion stores `evidence.verdict_label = "inconclusive_by_default"` and `evidence.sample_warning = true`; the operator's recorded outcome remains unchanged so evidence is not rewritten as a statistical conclusion.
+
+`external_refs` is a bounded object containing optional `campaign_id`, `adset_id`, `ad_id`, and `landing_page_url` strings only. No variant table, automated metric attachment, significance calculation, recommendation, integration, or background job is added.
+
+**Alternatives rejected:** application-side `max(code)+1` is race-prone; a permanent sequence cannot reset naturally by year; database-owned lifecycle rules would violate the application's business-logic boundary; adding a scoring dependency or configurable formula is unnecessary for the PRD.
+
 ## D-009 — Phase 4 playbook storage, search, and safe Markdown
 
 **Status:** Accepted

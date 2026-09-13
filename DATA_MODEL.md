@@ -56,3 +56,13 @@ The local SQL test runs transactionally and rolls back synthetic identities/work
 - Generated TypeScript types reflect local migrations 0001-0008. Phase 3–4 migrations are applied locally only; the remote development project remains at Phase 2 migration 0004 until deployment is explicitly authorized.
 
 The playbook SQL test adds 500 synthetic rows inside a transaction, verifies weighted body search and the query budget, then rolls everything back. Browser fixtures are loopback-guarded and delete their own articles and invited identity.
+
+## Phase 5 state
+
+- `0009_experiments.sql`: `experiments` and `experiment_results`, their PRD checks and foreign keys, timestamp triggers, authenticated read-only RLS, status/review and ownership indexes, and the result full-text GIN index. Anonymous access and direct authenticated writes are denied.
+- `experiments.code` is unique and formatted `EXP-YYYY-NNN`. `create_experiment` serializes allocation with a per-year advisory transaction lock and assigns `owner_id=auth.uid()`. The score is application-computed; no redundant score column exists.
+- `update_draft_experiment` rejects non-draft or stale rows. `transition_experiment` row-locks and compares the `updated_at` revision, permits only the lifecycle in D-010, stamps the Asia/Jakarta end date supplied by the service, and writes a unique result atomically when completing. The result requires outcome, KPI value, conclusion, learning and next action at both application and database boundaries.
+- `external_refs` is a bounded JSON object with only campaign, ad set, ad, and HTTP(S) landing-page fields. Sample count, threshold, warning flag and verdict label are immutable completion evidence. Searchable conclusion, learning and next action are stored in a generated `tsvector`.
+- Generated TypeScript types reflect local migrations 0001–0009. Phase 3–5 migrations remain local only; the remote development project is unchanged.
+
+Transactional SQL fixtures roll back lifecycle, RLS, evidence and search checks. A separate local 20-client database test proves race-safe yearly codes and deletes its fixture. Browser fixtures refuse remote Supabase, exercise the full lifecycle, and delete their result, experiment and invited identity.

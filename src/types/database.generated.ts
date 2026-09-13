@@ -61,6 +61,155 @@ export type Database = {
         }
         Relationships: []
       }
+      experiment_results: {
+        Row: {
+          conclusion: string
+          created_at: string
+          decided_at: string
+          decided_by: string
+          evidence: Json
+          experiment_id: string
+          id: string
+          learning: string
+          next_action: string
+          outcome: string
+          primary_kpi_result: number
+          search_vector: unknown
+          updated_at: string
+        }
+        Insert: {
+          conclusion: string
+          created_at?: string
+          decided_at?: string
+          decided_by: string
+          evidence?: Json
+          experiment_id: string
+          id?: string
+          learning: string
+          next_action: string
+          outcome: string
+          primary_kpi_result: number
+          search_vector?: unknown
+          updated_at?: string
+        }
+        Update: {
+          conclusion?: string
+          created_at?: string
+          decided_at?: string
+          decided_by?: string
+          evidence?: Json
+          experiment_id?: string
+          id?: string
+          learning?: string
+          next_action?: string
+          outcome?: string
+          primary_kpi_result?: number
+          search_vector?: unknown
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_results_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_results_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: true
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiments: {
+        Row: {
+          baseline_value: number | null
+          code: string
+          confidence: number
+          control_description: string
+          created_at: string
+          effort: number
+          end_date: string | null
+          external_refs: Json
+          hypothesis: string
+          id: string
+          owner_id: string
+          platform: string | null
+          primary_kpi: string
+          priority: number
+          review_date: string
+          secondary_kpi: string | null
+          start_date: string
+          status: string
+          target_value: number | null
+          title: string
+          updated_at: string
+          variable: string
+          variant_description: string
+        }
+        Insert: {
+          baseline_value?: number | null
+          code: string
+          confidence?: number
+          control_description?: string
+          created_at?: string
+          effort?: number
+          end_date?: string | null
+          external_refs?: Json
+          hypothesis: string
+          id?: string
+          owner_id: string
+          platform?: string | null
+          primary_kpi: string
+          priority?: number
+          review_date: string
+          secondary_kpi?: string | null
+          start_date: string
+          status?: string
+          target_value?: number | null
+          title: string
+          updated_at?: string
+          variable: string
+          variant_description?: string
+        }
+        Update: {
+          baseline_value?: number | null
+          code?: string
+          confidence?: number
+          control_description?: string
+          created_at?: string
+          effort?: number
+          end_date?: string | null
+          external_refs?: Json
+          hypothesis?: string
+          id?: string
+          owner_id?: string
+          platform?: string | null
+          primary_kpi?: string
+          priority?: number
+          review_date?: string
+          secondary_kpi?: string | null
+          start_date?: string
+          status?: string
+          target_value?: number | null
+          title?: string
+          updated_at?: string
+          variable?: string
+          variant_description?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           body: string
@@ -349,6 +498,27 @@ export type Database = {
         }
         Returns: undefined
       }
+      create_experiment: {
+        Args: {
+          p_baseline_value?: number
+          p_confidence?: number
+          p_control_description?: string
+          p_effort?: number
+          p_external_refs?: Json
+          p_hypothesis: string
+          p_platform?: string
+          p_primary_kpi: string
+          p_priority?: number
+          p_review_date: string
+          p_secondary_kpi?: string
+          p_start_date: string
+          p_target_value?: number
+          p_title: string
+          p_variable: string
+          p_variant_description?: string
+        }
+        Returns: string
+      }
       immutable_text_array: { Args: { value: string[] }; Returns: string }
       materialize_workflow: {
         Args: {
@@ -384,6 +554,44 @@ export type Database = {
           updated_at: string
           version: number
         }[]
+      }
+      transition_experiment: {
+        Args: {
+          p_conclusion?: string
+          p_end_date: string
+          p_evidence?: Json
+          p_expected: string
+          p_id: string
+          p_learning?: string
+          p_next_action?: string
+          p_outcome?: string
+          p_primary_kpi_result?: number
+          p_to: string
+        }
+        Returns: undefined
+      }
+      update_draft_experiment: {
+        Args: {
+          p_baseline_value?: number
+          p_confidence?: number
+          p_control_description?: string
+          p_effort?: number
+          p_expected: string
+          p_external_refs?: Json
+          p_hypothesis: string
+          p_id: string
+          p_platform?: string
+          p_primary_kpi: string
+          p_priority?: number
+          p_review_date: string
+          p_secondary_kpi?: string
+          p_start_date: string
+          p_target_value?: number
+          p_title: string
+          p_variable: string
+          p_variant_description?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

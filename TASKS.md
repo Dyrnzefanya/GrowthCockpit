@@ -37,7 +37,61 @@
 
 ## Next phase
 
-Phase 0, Phase 1, Phase 3 engineering, and Phase 4 engineering are PASS. Phase 4's operator procedure-replacement adoption/UAT remains pending follow-up evidence and is not marked complete. The operator classified that adoption evidence as non-blocking on 2026-09-13; Phase 5 declares dependencies only on Phases 1 and 2, plus Phase 3 for its Today section. Phase 2's pending external verification and Phase 3's operational one-real-workday UAT remain unchanged. Phase 5 is ready but is not authorized or started.
+Phases 0, 1, 3, 4, and 5 have passed their engineering gates. Phase 5 is `PASS — ENGINEERING COMPLETE`; its real-experiment operational UAT remains pending. PRD §35 gives Phase 6 dependencies on Phases 1 and 2, with Phase 3 required for its Today section, and does not make Phase 5's real-world observation a hard dependency. Phase 6 is therefore ready but unstarted and requires an explicit instruction.
+
+## Operational Validation Backlog
+
+These items require deployed browser access, real operator use, real business data, or elapsed operational time. They remain open and are not replaced by fixtures or automated evidence. Pending items do not block sequential engineering work unless the PRD explicitly makes one a hard dependency; they must be revisited during real-world use and final production hardening.
+
+- [ ] Phase 2 — verify authenticated deployed session persistence.
+- [ ] Phase 2 — verify deployed logout and two-tab/session invalidation behavior.
+- [ ] Phase 2 — complete an authenticated deployed settings read/update/reload/restore round-trip and verify its audit behavior.
+- [ ] Phase 2 — inspect authenticated deployed browser assets against the actual privileged values without exposing them.
+- [ ] Phase 2 — verify Vercel Deployment Protection for the intended production deployment.
+- [ ] Phase 3 — use the daily checklist through at least one real working day without database intervention.
+- [ ] Phase 4 — replace at least one procedure previously kept in chat or a spreadsheet with a published Playbook article.
+- [ ] Phase 5 — record and complete one real operator experiment after the system enters operational use.
+
+## Phase 5 — Experiment OS closure
+
+**Status: PASS — ENGINEERING COMPLETE. Operational UAT: PENDING.** On 2026-09-13 the operator classified the one-real-experiment requirement as operational evidence rather than an engineering defect. Every Phase 5 implementation requirement and technical acceptance criterion passes. Baseline revision `df54c4f5fdef20b2c0b7afe6932a1a3d221fa89a` passed GitHub CI run 34732876878. Before Phase 5 changes, local formatting, lint, strict typecheck, 26 unit/component/service tests, schema lint, and identity/workflow/playbook SQL tests passed. Existing operator-owned prompt-file moves remain excluded from Phase 5 scope.
+
+1. [x] BE-5.1 / FR-5.2: forward migration 0009 adds experiments/results, constraints, indexes, authenticated RLS, audit ownership, race-safe yearly codes, and atomic lifecycle/result persistence.
+2. [x] BE-5.2 / TEST-5.1, 5.3–5.5: pure transition, priority, duration, sample, and elapsed/review rules have exhaustive deterministic tests.
+3. [x] BE-5.3 / FR-5.1–5.11: Zod boundaries, authenticated repositories, services, conflict handling, URL filters, external references, and indexed learning search are complete.
+4. [x] FE-5.1–5.6: backlog/running/completed/cancelled views, one-screen form, detail/result panel, completion dialog, learning library, and Today review queue are active.
+5. [x] TEST-5.2 / TEST-5.6: concurrent code uniqueness and browser create → run → review queue → complete → retrieve pass, including accessibility and responsive review.
+
+Decision D-010 resolves the PRD's missing priority equation as `(priority × confidence) / effort`, with each input 1–5; the exact formula is displayed to operators. No new dependency is planned.
+
+### Engineering gates — requirements and acceptance
+
+- [x] FR-5.1 / NFR-5.1: creation uses one responsive screen with six required fields—title, hypothesis, variable, primary KPI, start date, and review date—and optional control, variant, secondary KPI, values, priority inputs, platform, and references.
+- [x] FR-5.2: codes use the start-date year and three-digit sequence. A real 20-client local concurrency test produced 20 unique monotonic codes from `EXP-2027-001` through `EXP-2027-020`.
+- [x] FR-5.3 / TEST-5.1: the exhaustive 4×4 domain matrix implements `draft → running`, `running → completed`, and `draft|running|completed → cancelled`; cancelled is terminal. Invalid errors name the allowed set. Transactional SQL independently enforces persisted transitions and stale-revision rejection.
+- [x] FR-5.4 / TEST-5.3: Zod, server service, atomic RPC, table checks, HTML validation, SQL, and browser tests prevent completion without outcome, KPI result, conclusion, learning, and next action.
+- [x] FR-5.5–5.6 / TEST-5.5: defaults are 3 days and 10 observed results from typed `app_settings`. Short duration warns without blocking. Small samples warn and persist `sample_warning=true` plus `verdict_label=inconclusive_by_default`; the result and library display that limitation.
+- [x] FR-5.7–5.8 / TEST-5.4: backlog order and visible score use `(priority × confidence) / effort`; ties use creation time and code. Running rows show elapsed and remaining/overdue review days.
+- [x] FR-5.9: the completed learning library searches indexed conclusion/learning text and filters by variable, KPI, and outcome through URL parameters with 20-row server pagination.
+- [x] FR-5.10: Today queries `running AND review_date <= today` against the status/review index and displays real due records only.
+- [x] FR-5.11: strict application and database shapes accept optional campaign/ad set/ad identifiers and HTTP(S) landing-page URLs; unknown fields and unsafe URLs fail.
+- [x] FE-5.1–5.6: the interface guides Hypothesis → Test → Evidence → Decision → Learning, retains the approved shell, and uses honest empty states without fabricated performance data.
+- [x] All six Phase 5 acceptance criteria pass with local automated evidence, including the complete persisted lifecycle, mandatory learning, review-date queue, displayed backlog formula/order, both warnings, and the four required project commands.
+
+### Engineering gates — verification
+
+- [x] Clean rebuild applies migrations 0001–0009; generated TypeScript database types are stable. Schema lint reports no warnings.
+- [x] Transactional SQL verifies lifecycle, result atomicity, learning search/index, cancellation from draft/running/completed, terminal cancelled state, ownership audit, malformed references, no anonymous grants/RPC execution, no direct authenticated writes, and required indexes. Fixtures roll back.
+- [x] Unit/component/service suite: 11 files and 33 tests pass, including all 16 state pairs, priority ordering/ties, year/date timing, guardrails, strict external-reference input, and mandatory completion fields.
+- [x] Authenticated Playwright: all 16 development tests pass in 2.1 minutes with one worker. Phase 5 creates a real persisted local fixture, surfaces the due review on Today, blocks empty learning, stores sample evidence, retrieves full-text learning, exercises URL filters, and deletes its records and identity.
+- [x] Actual rendered UI inspected at 390, 1280, and 1920 px. The one-page form, lifecycle tabs, empty/completed list, Today queue, and learning filters show no clipping or document overflow. Keyboard-native controls work; axe reports zero WCAG A/AA violations on experiments list/new/detail/learnings and Today.
+- [x] Formatting, ESLint, strict TypeScript/Next route generation, production build, repository secret scan, client-bundle secret scan, npm audit (zero vulnerabilities), production gallery exclusion, and both production Playwright tests pass. The final Today 90-day local loads were 228, 291, and 394 ms, all below its existing budget.
+- [x] Full diff review found no Phase 6 tables/routes/business logic, integration calls, jobs, AI, statistical-significance engine, multivariate engine, automatic platform metrics, or campaign mutation. No dependency was added. Remote database and deployment remain unchanged.
+- [x] Phase 5 engineering closure: implementation, technical acceptance, migrations/schema, RLS/security, automated tests, accessibility/performance, build, documentation, and scope review are complete.
+
+### Operational / UAT gate
+
+- [ ] PRD §35 operational UAT: at least one real operator experiment is recorded and completed in the app after the system enters actual operational use. Synthetic local SQL/browser fixtures are explicitly not claimed as this evidence.
 
 ## Phase 4 — implementation plan
 
@@ -60,7 +114,7 @@ Phase 0, Phase 1, Phase 3 engineering, and Phase 4 engineering are PASS. Phase 4
 - [x] Scope review: no Phase 5 table, route behavior, experiment feature, external integration, scheduler, AI, collaboration, attachment or revision history. Product routes contain only the five real procedural seeds; browser/SQL synthetic records are local, guarded, rolled back or deleted.
 - [ ] PRD §35 Phase 4 Definition of Done: operator replaces at least one procedure previously kept in chat or a spreadsheet with a published article. Automated seed/test content is not claimed as this operator evidence.
 
-No remote database migration or deployment was performed for Phase 4, matching the local-first phase workflow. The pending adoption evidence does not block Phase 5: PRD §35 Phase 5 lists dependencies on Phases 1 and 2, plus Phase 3 only for its Today section. Phase 5 remains unstarted until explicitly requested.
+No remote database migration or deployment was performed for Phase 4, matching the local-first phase workflow. The pending adoption evidence did not block Phase 5: PRD §35 Phase 5 lists dependencies on Phases 1 and 2, plus Phase 3 only for its Today section. Phase 5 began only after the operator's explicit instruction on 2026-09-13.
 
 ## Phase 2 handoff / Phase 3 authorization
 
