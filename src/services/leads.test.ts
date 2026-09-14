@@ -9,6 +9,9 @@ const repo = vi.hoisted(() => ({
   funnelFacts: vi.fn(),
 }));
 vi.mock("@/repositories/leads", () => repo);
+vi.mock("@/repositories/integrations", () => ({
+  machineSettings: vi.fn(async () => ({ values: settingsDefaults })),
+}));
 vi.mock("@/services/session", () => ({
   requireUser: vi.fn(async () => ({
     id: "11111111-1111-4111-8111-111111111111",
@@ -131,3 +134,6 @@ it("malformed detail IDs are not found without querying the database", async () 
   expect(await leadDetail("example")).toBeNull();
   expect(repo.readLead).not.toHaveBeenCalled();
 });
+vi.mock("@/services/crm-sync", () => ({
+  queueWriteback: vi.fn(async () => undefined),
+}));

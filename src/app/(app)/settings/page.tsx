@@ -8,8 +8,11 @@ import {
 import { requireUser } from "@/services/session";
 import { readProfile, readSettings } from "@/repositories/settings";
 import { can } from "@/lib/auth/can";
+import { configuration } from "@/repositories/hubspot";
+import { HubspotForm } from "@/components/hubspot-forms";
 export default async function Settings() {
   const user = await requireUser();
+  const hubspot = await configuration();
   const [profile, settings, editable] = await Promise.all([
     readProfile(user.id),
     readSettings(),
@@ -72,11 +75,15 @@ export default async function Settings() {
           )}
         </SectionCard>
         <SectionCard title="CRM mapping">
-          <EmptyState
-            title="Configuration not active yet"
-            description="HubSpot field and lifecycle mapping."
-            phase={8}
-          />
+          {editable ? (
+            <HubspotForm
+              mapping={
+                hubspot.mapping ? JSON.stringify(hubspot.mapping, null, 2) : ""
+              }
+            />
+          ) : (
+            <p className="p-5">Mapping hanya dapat dibaca.</p>
+          )}
         </SectionCard>
         <SectionCard title="Decision thresholds">
           <EmptyState

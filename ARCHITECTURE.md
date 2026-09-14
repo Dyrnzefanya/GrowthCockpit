@@ -1,5 +1,23 @@
 # Architecture
 
+## Phase 8 HubSpot CRM integration
+
+HubSpot owns CRM lifecycle, contact identity/owner and deal state; PM OS owns inquiry qualification/override and attribution. D-014 protects overridden inquiries independently from the contact CRM mirror. The pure record-to-row planner in `domain/hubspot.ts` owns ownership, ambiguity, qualification propagation and attribution stamping. `services/crm-sync.ts` coordinates it with the fixed-origin HubSpot transport and repositories; components remain presentational. This is the BE-8.3 transform implementation location recorded in D-015.
+
+Reuse Phase 7 durable events, run claims, retry classification and leases. `JOB-HUBSPOT-RECONCILE` resumes bounded modified-time windows; outbound work uses one workspace lease. `commit_hubspot_mirror` supplies atomic writes, row revision checks, claim fencing and immutable override protection. No new tables, dependency, CRM, queue broker or scheduler runtime. Mapping changes use authenticated settings writes with audit; privileged clients serve trusted machine coordination only. Warning candidates appear in existing health/run UI; Phase 9 alert delivery is untouched. No remote connection or cadence is asserted from local fixtures.
+
+## Phase 7 integration and job foundation
+
+The signed ingress boundary verifies raw-byte HMAC, timestamp, size/media limits and idempotency before coordinating the existing Phase 6 lead service. Authenticated invalid input is auditable; invalid signatures never retain a body. Durable acceptance precedes `after` processing. Queue claims and atomic lead/event finalization use a fencing token; crashed workers are recoverable without duplicate inquiry creation. Machine actors are null, with source_event_id provenance; manual operations still require the verified user and `can`.
+
+The three plumbing tables have authenticated read RLS and privileged repository writes. SQL provides locks, claims, constraints and atomic storage; HMAC, Zod, retry classification/backoff and job budgeting are application code. `integration_runs` supplies both attempt history and the per-job running lease; transaction advisory locking makes acquisition safe with PostgREST pooling. No broker, lock table, external workflow engine, pg_cron/pg_net, or new runtime dependency is introduced.
+
+At Phase 7 closure only JOB-RETRY-EVENTS was registered; Phase 8 adds JOB-HUBSPOT-RECONCILE as documented above. Bearer-authenticated scheduler POST/GET and same-origin session-authenticated manual POST share one bounded runner. Server actions also verify session/authorization. Scheduled calls require production + JOBS_ENABLED; the GET adapter cannot use cookies. `/api/health` exposes only status/version/commit/database reachability. The proxy exempts only these three machine endpoint paths; each boundary authenticates independently.
+
+The operator selected Apps Script first and prohibited assuming Vercel Pro. The repository keeps native cron empty for Hobby compatibility, declares the cadence in the registry, and supplies an opt-in GitHub Actions fallback. Deployment cadence/source registration are separate infrastructure evidence; no remote setup or scheduler activation is implied. See D-013 and INTEGRATIONS.md. Existing Phase 2 verification gaps and Phase 3–6 UAT remain open.
+
+`/integrations` and Today render actual job health, last-run/success evidence, server-paginated runs, dead letters and rejection metadata. Shared DataTable, health cards, drawer, buttons and toast feedback preserve the shell. Payloads and secrets are never sent to these components. Critical conditions are candidates from durable state only; Phase 9 will deliver alerts. No Phase 8 connector is implemented.
+
 ## Phase 6 vertical slice
 
 Lead pages/actions → session and `can("lead:write")` → Zod input → domain normalization/resolution/q1/attribution → repository snapshot and atomic commit. Manual entry and CSV import share `prepare`/`planLeads` and the same commit path. Deal coordination is colocated in the lead service/repository because the transaction also links its inquiry; no additional service abstraction is needed. Override and deal updates reject stale revisions. User-facing errors omit PII; diagnostic logs contain only database error codes.

@@ -4,6 +4,8 @@ import { PageHeader, SectionCard } from "@/components/operational";
 import { StatusBadge, type Status } from "@/components/status-badge";
 import { OverrideForm, DealForm } from "@/components/leads";
 import { leadDetail } from "@/services/leads";
+import { configuration } from "@/repositories/hubspot";
+import { qualificationDivergence } from "@/domain/hubspot";
 export default async function Page({
   params,
   searchParams,
@@ -16,6 +18,8 @@ export default async function Page({
     (await searchParams).event_page,
   );
   if (!m) notFound();
+  const config = await configuration();
+  const divergent = qualificationDivergence(m.lead, m.contact, config.mapping);
   const l = m.lead,
     c = m.contact;
   const facts = [
@@ -83,7 +87,34 @@ export default async function Page({
                 ? "Perlu pemeriksaan duplikat"
                 : "Tidak ada konflik duplikat tersimpan"}
             </p>
-            <p>HubSpot belum terhubung; pemetaan lifecycle belum tersedia.</p>
+            <p>
+              CRM lifecycle: {c?.lifecycle_stage ?? "Belum tersedia"}. Sync:{" "}
+              {c?.synced_at ?? "Belum ada"}.
+            </p>
+            <p>
+              CRM owner:{" "}
+              {c?.hubspot_owner_id
+                ? (config.mapping?.owner_map[c.hubspot_owner_id] ??
+                  c.hubspot_owner_id)
+                : "Belum tersedia"}
+            </p>
+            {c?.hubspot_contact_id && config.mapping && (
+              <Link
+                href={`https://app.hubspot.com/contacts/${config.mapping.portal_id}/contact/${c.hubspot_contact_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                Buka Contact di HubSpot
+              </Link>
+            )}
+            {divergent && (
+              <p role="alert" className="rounded border p-3">
+                Divergence: lifecycle CRM berbeda dari qualification inquiry.
+                Override manual dan audit dipertahankan; tidak ada rekonsiliasi
+                otomatis.
+              </p>
+            )}
           </div>
         </SectionCard>
         <SectionCard title="Atribusi inquiry · last touch">

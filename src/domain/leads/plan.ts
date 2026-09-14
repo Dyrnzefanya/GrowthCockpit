@@ -79,7 +79,7 @@ export function planLeads(
   snapshot: Snapshot,
   submissions: Submission[],
   settings: QualificationSettings,
-  actor: string,
+  actor: string | null,
   now: string,
   id: () => string,
 ): LeadPlan {
@@ -265,6 +265,7 @@ export function planLeads(
         duplicate_suspect: false,
         owner_id: i.owner_id ?? actor,
         deal_id: null,
+        source_event_id: null,
         // The timestamp anchors the rolling window; observation matching is never a calendar bucket.
         dedupe_key: JSON.stringify([
           contact?.id ?? s.key,

@@ -18,6 +18,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm audit --audit-level=high
       - name: Start isolated local Supabase
         run: npx supabase start > /dev/null
       - name: Set local test credentials without printing them
@@ -31,6 +32,7 @@ jobs:
           rm "$RUNNER_TEMP/supabase.json"
       - run: npm run db:lint
       - run: npm run test:db
+      - run: npm run test:hubspot
       - run: npm run db:types && git diff --exit-code -- src/types/database.generated.ts
       - run: npm run format:check
       - run: npm run secrets:check

@@ -76,7 +76,13 @@ export function parseSettings(rows: { key: string; value: unknown }[]) {
         `${key}: unavailable or invalid; using its documented default.`,
       );
   }
-  if (rows.some((row) => !Object.hasOwn(settingsDefaults, row.key)))
+  if (
+    rows.some(
+      (row) =>
+        row.key !== "hubspot.mapping" &&
+        !Object.hasOwn(settingsDefaults, row.key),
+    )
+  )
     warnings.push("An unknown setting was ignored.");
   return { values: settingsSchema.parse(values), warnings };
 }

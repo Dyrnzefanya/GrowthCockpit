@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireUser } from "@/services/session";
 import { can } from "@/lib/auth/can";
 import { readSettings } from "@/repositories/settings";
+import { machineSettings } from "@/repositories/integrations";
 import * as repository from "@/repositories/leads";
 import {
   leadInputSchema,
@@ -25,8 +26,8 @@ async function authorized() {
   if (!(await can("lead:write"))) throw new Error("FORBIDDEN");
   return actor.id;
 }
-async function settings() {
-  const { values } = await readSettings();
+async function settings(machine = false) {
+  const { values } = await (machine ? machineSettings() : readSettings());
   return {
     minQuantity: values["qualification.min_quantity"],
     freeDomains: values["qualification.free_email_domains"],
@@ -34,11 +35,11 @@ async function settings() {
     competitorDomains: values["qualification.competitor_domains"],
   };
 }
-async function prepare(submissions: Submission[], actor: string) {
+async function prepare(submissions: Submission[], actor: string | null) {
   const scope = scopeFor(submissions);
   const [snapshot, rules] = await Promise.all([
-    repository.snapshot(scope),
-    settings(),
+    repository.snapshot(scope, actor === null ? 3000 : undefined),
+    settings(actor === null),
   ]);
   const plan = planLeads(
     snapshot,
@@ -61,16 +62,54 @@ export async function createLead(value: unknown, requestId: unknown) {
   const actor = await authorized();
   const input = leadInputSchema.parse(value);
   const key = hash("manual:" + z.uuid().parse(requestId));
+  return persistLead(input, key, actor);
+}
+// Internal server service: only a durable, claimed HMAC-authenticated event reaches this entry.
+export async function ingestLead(
+  value: unknown,
+  event: { id: string; claim: string },
+) {
+  return persistLead(
+    leadInputSchema.parse(value),
+    hash("webhook:" + z.uuid().parse(event.id)),
+    null,
+    event,
+  );
+}
+async function persistLead(
+  input: z.infer<typeof leadInputSchema>,
+  key: string,
+  actor: string | null,
+  event?: { id: string; claim: string },
+) {
+  const deadline = Date.now() + 24000;
   for (let attempt = 0; attempt < 3; attempt++) {
+    if (Date.now() > deadline) throw new Error("TIMEOUT");
     const prepared = await prepare([{ input, key, row: 1 }], actor);
     if (prepared.plan.report.some((r) => r.status === "error"))
       throw new Error("CONFLICT");
     try {
+      if (event)
+        for (const lead of prepared.plan.leads) lead.source_event_id = event.id;
       await repository.commit(
         prepared.scope,
         prepared.snapshot.revision,
         prepared.plan,
+        event
+          ? {
+              ...event,
+              leadId: prepared.plan.report[0].leadId!,
+              outcome: prepared.plan.report[0].status,
+            }
+          : undefined,
       );
+      if (prepared.plan.report[0].leadId) {
+        const { queueWriteback } = await import("@/services/crm-sync");
+        await queueWriteback(prepared.plan.report[0].leadId, key).catch(() => {
+          // Local commit already succeeded; reconcile recovers this durable lead revision.
+          console.warn("HUBSPOT_ENQUEUE_DEFERRED");
+        });
+      }
       return prepared.plan.report[0];
     } catch (e) {
       if (!(e instanceof Error) || e.message !== "CONFLICT" || attempt === 2)
@@ -147,6 +186,13 @@ export async function override(value: unknown) {
     change.patch,
     change.event,
   );
+  await (
+    await import("@/services/crm-sync")
+  )
+    .queueWriteback(input.id, input.revision + input.status)
+    .catch(() => {
+      console.warn("HUBSPOT_ENQUEUE_DEFERRED");
+    });
 }
 export async function saveDeal(value: unknown) {
   const actor = await authorized(),

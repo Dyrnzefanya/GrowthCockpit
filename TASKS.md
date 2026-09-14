@@ -1,5 +1,53 @@
 # Tasks
 
+## Phase 8 - HubSpot CRM Integration
+
+**Status: PASS - ENGINEERING COMPLETE (local). Operational / external activation: PENDING.** Phase 9 is not authorized. Engineering and operational evidence remain separate.
+
+### Engineering requirements and traceability
+
+- [x] Read Phase 8, ownership section 16, integration contract 18, mapping/write-back 19, attribution 23.3 and A1-A3. Inspect Phase 6 resolution/override/deals and Phase 7 queue/runner before implementation. Contact=person; Lead=inquiry; multiple inquiries per person.
+- [x] D-014 resolved: manual disqualified inquiry remains disqualified after HubSpot SQL lifecycle change. Mirror raw lifecycle independently, preserve override/audit metadata and surface divergence. D-015 records adapter/mirror decisions before implementation.
+- [x] FR-8.1 / BE-8.1 / NFR-8.3: server-only fixed-host client, bounded retry, Retry-After, throttling, deadlines, allowlisted writes and sanitized errors. No dependency added.
+- [x] FR-8.2-8.3 / BE-8.2-8.3: Zod mapping, portal/property metadata validation, raw unmapped values and named WARNING/CRITICAL candidates. Pure transform is domain/hubspot.ts per D-015. No provider IDs guessed.
+- [x] FR-8.4-8.6 / BE-8.6: queued contact creation/update and company association, stable local bindings, fill-empty first touch, approved MQL properties and lifecycle flag off by default. Serialized outbound creation; ambiguous creates parked. Reconcile recovers CSV and interrupted enqueue from durable lead revisions.
+- [x] FR-8.7 / BE-8.4-8.5: thin HubSpot endpoint, raw v3/v1 signatures, payload limits, portal validation, durable event identity, Phase 7 claims/retries and atomic mirror/event completion.
+- [x] FR-8.8 / JOB-8.1 / NFR-8.1: bounded 30-minute reconcile target, five-minute overlap, fixed window/page/remaining-ID cursors, resumable failures and opt-in scheduler binding. Actual deployed cadence remains separately pending.
+- [x] FR-8.9-8.11 / BE-8.4: stable-ID resolution, explicit inquiry linkage then unambiguous contact fallback, source timestamp/history, retained unlinked/archived records and ambiguity refusal.
+- [x] FR-8.12 / FE-8.1-8.3 / NFR-8.2: integration health/cursor/runs, mapping validation/audit, manual record/date re-sync, lead CRM deep link/owner/divergence and Today data health. No provider calls during page rendering.
+- [x] FR-8.13 / BE-8.7: existing Phase 6 attribution helpers stamp and preserve won allocations. Same-qualification CRM deal audit entries cannot inflate activity-funnel counts.
+- [x] Forward migrations 0019-0021 applied locally; no new table, machine RPC restricted to service_role, existing RLS retained. Types regenerated for local 0001-0021; remote database unchanged.
+
+### Engineering tests
+
+- [x] TEST-8.1-8.3, 8.5-8.9: committed synthetic transforms, D-014 all-field preservation, actual-history timestamps, partial/ambiguous/unmapped/out-of-order/archive handling, same-revision manual re-evaluation, won attribution, malformed mapping, raw signature/tampering/stale/downgrade, rate limit and sanitized failure tests.
+- [x] TEST-8.4 / 8.11: `npm run test:hubspot` mocks only HubSpot HTTP with real local Supabase persistence/queue: double reconcile, retry after 503, write-once attribution, won/partial deal and bounded 1,000-record reconciliation. No remote CRM data used.
+- [x] SQL suites for Phases 2-8, migration list, schema lint and generated types pass. Machine RPC grants, unchanged override, independent lifecycle, CAS, prior RLS/concurrency retained. Known non-fatal CLI MaxListenersExceededWarning during successful type generation.
+- [x] Lint and strict TypeScript pass; 77 unit tests in 18 files pass. Phase 6 qualification/metric regression retains 100% branch coverage (159/159).
+- [x] Real local integration test passes: D-014, same-version replay, transient provider failure through the queue, new Contact/Company creation exactly once, association and stable local bindings, fill-empty attribution, default-disabled lifecycle write-back, Won/partial deal persistence. Latest measured 1,000-record reconcile: 58,952 ms across bounded invocations, below the 30-minute window; repeat writes zero mirror changes.
+- [x] Development Playwright regression: 19 existing tests pass; the added HubSpot scenario passes after correcting the test's expected lowercase health label. It covers real local invitation/session, malformed and valid mapping/audit round-trip, independent CRM/manual divergence and deep link, provider-failure health, keyboard focus, five concurrent signed deliveries with one queue row, tamper rejection and axe checks. Rendered HubSpot pages reviewed at 390, 1280 and 1920 px; no clipping/overflow or navigation redesign.
+- [x] Production build and four production Playwright tests pass, including gallery protection, auth, queue performance and prior data-heavy pages. Latest measured ingest p95 20.5 ms; 50k lead page 381-473 ms; Today with 90-day history 591-647 ms. These are local measurements, not deployed SLAs.
+- [x] Repository secret scan, process-key browser artifact scan (including HubSpot), formatting, npm audit (zero vulnerabilities) and diff scope review pass. No application dependency/package-lock changes.
+- [x] Migration 0021 corrects provider run labels through the existing claim function; SQL verifies HubSpot namespace and that deal-audit entries do not inflate activity-funnel counts. Local migration/schema/RLS suite and generated types pass.
+
+Harness corrections were test-only: an async queue mock now matches the service return type; company association uses a new inquiry fixture because Phase 6 correctly rejects mutation of historical company linkage; fixture cleanup uses the existing local PostgreSQL harness because privileged HTTP DELETE of retained run history is intentionally revoked. No security rule was relaxed to make tests pass.
+
+### Closure evidence
+
+Skills actually used: Ponytail (minimal implementation and existing infrastructure reuse); UI UX Pro Max (existing-UI review checklist). Installed Next.js guidance and official HubSpot API documentation were consulted. Tools used: Git, PowerShell/Python, Supabase CLI, Docker/PostgreSQL, Vitest, Playwright/axe, rendered screenshots, ESLint/TypeScript/Prettier, production build and secret/dependency scans. No Superpowers or installed Supabase/security skill is claimed.
+
+Technical acceptance passes locally for new contact/company write-back, source stage history, reconcile idempotency, named unmapped warnings, attributed Won deals, outage-safe UI and secret protection. Raw provider fixtures are synthetic. External activation and real-use acceptance below are not claimed PASS. Final local cleanup found zero residual HubSpot test contacts/companies/deals and restored the known synthetic mapping to the unconfigured seed state.
+
+Scope/diff reviewed: Phase 7 dependency plumbing and Phase 8 only; no new Phase 8 table/dependency, no Phase 9 delivery or later feature. No secrets/environment files staged except blank .env.example. Commit on main includes existing uncommitted Phase 7 dependency and Phase 8 implementation/evidence; operator-owned Docs/Prompt archive moves remain unstaged. No push/deployment is performed by this phase closure. GitHub CI for this new revision is not executed; earlier run 34773261638 verifies only the Phase 6 ancestor. Phase 9 engineering is READY under the operational-evidence policy, but is not started; real CRM operation still requires the pending external gates.
+
+### Operational / external gates
+
+- [ ] A1/A2 / INT-8.1-8.3: real properties, minimum granted scopes, portal/pipeline/stage/owner mapping, webhook subscriptions and sanitized real sandbox fixtures. HubSpot credentials/connector absent. Synthetic fixtures do not satisfy real-response evidence.
+- [ ] Real lead/contact write-back, CRM stage event, won attribution and protected deployed scheduler/queue cadence. No remote CRM API call, migration, deployment or scheduler activation performed.
+- [ ] A3 and one-working-week DoD: sales ownership/Closed Won-Lost SLA and CRM consistency without unexplained correction. PENDING operational UAT, never substituted with fixtures.
+
+Preserve Phase 2 authenticated-browser/host-protection gaps and all Phase 3-7 operational/infrastructure items below. Local engineering evidence is not deployed PASS. Phase 7 was uncommitted at this phase's start and is a required dependency of the Phase 8 commit; operator prompt archive moves remain excluded. No Phase 9/Slack, Meta, AI, n8n, campaign modification or fabricated product data.
+
 ## Phase 0 — Project Foundation & Architecture
 
 ### Requirements
@@ -37,7 +85,63 @@
 
 ## Next phase
 
-Phase 6 only is authorized. Phases 0, 1, 3–5 passed engineering gates; the Phase 2 handoff and all Phase 2–5 operational evidence remain open below. The operator resolved the two Phase 6 domain questions. No Phase 7 implementation is authorized.
+Phase 8 only is authorized; see its readiness notes above. MVP Core engineering passed at `ae7836d69649b1910d25747c5832ec1c67ca4a62` (GitHub CI 34773261638 verified successful; 50 baseline unit tests rerun). Preserve all earlier operational and infrastructure evidence below. No Phase 9 implementation is authorized.
+
+## Phase 7 — Integration & Background Job Foundation
+
+**Status: PASS — LOCAL ENGINEERING COMPLETE, as reported at Phase 7 closure. Infrastructure / operational activation: PENDING.** Real source registration and high-frequency deployed scheduler activation remain separate infrastructure/operational evidence under the operator's Phase 7 clarification. No Vercel Pro assumption, paid dependency or n8n.
+
+### Decisions and plan
+
+- [x] Read active Phase 7 and referenced API/error/schema/RLS/integration/retry/attribution/health/security/testing/environment sections; review control documents and Phase 6 CI.
+- [x] D-013 records pooling-safe per-job acquisition/lease, event fencing, null machine actors, canonical rejected/failed/dead_letter terminology, attempt semantics, A10 reference, scheduler limits and source selection.
+- [x] Apps Script landing-page backend is the first signing source; WhatsApp is not the first activation. Operator explicitly treats native ten-minute Vercel Cron as unavailable until verified and allows later infrastructure activation. Keep `vercel.json` Hobby-compatible with no active cron; registry and opt-in GitHub fallback define the target cadence.
+- [x] Implementation sequence: local schema → HMAC/contract → shared lead service + event atomicity → retry/job runner → UI/health → signing/fallback documentation → security, SQL, browser and regression gates.
+
+### Engineering traceability
+
+| Requirements                                                      | Implementation/evidence                                                                                                                                                                                                                                                                              |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-7.1–7.3, FR-7.7; BE-7.2/7.4; TEST-7.1–7.3/7.6/7.13; NFR-7.3    | Zod nested §23.2 schema; raw-byte HMAC with timestamp/method/path; constant-time dual-key comparison; inclusive ±300s; bounded JSON/UTF-8 body. Failed auth/media/size audits never contain the payload.                                                                                             |
+| FR-7.4–7.6; BE-7.1/7.3/7.5; NFR-7.1/7.2; TEST-7.4/7.5/7.12        | Unique idempotency key and request digest; durable 202 receipt; `after` processing; stored receipt/current outcome on replay; same Phase 6 preparation/domain/commit service; source_event_id and correlation/attempt logs. Ten concurrent deliveries create one inquiry.                            |
+| FR-7.8/7.9; BE-7.8; JOB-7.1; TEST-7.9–7.11                        | SKIP LOCKED claims, fencing, expired worker recovery; application retry classification; full-jitter 1m/5m/25m/2h/6h caps; five total attempts by default; rejected terminal events; dead-letter exhaustion/manual retry; candidates for future Phase 9 alerts.                                       |
+| FR-7.10–7.12; BE-7.6/7.7; JOB-7.2; NFR-7.4/7.5; TEST-7.7/7.8/7.11 | One registered retry job; transaction advisory acquisition plus run lease; wrong bearer/GET session/cross-origin rejection; same-origin authorized manual POST; 40s budget/24s item reserve and bounded batch; resumable due queue; dual-run tests; optional fallback and documented native binding. |
+| FR-7.13/7.14; BE-7.9; FE-7.1/7.2                                  | Shared cards/table/drawer, URL-filtered 20-row server pagination, run counts/timing/correlation/redacted error, rejection metadata, dead-letter retry, manual run, Today job-health strip. No payload/secret is serialized into UI.                                                                  |
+| INT-7.1                                                           | Apps Script reference signing recipe in INTEGRATIONS.md; Script Properties/server-only credentials, stable submission UUID, safe receipt and transport retry semantics.                                                                                                                              |
+| INT-7.2; deployed cadence acceptance                              | PENDING external registration/activation; no real source secret or schedule is configured or claimed by local fixtures.                                                                                                                                                                              |
+
+### Engineering evidence
+
+- [x] Local forward migrations 0016–0018 applied; generated database types updated. 0017 adds the signed-request replay fence; 0018 removes Supabase's default service-role DELETE grant from retained plumbing history. No remote migration/reset.
+- [x] Unit/service tests: 61 pass; Phase 6 qualification/normalization/formula branch coverage remains 159/159. HMAC boundary/rotation/tamper, terminal/retryable errors, batch/time budget, double-run, auth/CSRF and scrubbed failures covered.
+- [x] Isolated Phase 7 browser test passes: ten concurrent signed deliveries → one MQL, replay, forced real transaction failure → five attempts → dead letter → UI retry → success; rejected payloads are visible without PII. Browser session fetch preserves Secure cookies; no auth weakening.
+- [x] Actual rendered integrations reviewed at 390/1280/1920px; keyboard drawer Escape restores focus; axe zero A/AA violations on integrations and Today. Shared DataTable confines horizontal scrolling; retry toast remains visible after the row leaves the list.
+- [x] Production build and browser secret scan pass, including all three process-only generated Phase 7 secrets. Four production-browser tests pass. Warm signed-ingest p95 is 27.2ms (20 measured requests, local production server/Supabase), versus ≤500ms. Phase 6 50k first-page samples 412/393/439ms; Today 90-day samples 618/588/257ms.
+- [x] npm audit: zero vulnerabilities. Final formatting, lint, strict typecheck, 61 unit tests and repository secret scan pass.
+- [x] Whole-app Playwright: 19/19 pass, zero failures/flaky/skipped (177.0 seconds), including the Phase 6 5,000-row CSV import/replay. Sequential SQL suite passes across Phases 2?7; ten concurrent job acquisitions yield one winner/nine refusals. Schema lint has no errors; database types regenerated.
+- [x] Production build, four production browser gates and exact configured-secret client scan pass. Full tracked/new-file review and diff whitespace check completed; no dependencies or future-phase connectors added. Final presentation correction formats Today last-success using the existing WIB helper.
+- [x] Git remains on main at ae7836d69649b1910d25747c5832ec1c67ca4a62; the verified CI run 34773261638 covers the Phase 6 baseline only. Phase 7 local changes are not committed/pushed/deployed; remote CI for this revision is not claimed. Operator-owned prompt archive moves remain untouched.
+- Harness notes: Windows sandbox blocked CLI/worker subprocesses; approved unrestricted reruns succeeded. An incompatible PowerShell random-key helper left CRON_SECRET empty; the build correctly rejected it, and Node crypto process-only values passed. A concurrent SQL run overlapped browser fixtures and was invalid evidence; final database tests must run sequentially. A new HTTP timeout initially affected CSV commits; it is now scoped to machine ingest only and the full Phase 6 import regression now passes. Type generation emitted the previously observed non-fatal CLI MaxListenersExceededWarning and completed successfully.
+
+### Acceptance and closure
+
+- [x] Signed payload creates a lead through the shared service; unsigned/tampered payload is rejected without a logged body.
+- [x] Ten concurrent deliveries produce one lead; changing the unsigned idempotency header does not bypass the signed-request replay fence.
+- [x] Forced failure follows retry classification/backoff, exhausts at five attempts, and can recover through the authorized manual control.
+- [x] Integrations shows runs, rejected requests, dead letters and job controls; Today shows actual health/configuration state.
+- [x] Required local engineering commands, SQL/RLS/security, accessibility, responsive and performance gates pass.
+- [ ] Deployed ten-minute cadence remains unverified, explicitly deferred by the operator's no-paid-plan/local-foundation clarification. The opt-in fallback is implemented but inactive.
+- [ ] Real Apps Script submission, visible deliberate rejection and automatic deployed retry recovery remain operational evidence; local fixtures do not satisfy them.
+
+This is a local engineering PASS under the operator's Phase 7 scope clarification, not a claim that every original deployed acceptance item or real-use Definition of Done occurred. Source registration (INT-7.2) and deployed cadence (FR-7.12/JOB-7.2 acceptance) must be completed before integrated operation. This historical Phase 7 record predates Phase 8; see current status above.
+
+### Infrastructure / operational validation (not fabricated)
+
+- [ ] Register the actual Apps Script source and its server-side signing secret; demonstrate a real landing-page inquiry, rejected request visibility, and automatic recovery in deployed use.
+- [ ] Verify host protection, actual Vercel plan and an approved scheduler; configure runtime/repository secrets through normal protected tooling and record deployed cadence. Native ten-minute Cron is not assumed available. GitHub schedule is opt-in/best-effort and not a guaranteed cadence SLA.
+- [ ] Apply reviewed Phase 3–7 migrations remotely only under the authorized protected deployment workflow. No deployment, remote database mutation, secret registration or paid upgrade occurs during local foundation work.
+
+All earlier operational backlog items remain pending. No Phase 8/HubSpot, Meta, Slack, alerts, AI, n8n, automated campaign changes or fake product records are introduced.
 
 ## Phase 6 — Lead & Funnel Core
 
@@ -92,6 +196,8 @@ All nine PRD technical acceptance criteria pass with the evidence above: manual 
 - Remote Phase 3–6 migrations are not applied in this turn; no manual remote deployment or integration configuration occurs. Git publication can trigger the repository's existing deployment automation and must not be represented as remote database verification.
 
 ## Operational Validation Backlog
+
+Phase 8: A1-A3, INT-8.1-8.3, real sandbox captures, deployed CRM transitions/write-back and cadence, followed by one working week of consistency evidence, remain **PENDING**. D-014 is resolved. No Phase 2-7 item below is closed by this addition.
 
 These items require deployed browser access, real operator use, real business data, or elapsed operational time. They remain open and are not replaced by fixtures or automated evidence. Pending items do not block sequential engineering work unless the PRD explicitly makes one a hard dependency; they must be revisited during real-world use and final production hardening.
 
@@ -410,9 +516,9 @@ The first local build correctly rejected a missing modern publishable-key variab
 
 ## Known future decisions and issues (preserved)
 
-- **Phase 6:** inquiry identity, contactability, and deduplication; lead-only views before Phase 10 spend data.
-- **Phase 7:** scheduler/fallback; scheduler-wide outage detection; A10/A12 reference; retry/dead-letter terminology; `pg_cron`/`pg_net` versus extension whitelist.
-- **Phase 8:** manual qualification override versus HubSpot lifecycle authority.
+- **Phase 6:** resolved in D-011/D-012; preserve the operational UAT backlog. Spend-dependent metrics remain unavailable until Phase 10.
+- **Phase 7:** local foundation decisions resolved in D-013. Source registration, host protection, hosting plan and deployed scheduler evidence remain pending; scheduler-wide outage alerting belongs to Phase 9.
+- **Phase 8:** manual qualification override versus HubSpot lifecycle authority resolved by D-014; external configuration/UAT remains pending.
 - **Phase 9:** Slack INFO routing.
 - **Phase 11:** R-01 versus R-02 sample-gate precedence.
 - **Phase 13 / deployment planning:** production and real-data sequencing where still applicable.

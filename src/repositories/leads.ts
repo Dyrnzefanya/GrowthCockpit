@@ -22,19 +22,48 @@ function check(error: { code?: string } | null) {
     );
   }
 }
-export async function snapshot(scope: Scope) {
-  const { data, error } = await adminClient().rpc("crm_snapshot", {
-    p_scope: scope,
-  });
+export async function snapshot(scope: Scope, timeoutMs?: number) {
+  const { data, error } = await adminClient()
+    .rpc("crm_snapshot", {
+      p_scope: scope,
+    })
+    .abortSignal(
+      timeoutMs ? AbortSignal.timeout(timeoutMs) : new AbortController().signal,
+    );
   check(error);
   return data as unknown as Snapshot;
 }
-export async function commit(scope: Scope, revision: string, plan: LeadPlan) {
-  const { error } = await adminClient().rpc("commit_lead_batch", {
-    p_scope: scope,
-    p_revision: revision,
-    p_plan: plan as unknown as Json,
-  });
+export async function commit(
+  scope: Scope,
+  revision: string,
+  plan: LeadPlan,
+  event?: { id: string; claim: string; leadId: string; outcome: string },
+) {
+  const query = event
+    ? adminClient().rpc("finish_webhook", {
+        p_id: event.id,
+        p_claim: event.claim,
+        p_status: "processed",
+        p_error: null!,
+        p_retry: null!,
+        p_result: {
+          event_id: event.id,
+          status: "processed",
+          lead_id: event.leadId,
+          outcome: event.outcome,
+        },
+        p_scope: scope,
+        p_revision: revision,
+        p_plan: plan as unknown as Json,
+      })
+    : adminClient().rpc("commit_lead_batch", {
+        p_scope: scope,
+        p_revision: revision,
+        p_plan: plan as unknown as Json,
+      });
+  const { error } = await (event
+    ? query.abortSignal(AbortSignal.timeout(3000))
+    : query);
   check(error);
 }
 export async function listLeads(f: z.infer<typeof leadFiltersSchema>) {
@@ -60,22 +89,35 @@ export async function listLeads(f: z.infer<typeof leadFiltersSchema>) {
   check(error);
   return { rows: data ?? [], total: count ?? 0 };
 }
-export async function readLead(id: string, eventPage = 0) {
-  const client = await serverClient();
+export async function readLead(id: string, eventPage = 0, machine = false) {
+  const client = machine ? adminClient() : await serverClient();
+  const signal = machine
+    ? AbortSignal.timeout(3000)
+    : new AbortController().signal;
   const { data, error } = await client
     .from("leads")
     .select("*")
     .eq("id", id)
-    .abortSignal(new AbortController().signal)
+    .abortSignal(signal)
     .maybeSingle();
   check(error);
   if (!data) return null;
   const [contact, company, events, deal] = await Promise.all([
     data.contact_id
-      ? client.from("contacts").select("*").eq("id", data.contact_id).single()
+      ? client
+          .from("contacts")
+          .select("*")
+          .eq("id", data.contact_id)
+          .abortSignal(signal)
+          .single()
       : null,
     data.company_id
-      ? client.from("companies").select("*").eq("id", data.company_id).single()
+      ? client
+          .from("companies")
+          .select("*")
+          .eq("id", data.company_id)
+          .abortSignal(signal)
+          .single()
       : null,
     client
       .from("lead_stage_events")
@@ -84,9 +126,15 @@ export async function readLead(id: string, eventPage = 0) {
       .order("changed_at")
       .order("created_at")
       .order("id")
-      .range(eventPage * 20, eventPage * 20 + 19),
+      .range(eventPage * 20, eventPage * 20 + 19)
+      .abortSignal(signal),
     data.deal_id
-      ? client.from("deals").select("*").eq("id", data.deal_id).single()
+      ? client
+          .from("deals")
+          .select("*")
+          .eq("id", data.deal_id)
+          .abortSignal(signal)
+          .single()
       : null,
   ]);
   for (const result of [contact, company, events, deal])

@@ -14,6 +14,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:lead-coverage": "vitest run src/domain/leads/leads.test.ts src/domain/metrics/formulas.test.ts --coverage --coverage.include=src/domain/qualification/index.ts --coverage.include=src/domain/metrics/*.ts --coverage.include=src/domain/leads/rules.ts --coverage.include=src/domain/attribution/normalise.ts --coverage.thresholds.branches=100",
+    "test:hubspot": "vitest run --config vitest.hubspot.config.ts",
     "test:e2e": "playwright test",
     "test:production": "playwright test --config playwright.production.config.ts",
     "format": "prettier --write .",

@@ -4,6 +4,13 @@ import { safeNext } from "@/lib/auth/redirect";
 import { serverEnv } from "@/lib/env.server";
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  if (
+    pathname === "/api/ingest/lead" ||
+    pathname === "/api/ingest/hubspot" ||
+    /^\/api\/jobs\/[^/]+$/.test(pathname) ||
+    pathname === "/api/health"
+  )
+    return NextResponse.next();
   if (pathname === "/auth/confirm") return NextResponse.next();
   const session = await refreshSession(request);
   const publicPage = pathname === "/login";

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { LeadQueue } from "@/components/lead-queue";
+import { DataHealth } from "@/components/data-health";
 import { PageHeader, SectionCard } from "@/components/operational";
 import { EmptyState } from "@/components/states";
 import {
@@ -180,11 +181,13 @@ export default async function Page({
           description="Bagian ini belum aktif; tidak ada data yang dibuat-buat."
         >
           <ul className="grid gap-3 p-5 text-sm text-muted-foreground sm:grid-cols-2">
-            <li>Data health · Phase 7</li>
             <li>Alerts · Phase 9</li>
             <li>Priority actions · Phase 11</li>
           </ul>
         </SectionCard>
+        <Suspense fallback={<p role="status">Memuat data health…</p>}>
+          <DataHealth />
+        </Suspense>
       </div>
     </>
   );

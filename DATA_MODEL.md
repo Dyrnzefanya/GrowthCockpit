@@ -1,8 +1,22 @@
 # Data Model
 
+## Phase 8 CRM mirrors
+
+Forward-only migration `0019_hubspot_mirror.sql` adds no tables: it permits a genuine provider-ID-only CRM contact, seeds null `hubspot.mapping` (sync disabled), and adds a service-only atomic mirror commit. Existing CRM table RLS/grants remain unchanged; anonymous and authenticated users cannot invoke this machine RPC. Stable external IDs prevent duplicate mirror rows; local revision CAS and source timestamps prevent stale overwrites. Manual inquiry audit and first/last touch remain preserved. The RPC accepts only the four existing CRM/inquiry tables and rejects protected audit/override patches.
+
+`0020_crm_activity_audit.sql` keeps the security-invoker activity view while excluding same-qualification audit events. CRM deal stage changes retain a source=hubspot timeline event without counting a fabricated MQL/SQL transition. Won deal attribution uses the existing allocations and rule-version columns; no spend, FX or analytics table is invented. Generated types reflect local migrations 0001-0021. `0021_hubspot_run_namespace.sql` identifies HubSpot queue attempts as integration=hubspot while retaining the existing claim mechanics and grants. All migration/schema/RLS evidence here is local; remote development database state is unchanged.
+
+## Phase 7 plumbing
+
+Local migration 0016 adds webhook_events, integration_runs, sync_state and leads.source_event_id. It permits a null stage actor for machine processing without creating a fake profile. All three new tables enable RLS at creation: authenticated SELECT only, privileged repository writes. Service-role DELETE is explicitly revoked by forward migration 0018 because Supabase's default table grant otherwise includes it. Operational history is retained; payload retention remains Phase 13 work.
+
+Webhook idempotency uses a unique key. Migration 0017 also makes the authenticated request digest unique, preventing an attacker from swapping the unsigned Idempotency-Key on an otherwise identical valid signature. Raw JSON is retained only for authenticated requests. Receipt/outcome and correlation IDs allow safe replay without an additional write. Claim IDs fence atomic event/lead completion; SKIP LOCKED claims recover expired workers and retain attempt logs.
+
+Integration runs record trigger, status, counts, timing, redacted error and correlation ID. A per-job advisory transaction lock plus expiring running-row lease protects work across pooled RPCs. Sync state records cursor, last run/success and consecutive failures. Retry delays/terminal classification stay in TypeScript. At Phase 7 closure no remote migration was claimed; migrations 0001–0018 are the local development schema.
+
 ## Phase 6 CRM / inquiry core
 
-Migrations 0010–0015 create the five Phase 6 tables and four security-invoker fact views, then forward-only corrections to bounded batch/snapshot execution. Applied migrations are never edited. No Phase 7 source-event table, ingest endpoint, or spend table exists.
+Migrations 0010–0015 create the five Phase 6 tables and four security-invoker fact views, then forward-only corrections to bounded batch/snapshot execution. Applied migrations are never edited. At Phase 6 closure no Phase 7 source-event table or ingest endpoint existed; the Phase 7 additions are listed above. No spend table exists.
 
 - `companies`: domain-first/name-second resolution; domain uniqueness and normalized name index.
 - `contacts`: a person with at least one valid normalized channel supplied by the domain. Partial email/phone uniqueness, optional company, immutable first-touch evidence.

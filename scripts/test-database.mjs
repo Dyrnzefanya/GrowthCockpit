@@ -20,7 +20,15 @@ execFileSync(
     "ON_ERROR_STOP=1",
   ],
   {
-    input: ["identity", "workflows", "playbook", "experiments", "leads"]
+    input: [
+      "identity",
+      "workflows",
+      "playbook",
+      "experiments",
+      "leads",
+      "integrations",
+      "hubspot",
+    ]
       .map((name) => readFileSync(`supabase/tests/${name}.sql`, "utf8"))
       .join("\n"),
     stdio: ["pipe", "inherit", "inherit"],
@@ -44,6 +52,24 @@ const psql = (sql) =>
     "-Atqc",
     sql,
   ]);
+
+const phase7Key = "phase7-concurrency-fixture";
+try {
+  const attempts = await Promise.all(
+    Array.from({ length: 10 }, () =>
+      psql(
+        `select coalesce(public.start_job('${phase7Key}','manual',gen_random_uuid())::text,'busy')`,
+      ),
+    ),
+  );
+  if (attempts.filter((r) => r.stdout.trim() !== "busy").length !== 1)
+    throw new Error("Phase 7 concurrent job acquisition failed");
+  console.log("Phase 7 concurrency: one job acquired; nine rejected");
+} finally {
+  await psql(
+    `delete from public.integration_runs where job_key='${phase7Key}'; delete from public.sync_state where resource='${phase7Key}';`,
+  );
+}
 
 const crmScope = JSON.stringify({
   emails: [],

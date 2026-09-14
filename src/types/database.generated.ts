@@ -457,9 +457,77 @@ export type Database = {
           },
         ]
       }
+      integration_runs: {
+        Row: {
+          correlation_id: string
+          created_at: string
+          ended_at: string | null
+          error_summary: string | null
+          event_id: string | null
+          id: string
+          integration: string
+          job_key: string | null
+          lease_until: string | null
+          records_failed: number
+          records_read: number
+          records_written: number
+          resource: string
+          started_at: string
+          status: string
+          trigger: string
+          updated_at: string
+        }
+        Insert: {
+          correlation_id: string
+          created_at?: string
+          ended_at?: string | null
+          error_summary?: string | null
+          event_id?: string | null
+          id?: string
+          integration: string
+          job_key?: string | null
+          lease_until?: string | null
+          records_failed?: number
+          records_read?: number
+          records_written?: number
+          resource: string
+          started_at?: string
+          status: string
+          trigger: string
+          updated_at?: string
+        }
+        Update: {
+          correlation_id?: string
+          created_at?: string
+          ended_at?: string | null
+          error_summary?: string | null
+          event_id?: string | null
+          id?: string
+          integration?: string
+          job_key?: string | null
+          lease_until?: string | null
+          records_failed?: number
+          records_read?: number
+          records_written?: number
+          resource?: string
+          started_at?: string
+          status?: string
+          trigger?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_runs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_stage_events: {
         Row: {
-          actor: string
+          actor: string | null
           changed_at: string
           created_at: string
           from_status: string | null
@@ -471,7 +539,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          actor: string
+          actor?: string | null
           changed_at: string
           created_at?: string
           from_status?: string | null
@@ -483,7 +551,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          actor?: string
+          actor?: string | null
           changed_at?: string
           created_at?: string
           from_status?: string | null
@@ -553,6 +621,7 @@ export type Database = {
           qualified_at: string | null
           referrer: string | null
           required_by_date: string | null
+          source_event_id: string | null
           source_system: string
           source_updated_at: string | null
           sql_at: string | null
@@ -601,6 +670,7 @@ export type Database = {
           qualified_at?: string | null
           referrer?: string | null
           required_by_date?: string | null
+          source_event_id?: string | null
           source_system?: string
           source_updated_at?: string | null
           sql_at?: string | null
@@ -649,6 +719,7 @@ export type Database = {
           qualified_at?: string | null
           referrer?: string | null
           required_by_date?: string | null
+          source_event_id?: string | null
           source_system?: string
           source_updated_at?: string | null
           sql_at?: string | null
@@ -683,6 +754,13 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_source_event_id_fkey"
+            columns: ["source_event_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_events"
             referencedColumns: ["id"]
           },
         ]
@@ -813,6 +891,114 @@ export type Database = {
           id?: string
           role?: string
           timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sync_state: {
+        Row: {
+          consecutive_failures: number
+          created_at: string
+          cursor: string | null
+          id: string
+          integration: string
+          last_error: string | null
+          last_run_at: string | null
+          last_success_at: string | null
+          resource: string
+          updated_at: string
+        }
+        Insert: {
+          consecutive_failures?: number
+          created_at?: string
+          cursor?: string | null
+          id?: string
+          integration: string
+          last_error?: string | null
+          last_run_at?: string | null
+          last_success_at?: string | null
+          resource: string
+          updated_at?: string
+        }
+        Update: {
+          consecutive_failures?: number
+          created_at?: string
+          cursor?: string | null
+          id?: string
+          integration?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          last_success_at?: string | null
+          resource?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          attempts: number
+          claim_id: string | null
+          correlation_id: string
+          created_at: string
+          event_type: string
+          external_event_id: string | null
+          id: string
+          idempotency_key: string | null
+          last_error: string | null
+          locked_at: string | null
+          next_retry_at: string | null
+          payload: Json | null
+          processed_at: string | null
+          received_at: string
+          request_hash: string | null
+          result: Json
+          signature_valid: boolean
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          claim_id?: string | null
+          correlation_id: string
+          created_at?: string
+          event_type?: string
+          external_event_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          locked_at?: string | null
+          next_retry_at?: string | null
+          payload?: Json | null
+          processed_at?: string | null
+          received_at?: string
+          request_hash?: string | null
+          result?: Json
+          signature_valid: boolean
+          source: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          claim_id?: string | null
+          correlation_id?: string
+          created_at?: string
+          event_type?: string
+          external_event_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          last_error?: string | null
+          locked_at?: string | null
+          next_retry_at?: string | null
+          payload?: Json | null
+          processed_at?: string | null
+          received_at?: string
+          request_hash?: string | null
+          result?: Json
+          signature_valid?: boolean
+          source?: string
+          status?: string
           updated_at?: string
         }
         Relationships: []
@@ -1023,8 +1209,23 @@ export type Database = {
       }
     }
     Functions: {
+      accept_webhook: { Args: { p_event: Json }; Returns: Json }
+      claim_webhook: {
+        Args: { p_id: string; p_max: number; p_trigger: string }
+        Returns: Json
+      }
       commit_deal: {
         Args: { p_deal: Json; p_lead_revision: string; p_revision: string }
+        Returns: undefined
+      }
+      commit_hubspot_mirror: {
+        Args: {
+          p_changes: Json
+          p_claim?: string
+          p_event?: string
+          p_events: Json
+          p_result?: Json
+        }
         Returns: undefined
       }
       commit_lead_batch: {
@@ -1071,6 +1272,32 @@ export type Database = {
         Returns: string
       }
       crm_snapshot: { Args: { p_scope: Json }; Returns: Json }
+      finish_integration_run: {
+        Args: {
+          p_cursor: string
+          p_error: string
+          p_failed: number
+          p_id: string
+          p_read: number
+          p_status: string
+          p_written: number
+        }
+        Returns: undefined
+      }
+      finish_webhook: {
+        Args: {
+          p_claim: string
+          p_error: string
+          p_id: string
+          p_plan?: Json
+          p_result: Json
+          p_retry: string
+          p_revision?: string
+          p_scope?: Json
+          p_status: string
+        }
+        Returns: undefined
+      }
       immutable_text_array: { Args: { value: string[] }; Returns: string }
       materialize_workflow: {
         Args: {
@@ -1081,6 +1308,7 @@ export type Database = {
         }
         Returns: string
       }
+      retry_webhook: { Args: { p_id: string }; Returns: boolean }
       search_playbook: {
         Args: {
           p_category?: string
@@ -1106,6 +1334,10 @@ export type Database = {
           updated_at: string
           version: number
         }[]
+      }
+      start_job: {
+        Args: { p_correlation: string; p_key: string; p_trigger: string }
+        Returns: string
       }
       transition_experiment: {
         Args: {

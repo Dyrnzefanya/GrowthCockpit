@@ -28,7 +28,7 @@
 
 ## Current scope
 
-The operator has authorized Phase 6 — Lead & Funnel Core only. Contact = person; lead = inquiry event; one contact may have multiple leads. Apply the operator's inclusive rolling 24-hour duplicate window for matching normalized contact/product and retain uncontactable inquiries with contact_id=null and DQ_NO_CONTACT (DECISIONS.md D-011). Preserve the Phase 2–6 Operational Validation Backlog in TASKS.md. Engineering completion and pending real-use UAT are tracked separately under the operator's closure policy. Do not begin Phase 7 or add external integrations, automated ingest, jobs, alerts, AI, automated platform metrics, or campaign modification.
+The operator has authorized Phase 8 — HubSpot CRM Integration only. Follow PRD sections 16, 19 and Phase 8; reuse the Phase 6 lead service and Phase 7 integration/job infrastructure. Preserve all prior infrastructure and Operational Validation Backlog items in TASKS.md. Preserve D-014: manual inquiry overrides win locally; mirror HubSpot lifecycle independently and expose divergence. Do not begin Phase 9 or add Meta/Slack connectors, alert delivery, AI, n8n, automated platform metrics, or campaign modification.
 
 UI conventions: use `src/styles/tokens.css` and semantic Tailwind utilities; use shared components instead of feature-specific replacements. Illustrative data belongs only under the server-gated development gallery. Route pages remain Server Components unless they need interaction. Keep filters and date ranges in URL parameters. Above 500 rows, tables require injected server pagination.
 
