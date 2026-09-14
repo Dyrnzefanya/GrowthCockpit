@@ -9,6 +9,7 @@ const secrets = [
   process.env.CRON_SECRET,
   process.env.HUBSPOT_ACCESS_TOKEN,
   process.env.HUBSPOT_WEBHOOK_SECRET,
+  process.env.SLACK_WEBHOOK_URL,
 ].filter(Boolean);
 if (!secret || !existsSync(".next/static"))
   throw new Error(
@@ -24,5 +25,5 @@ function check(directory) {
 }
 check(".next/static");
 console.log(
-  "Supabase and configured Phase 7/8 secrets absent from browser artifacts.",
+  "Supabase and configured Phase 7–9 secrets absent from browser artifacts.",
 );

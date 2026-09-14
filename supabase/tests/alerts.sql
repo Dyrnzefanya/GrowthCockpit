@@ -1,0 +1,31 @@
+begin;
+do $$ declare a public.alerts; entity_id uuid:=gen_random_uuid(); actor uuid; i integer; begin
+ if not (select relrowsecurity from pg_class where oid='public.alerts'::regclass) then raise exception 'RLS missing'; end if;
+ if has_table_privilege('anon','public.alerts','select') or has_table_privilege('authenticated','public.alerts','insert') or has_table_privilege('authenticated','public.alerts','update') then raise exception 'Alert grants incorrect'; end if;
+ if has_function_privilege('authenticated','public.raise_alert(jsonb)','execute') or has_function_privilege('anon','public.transition_alert(uuid,text,text,uuid,timestamptz)','execute') then raise exception 'Mutation RPC exposed'; end if;
+ select p.id into actor from public.profiles p limit 1;
+ set local role service_role;
+ a:=public.raise_alert(jsonb_build_object('alert_key','db:test','type','new_mql','severity','info','source','lead','entity_type','lead','entity_id',entity_id,'title','Test','message','Safe','evidence','{}'::jsonb,'notify',true,'detected_at',now()));
+ perform public.raise_alert(jsonb_build_object('alert_key','db:test','type','new_mql','severity','info','source','lead','entity_type','lead','entity_id',entity_id,'title','Test','message','Safe','evidence','{}'::jsonb,'notify',true,'detected_at',now()));
+ if (select count(*) from public.alerts where alert_key='db:test')<>1 or (select occurrence_count from public.alerts where alert_key='db:test')<>2 then raise exception 'Dedupe failed'; end if;
+ a:=public.transition_alert(a.id,'acknowledge','operator_acknowledged',actor,null);
+ if a.status<>'acknowledged' or a.acknowledged_at is null then raise exception 'Acknowledgement failed'; end if;
+ a:=public.transition_alert(a.id,'resolve','condition_cleared',actor,null);
+ if a.status<>'resolved' then raise exception 'Resolution failed'; end if;
+ perform public.raise_alert(jsonb_build_object('alert_key','db:test','type','new_mql','severity','info','source','lead','entity_type','lead','entity_id',entity_id,'title','Test','message','Safe','evidence','{}'::jsonb,'notify',true,'detected_at',now()));
+ if (select count(*) from public.alerts where alert_key='db:test')<>2 then raise exception 'Resolved condition did not re-open as a new occurrence'; end if;
+ a:=(select x from public.alerts x where alert_key='db:test' and status='open');
+ a:=public.transition_alert(a.id,'snooze','operator_snoozed',actor,now()+interval '1 hour');
+ if a.status<>'suppressed' or a.suppressed_until is null then raise exception 'Snooze failed'; end if;
+ perform public.reactivate_due_alerts(now()+interval '2 hours');
+ if (select status from public.alerts where id=a.id)<>'open' then raise exception 'Snooze did not end'; end if;
+ perform public.record_alert_delivery(array[a.id],'sent',null,null,5);
+ if (select notification_count from public.alerts where alert_key='db:test' and status='open')<>1 then raise exception 'Delivery evidence lost'; end if;
+ for i in 1..105 loop
+   perform public.raise_alert(jsonb_build_object('alert_key','db:test','type','new_mql','severity','info','source','lead','entity_type','lead','entity_id',entity_id,'title','Test','message','Safe','evidence','{}'::jsonb,'notify',true,'detected_at',now()));
+ end loop;
+ if jsonb_array_length((select history from public.alerts where id=a.id))<>100 then raise exception 'Alert history bound failed'; end if;
+ perform public.resolve_missing_alerts(array['new_mql'],array[]::text[],now()+interval '1 second');
+ if (select status from public.alerts where id=a.id)<>'resolved' or (select resolved_reason from public.alerts where id=a.id)<>'condition_cleared' then raise exception 'Auto-resolution failed'; end if;
+end $$;
+rollback;

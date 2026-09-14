@@ -103,6 +103,18 @@ async function persistLead(
             }
           : undefined,
       );
+      const result = prepared.plan.report[0];
+      const created = prepared.plan.leads.find(
+        (lead) => lead.id === result.leadId && result.status === "created",
+      );
+      if (created)
+        await (
+          await import("@/services/alerts")
+        ).emitLeadAlert(
+          created.id,
+          created.qualification_status,
+          created.campaign_id,
+        );
       if (prepared.plan.report[0].leadId) {
         const { queueWriteback } = await import("@/services/crm-sync");
         await queueWriteback(prepared.plan.report[0].leadId, key).catch(() => {
@@ -144,6 +156,22 @@ export async function importLeads(value: unknown, commit: boolean) {
     if (counts.errors) throw new Error("CSV_ROWS");
     if (input.fingerprint !== p.fingerprint) throw new Error("PREVIEW_STALE");
     await repository.commit(p.scope, p.snapshot.revision, p.plan);
+    const createdIds = new Set(
+      p.plan.report
+        .filter((row) => row.status === "created" && row.leadId)
+        .map((row) => row.leadId!),
+    );
+    await (
+      await import("@/services/alerts")
+    ).emitLeadAlerts(
+      p.plan.leads
+        .filter((lead) => createdIds.has(lead.id))
+        .map((lead) => ({
+          id: lead.id,
+          status: lead.qualification_status,
+          campaignId: lead.campaign_id,
+        })),
+    );
   }
   return { counts, report, fingerprint: p.fingerprint, committed: commit };
 }
@@ -186,6 +214,9 @@ export async function override(value: unknown) {
     change.patch,
     change.event,
   );
+  await (
+    await import("@/services/alerts")
+  ).emitLeadAlert(input.id, input.status, current.lead.campaign_id);
   await (
     await import("@/services/crm-sync")
   )
@@ -245,6 +276,10 @@ export async function saveDeal(value: unknown) {
     attribution_allocations: allocation,
   };
   await repository.writeDeal(deal, input.revision, detail.lead.updated_at);
+  if (detail.deal?.stage_category !== input.stage_category)
+    await (
+      await import("@/services/alerts")
+    ).emitDealAlert(deal.id, input.stage_category, input.lead_id);
 }
 export async function followUpQueue() {
   await requireUser();

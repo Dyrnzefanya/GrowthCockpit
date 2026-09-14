@@ -87,6 +87,7 @@ export async function syncRecord(
       }
       throw e;
     }
+    await (await import("@/services/alerts")).emitHubspotAlerts(plan);
     if (plan.warnings.length)
       await repo.saveState(kind + ":issues", null, plan.warnings, undefined);
     return plan.changes.length;

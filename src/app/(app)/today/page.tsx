@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { LeadQueue } from "@/components/lead-queue";
 import { DataHealth } from "@/components/data-health";
+import { Alerts } from "@/components/alerts";
+import { Toaster } from "@/components/ui/sonner";
 import { PageHeader, SectionCard } from "@/components/operational";
 import { EmptyState } from "@/components/states";
 import {
@@ -18,6 +20,7 @@ export default async function Page({
   const model = await todayModel(await searchParams);
   return (
     <>
+      <Toaster />
       <PageHeader
         title="Today"
         description={`Selamat bekerja. ${model.heading}`}
@@ -176,12 +179,14 @@ export default async function Page({
         <Suspense fallback={<p role="status">Memuat lead follow-up…</p>}>
           <LeadQueue />
         </Suspense>
+        <Suspense fallback={<p role="status">Memuat alerts…</p>}>
+          <Alerts />
+        </Suspense>
         <SectionCard
           title="Bagian berikutnya"
           description="Bagian ini belum aktif; tidak ada data yang dibuat-buat."
         >
           <ul className="grid gap-3 p-5 text-sm text-muted-foreground sm:grid-cols-2">
-            <li>Alerts · Phase 9</li>
             <li>Priority actions · Phase 11</li>
           </ul>
         </SectionCard>

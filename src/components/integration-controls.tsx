@@ -91,7 +91,15 @@ export function RunTable({
     />
   );
 }
-export function IntegrationControl({ id }: { id?: string }) {
+export function IntegrationControl({
+  id,
+  job,
+  label,
+}: {
+  id?: string;
+  job?: string;
+  label?: string;
+}) {
   const router = useRouter();
   const [state, action, pending] = useActionState(
     async (previous: { message: string }, form: FormData) => {
@@ -108,8 +116,9 @@ export function IntegrationControl({ id }: { id?: string }) {
     <form action={action} className="space-y-2">
       <input type="hidden" name="operation" value={id ? "retry" : "run"} />
       {id && <input type="hidden" name="id" value={id} />}
+      {job && <input type="hidden" name="job" value={job} />}
       <Button variant="outline" disabled={pending} type="submit">
-        {pending ? "Memproses…" : id ? "Retry now" : "Run now"}
+        {pending ? "Memproses…" : id ? "Retry now" : (label ?? "Run now")}
       </Button>
       <p role="status" className="text-sm">
         {state.message}

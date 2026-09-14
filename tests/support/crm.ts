@@ -13,6 +13,7 @@ export async function cleanupLeads(ids: string[]) {
   // Local superuser cleanup only: product roles cannot disable append-only history.
   const sql = `begin; set local session_replication_role=replica;
  create temp table fixture_leads on commit drop as select id,contact_id,company_id from public.leads where id in (${quoted(ids)});
+ delete from public.alerts where entity_id in (${quoted(ids)}) or evidence->>'lead_id'=any(array[${quoted(ids)}]);
  delete from public.lead_stage_events where lead_id in (${quoted(ids)});
  delete from public.deals where lead_id in (${quoted(ids)});
  delete from public.leads where id in (${quoted(ids)});

@@ -8,7 +8,13 @@ const repo = vi.hoisted(() => ({
   writeDeal: vi.fn(),
   funnelFacts: vi.fn(),
 }));
+const alerts = vi.hoisted(() => ({
+  emitLeadAlert: vi.fn(),
+  emitLeadAlerts: vi.fn(),
+  emitDealAlert: vi.fn(),
+}));
 vi.mock("@/repositories/leads", () => repo);
+vi.mock("@/services/alerts", () => alerts);
 vi.mock("@/repositories/integrations", () => ({
   machineSettings: vi.fn(async () => ({ values: settingsDefaults })),
 }));

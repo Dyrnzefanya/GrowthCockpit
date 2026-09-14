@@ -14,6 +14,10 @@ const mocks = vi.hoisted(() => ({
   user: vi.fn(),
   can: vi.fn(),
   after: vi.fn(),
+  stale: vi.fn(),
+  health: vi.fn(),
+  dispatch: vi.fn(),
+  safeRaise: vi.fn(),
 }));
 const env = vi.hoisted(() => ({
   APP_ENV: "production",
@@ -30,6 +34,12 @@ vi.mock("@/services/leads", () => ({ ingestLead: mocks.lead }));
 vi.mock("@/repositories/auth", () => ({ authenticatedUser: mocks.user }));
 vi.mock("@/lib/auth/can", () => ({ can: mocks.can }));
 vi.mock("next/server", () => ({ after: mocks.after }));
+vi.mock("@/services/alert-jobs", () => ({
+  runStaleLeads: mocks.stale,
+  runDataHealth: mocks.health,
+  dispatchNotifications: mocks.dispatch,
+}));
+vi.mock("@/services/alerts", () => ({ safelyRaise: mocks.safeRaise }));
 import { runJob, dispatchJob } from "./runner";
 import { receiveLead, processNext } from "../integration-runs";
 import { sign } from "@/lib/http/hmac";
@@ -50,6 +60,16 @@ beforeEach(() => {
   mocks.dueExists.mockResolvedValue(false);
   mocks.user.mockResolvedValue({ email_confirmed_at: "2026-01-01" });
   mocks.can.mockResolvedValue(true);
+  const alertJobResult = {
+    read: 1,
+    written: 1,
+    failed: 0,
+    hasMore: false,
+    cursor: null,
+  };
+  mocks.stale.mockResolvedValue(alertJobResult);
+  mocks.health.mockResolvedValue(alertJobResult);
+  mocks.dispatch.mockResolvedValue(alertJobResult);
   vi.spyOn(console, "info").mockImplementation(() => {});
 });
 afterEach(() => {
@@ -192,6 +212,18 @@ it("stops before timeout and leaves due work resumable", async () => {
     records_read: 0,
   });
   expect(mocks.claim).not.toHaveBeenCalled();
+});
+it("TEST-9.10 runs every Phase 9 job through the existing lease and remains repeatable", async () => {
+  for (const [key, handler] of [
+    ["JOB-STALE-LEADS", mocks.stale],
+    ["JOB-DATA-HEALTH", mocks.health],
+    ["JOB-NOTIFY-DISPATCH", mocks.dispatch],
+  ] as const) {
+    expect(await runJob(key, "manual")).toMatchObject({ status: "success" });
+    expect(await runJob(key, "manual")).toMatchObject({ status: "success" });
+    expect(handler).toHaveBeenCalledTimes(2);
+    handler.mockClear();
+  }
 });
 it("TEST-7.7 bearer and session paths reject wrong secrets, cross-origin requests and GET sessions", async () => {
   const req = (headers: Record<string, string> = {}, method = "POST") =>

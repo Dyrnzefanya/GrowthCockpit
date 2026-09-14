@@ -34,6 +34,120 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_key: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          evidence: Json
+          first_seen_at: string
+          history: Json
+          id: string
+          last_notified_at: string | null
+          last_seen_at: string
+          message: string
+          next_notification_at: string | null
+          notification_attempts: number
+          notification_count: number
+          notification_status: string
+          occurrence_count: number
+          resolved_at: string | null
+          resolved_reason: string | null
+          severity: string
+          source: string
+          status: string
+          suppressed_at: string | null
+          suppressed_by: string | null
+          suppressed_reason: string | null
+          suppressed_until: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_key: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          evidence?: Json
+          first_seen_at: string
+          history?: Json
+          id?: string
+          last_notified_at?: string | null
+          last_seen_at: string
+          message: string
+          next_notification_at?: string | null
+          notification_attempts?: number
+          notification_count?: number
+          notification_status?: string
+          occurrence_count?: number
+          resolved_at?: string | null
+          resolved_reason?: string | null
+          severity: string
+          source: string
+          status?: string
+          suppressed_at?: string | null
+          suppressed_by?: string | null
+          suppressed_reason?: string | null
+          suppressed_until?: string | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_key?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          evidence?: Json
+          first_seen_at?: string
+          history?: Json
+          id?: string
+          last_notified_at?: string | null
+          last_seen_at?: string
+          message?: string
+          next_notification_at?: string | null
+          notification_attempts?: number
+          notification_count?: number
+          notification_status?: string
+          occurrence_count?: number
+          resolved_at?: string | null
+          resolved_reason?: string | null
+          severity?: string
+          source?: string
+          status?: string
+          suppressed_at?: string | null
+          suppressed_by?: string | null
+          suppressed_reason?: string | null
+          suppressed_until?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alerts_suppressed_by_fkey"
+            columns: ["suppressed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           created_at: string
@@ -1210,6 +1324,14 @@ export type Database = {
     }
     Functions: {
       accept_webhook: { Args: { p_event: Json }; Returns: Json }
+      alert_notification_volume: {
+        Args: { p_days?: number }
+        Returns: {
+          business_date: string
+          notifications: number
+          type: string
+        }[]
+      }
       claim_webhook: {
         Args: { p_id: string; p_max: number; p_trigger: string }
         Returns: Json
@@ -1308,6 +1430,63 @@ export type Database = {
         }
         Returns: string
       }
+      raise_alert: {
+        Args: { p_alert: Json }
+        Returns: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_key: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          evidence: Json
+          first_seen_at: string
+          history: Json
+          id: string
+          last_notified_at: string | null
+          last_seen_at: string
+          message: string
+          next_notification_at: string | null
+          notification_attempts: number
+          notification_count: number
+          notification_status: string
+          occurrence_count: number
+          resolved_at: string | null
+          resolved_reason: string | null
+          severity: string
+          source: string
+          status: string
+          suppressed_at: string | null
+          suppressed_by: string | null
+          suppressed_reason: string | null
+          suppressed_until: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "alerts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      raise_alert_batch: { Args: { p_alerts: Json }; Returns: number }
+      reactivate_due_alerts: { Args: { p_at: string }; Returns: number }
+      record_alert_delivery: {
+        Args: {
+          p_error: string
+          p_ids: string[]
+          p_max: number
+          p_next: string
+          p_outcome: string
+        }
+        Returns: number
+      }
+      resolve_missing_alerts: {
+        Args: { p_active_keys: string[]; p_before: string; p_types: string[] }
+        Returns: number
+      }
       retry_webhook: { Args: { p_id: string }; Returns: boolean }
       search_playbook: {
         Args: {
@@ -1338,6 +1517,53 @@ export type Database = {
       start_job: {
         Args: { p_correlation: string; p_key: string; p_trigger: string }
         Returns: string
+      }
+      transition_alert: {
+        Args: {
+          p_action: string
+          p_actor: string
+          p_id: string
+          p_reason: string
+          p_until?: string
+        }
+        Returns: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_key: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          evidence: Json
+          first_seen_at: string
+          history: Json
+          id: string
+          last_notified_at: string | null
+          last_seen_at: string
+          message: string
+          next_notification_at: string | null
+          notification_attempts: number
+          notification_count: number
+          notification_status: string
+          occurrence_count: number
+          resolved_at: string | null
+          resolved_reason: string | null
+          severity: string
+          source: string
+          status: string
+          suppressed_at: string | null
+          suppressed_by: string | null
+          suppressed_reason: string | null
+          suppressed_until: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "alerts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       transition_experiment: {
         Args: {

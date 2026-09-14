@@ -31,7 +31,21 @@ export const serverEnvSchema = publicEnvSchema
       .string()
       .regex(/^\d{1,30}$/)
       .optional(),
-    SLACK_WEBHOOK_URL: z.url().optional(),
+    SLACK_WEBHOOK_URL: z
+      .url()
+      .refine((value) => {
+        const url = new URL(value);
+        return (
+          url.protocol === "https:" &&
+          url.hostname === "hooks.slack.com" &&
+          url.pathname.startsWith("/services/") &&
+          !url.username &&
+          !url.password &&
+          !url.search &&
+          !url.hash
+        );
+      }, "Expected a Slack Incoming Webhook URL.")
+      .optional(),
     META_AD_ACCOUNT_ID: z.string().min(1).optional(),
     META_ACCESS_TOKEN: z.string().min(1).optional(),
     META_API_VERSION: z.string().min(1).optional(),

@@ -1,8 +1,51 @@
 # Tasks
 
+## Phase 9 — Alerts & Slack
+
+**Status: PASS — ENGINEERING COMPLETE (local). Operational / external activation: PENDING. Phase 10 is not authorized.**
+
+### Implementation plan
+
+- [x] Read Phase 9, §§20–21 and the existing Phase 6–8 producer/job/UI paths; record D-016 before adding schema/services.
+- [x] Add the forward-only alerts migration, RLS, atomic dedupe/lifecycle/delivery functions and regenerated types.
+- [x] Implement deterministic alert policy, Phase 6–8 producers, Slack allowlist transport and the three bounded jobs through the existing runner.
+- [x] Activate Today alerts/detail actions and Integrations notification-volume evidence without redesigning either route.
+- [x] Complete TEST-9.1–9.10, database/RLS, responsive/axe, secrets, build and diff-review evidence.
+
+### Engineering gates
+
+- [x] FR-9.1–FR-9.12; NFR-9.1–NFR-9.3; BE-9.1–BE-9.6; FE-9.1–FE-9.3; JOB-9.1–JOB-9.3. INT-9.1 code/config contract is complete; external workspace/channel provisioning remains below.
+
+### Requirements and acceptance evidence
+
+| Requirements                                | Implementation / evidence                                                                                                                                                                                                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| FR-9.1–9.3; BE-9.1–9.3; TEST-9.1–9.3        | Migration `0022_alerts.sql`, partial active-key uniqueness, advisory-key serialization, occurrence refresh, audited acknowledge/snooze/resolve/reactivate and `condition_cleared` sweep. Ten concurrent raises produce one row and ten occurrences.                            |
+| FR-9.4–9.8; BE-9.5/9.6; TEST-9.4–9.7        | D-016 routing, WIB daily cap, >5/category/hour digest, stale daily digest, 07:00–20:00 INFO window, notification counts and strict Slack allowlist. Native fetch implements bounded timeout/rate-limit/network retry without reading provider bodies.                          |
+| FR-9.9/9.10; FE-9.1/9.2                     | Today shows only open alerts grouped by severity. Authorized acknowledge and snooze persist, immediately leave Today, and retain history; detail exposes trace IDs, safe evidence and playbook links.                                                                          |
+| FR-9.11; NFR-9.3; TEST-9.8                  | Alert creation is best-effort after the lead/CRM transaction. Delivery state, retry time and terminal non-recursive in-app failure are separate from the producer; Slack is never called on the lead path.                                                                     |
+| FR-9.12; BE-9.4; JOB-9.1–9.3; TEST-9.9/9.10 | Stale-lead, data-health and notify jobs reuse the Phase 7 bounded runner/lease. Health checks dead letters, failure streaks, unmapped values, attribution coverage, recovery and >2-cadence scheduler silence. Every registered Phase 9 job is repeatable in the runner tests. |
+| NFR-9.1/9.2; FE-9.3                         | A bounded 500-condition day-health evaluation completes below 10 seconds in the test gate. `/integrations` shows actual sent counts by WIB business date/type and never treats configuration as delivery.                                                                      |
+| INT-9.1                                     | Server-only env-specific Incoming Webhook contract and opt-in scheduler binding are implemented. Actual Du Anyam Slack app, `#pm-alerts`, `#pm-alerts-dev`, webhooks and deployed cadence remain operational evidence.                                                         |
+
+### Engineering evidence
+
+- [x] Clean local schema applies migrations 0001–0022; schema lint reports no errors. Sequential SQL/RLS suite passes, including alert table/RPC grants, lifecycle/delivery and concurrent dedupe. Generated types include the Phase 9 schema.
+- [x] Formatting, ESLint, strict TypeScript and 92/92 unit/service tests pass. Focused alert/Slack/runner tests cover TEST-9.1–9.10, one eligible MQL → one send, bounded health evaluation and delivery exhaustion.
+- [x] Whole-app Playwright passes 21/21 in 1.8 minutes with real local invite-only auth. Phase 9 covers persisted acknowledge/snooze, detail/history, notification volume, 390/1280/1920 rendering and axe with zero A/AA violations. Test workers are bounded to three locally/two in CI after six workers saturated the shared local database during the existing 5,000-row import.
+- [x] Production build and production browser gates pass 4/4: gallery protection, shell paint, signed-ingest p95 16.3 ms, 50k-lead pages 308–336 ms and 90-day Today loads 546–633 ms. Repository secret scan, configured-secret client artifact scan and npm audit (zero vulnerabilities) pass.
+- [x] Rendered Today screenshots at 390/1280/1920 were reviewed: severity hierarchy, alert actions, drawer trigger, responsive wrapping, navigation, typography and overflow remain sound. No sidebar redesign or fabricated product data.
+- [x] Scope review confirms Phase 9 only: one alert table, Slack outbound adapter, three registered jobs, Today/Integrations surfaces and Phase 6–8 producers. No Meta, Phase 10, interactive Slack, Events API, email/WhatsApp delivery, AI, n8n or campaign modification.
+
+### Operational / UAT gates
+
+- [ ] One week of real operation with no duplicate notifications and no missed critical condition. Do not substitute fixtures for this evidence.
+- [ ] Slack workspace app, separate `#pm-alerts` / `#pm-alerts-dev` Incoming Webhooks and actual scheduler cadence are configured and verified externally (A4 and existing scheduler precondition).
+- [ ] Send one real MQL through the deployed source and verify exactly one PII-free Slack message, plus one-week operation with no duplicate notifications or missed critical condition. Fixtures do not satisfy this evidence.
+
 ## Phase 8 - HubSpot CRM Integration
 
-**Status: PASS - ENGINEERING COMPLETE (local). Operational / external activation: PENDING.** Phase 9 is not authorized. Engineering and operational evidence remain separate.
+**Status: PASS - ENGINEERING COMPLETE (local). Operational / external activation: PENDING.** Phase 9 is recorded above; engineering and operational evidence remain separate.
 
 ### Engineering requirements and traceability
 
@@ -196,6 +239,8 @@ All nine PRD technical acceptance criteria pass with the evidence above: manual 
 - Remote Phase 3–6 migrations are not applied in this turn; no manual remote deployment or integration configuration occurs. Git publication can trigger the repository's existing deployment automation and must not be represented as remote database verification.
 
 ## Operational Validation Backlog
+
+Phase 9: A4 / INT-9.1 Slack workspace app, distinct production/development channels and webhooks, protected deployed scheduler cadence, one real MQL delivery and one week without duplicate notifications or missed critical conditions remain **PENDING**. Local fixtures prove behavior but are not operational evidence.
 
 Phase 8: A1-A3, INT-8.1-8.3, real sandbox captures, deployed CRM transitions/write-back and cadence, followed by one working week of consistency evidence, remain **PENDING**. D-014 is resolved. No Phase 2-7 item below is closed by this addition.
 

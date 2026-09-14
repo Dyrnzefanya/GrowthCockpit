@@ -75,4 +75,27 @@ describe("public environment", () => {
       parseEnvironment(serverEnvSchema, { ...values, APP_ENV: "staging" }),
     ).toThrow("APP_ENV");
   });
+
+  it("accepts only a Slack Incoming Webhook URL", () => {
+    const values = {
+      NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishableKey,
+      SUPABASE_SECRET_KEY: secretKey,
+      APP_ENV: "preview",
+      APP_BASE_URL: "https://preview.example.test",
+      APP_TIMEZONE: "Asia/Jakarta",
+    };
+    expect(
+      parseEnvironment(serverEnvSchema, {
+        ...values,
+        SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/test/path/value",
+      }).SLACK_WEBHOOK_URL,
+    ).toContain("hooks.slack.com/services/");
+    expect(() =>
+      parseEnvironment(serverEnvSchema, {
+        ...values,
+        SLACK_WEBHOOK_URL: "https://example.test/services/test/path/value",
+      }),
+    ).toThrow("SLACK_WEBHOOK_URL");
+  });
 });

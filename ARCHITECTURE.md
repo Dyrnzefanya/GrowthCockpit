@@ -1,5 +1,13 @@
 # Architecture
 
+## Phase 9 alerts and Slack
+
+Alert policy is deterministic application logic in `src/domain/alerts`: stable keys, severity, channel routing, quiet hours, per-day caps, digest grouping, retry classification and scheduler-overdue rules. `src/services/alerts.ts` is the shared producer boundary for Phase 6 lead/deal changes and Phase 8 CRM mirrors. `src/services/alert-jobs.ts` coordinates persisted facts, lifecycle reconciliation and delivery. Route pages and controls remain presentational; Supabase access stays in `src/repositories/alerts.ts`, and the Slack transport stays in `src/integrations/slack/client.ts`.
+
+The alert row is the first-class durable record. PostgreSQL serializes raises for a deterministic key and owns atomic lifecycle/delivery transitions. Repeated evaluation refreshes one unresolved alert and increments its occurrence count; condition jobs resolve absent keys with an explicit `condition_cleared` reason. Authenticated users may read alerts through RLS. Only narrow service-role RPCs mutate them after an authorized server action or trusted job invocation. Alert production is best-effort after the producing transaction, so a Slack or alert-storage outage cannot roll back an inquiry or CRM mirror.
+
+`JOB-STALE-LEADS`, `JOB-DATA-HEALTH` and `JOB-NOTIFY-DISPATCH` reuse the Phase 7 registry, lease, deadline and batch controls. Slack receives an allowlisted projection of type, severity, non-PII identifiers, counts, reason codes and an internal link. Delivery failure is recorded independently and retried; exhaustion creates an in-app-only alert. The existing opt-in GitHub scheduler is the deployment fallback because high-frequency native Vercel Cron remains unverified. No broker, public alert endpoint, new dependency, n8n runtime or Phase 10 producer is introduced.
+
 ## Phase 8 HubSpot CRM integration
 
 HubSpot owns CRM lifecycle, contact identity/owner and deal state; PM OS owns inquiry qualification/override and attribution. D-014 protects overridden inquiries independently from the contact CRM mirror. The pure record-to-row planner in `domain/hubspot.ts` owns ownership, ambiguity, qualification propagation and attribution stamping. `services/crm-sync.ts` coordinates it with the fixed-origin HubSpot transport and repositories; components remain presentational. This is the BE-8.3 transform implementation location recorded in D-015.

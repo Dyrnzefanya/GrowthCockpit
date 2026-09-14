@@ -1,5 +1,13 @@
 # Integrations
 
+## Phase 9 Slack outbound delivery
+
+Slack is outbound-only through an Incoming Webhook held in server-only `SLACK_WEBHOOK_URL`. The environment schema accepts only HTTPS URLs under `hooks.slack.com/services/`; the value is absent from public configuration and browser artifacts. `SLACK_WEBHOOK_URL` is optional so in-app alerts continue honestly when Slack is not configured. The serializer sends only alert type/severity, non-PII entity identifiers, counts, allowlisted reason codes, deployment environment and an internal `/today#alerts` link. It never sends raw provider payloads, contact data, alert evidence wholesale or credentials.
+
+Routing follows PRD §20.2 and D-016. Critical alerts, stale-lead digests, warning integration failures and the specified MQL/SQL/deal/recovery information events are Slack-eligible; experiment/rule information remains in-app. A key is delivered at most once per WIB business date. More than five eligible alerts of one type within an hour become one digest, and information events outside 07:00–20:00 WIB defer to the next morning. Transport uses native `fetch`, a short timeout and bounded retry. Application delivery state and backoff are persisted separately, so provider failure never removes the alert or blocks its producing transaction; terminal failure creates a non-recursive in-app critical alert.
+
+The existing job endpoint runs `JOB-NOTIFY-DISPATCH` every five minutes, `JOB-DATA-HEALTH` hourly and `JOB-STALE-LEADS` at 08:00 WIB on weekdays when an approved scheduler is active. `.github/workflows/alert-jobs.yml` is opt-in with `PMOS_SCHEDULER=github`; it reuses the Phase 7 bearer boundary and optional host-protection bypass. Do not enable it alongside another scheduler. External Slack app/channel/webhook setup and deployed cadence are operational prerequisites and are not satisfied by local fixtures.
+
 ## Phase 8 mapping and runtime
 
 The following mapping is implemented and locally verified. It is not evidence of an active remote CRM connection:

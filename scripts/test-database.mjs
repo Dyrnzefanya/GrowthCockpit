@@ -28,6 +28,7 @@ execFileSync(
       "leads",
       "integrations",
       "hubspot",
+      "alerts",
     ]
       .map((name) => readFileSync(`supabase/tests/${name}.sql`, "utf8"))
       .join("\n"),
@@ -69,6 +70,27 @@ try {
   await psql(
     `delete from public.integration_runs where job_key='${phase7Key}'; delete from public.sync_state where resource='${phase7Key}';`,
   );
+}
+
+const alertKey = "phase9:concurrency-fixture";
+try {
+  await Promise.all(
+    Array.from({ length: 10 }, () =>
+      psql(
+        `select public.raise_alert(jsonb_build_object('alert_key','${alertKey}','type','new_mql','severity','info','source','test','entity_type','lead','entity_id',gen_random_uuid(),'title','Test','message','Safe','evidence','{}'::jsonb,'notify',true,'detected_at',now()));`,
+      ),
+    ),
+  );
+  const result = (
+    await psql(
+      `select count(*) || ':' || max(occurrence_count) from public.alerts where alert_key='${alertKey}'`,
+    )
+  ).stdout.trim();
+  if (result !== "1:10")
+    throw new Error(`Phase 9 alert dedupe failed: ${result}`);
+  console.log("TEST-9.2 concurrent alert raise: one row, ten occurrences");
+} finally {
+  await psql(`delete from public.alerts where alert_key='${alertKey}'`);
 }
 
 const crmScope = JSON.stringify({

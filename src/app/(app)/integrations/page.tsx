@@ -49,7 +49,7 @@ export default async function Page({
                   ? "Endpoint signed ingest dikonfigurasi. Riwayat di bawah menunjukkan penerimaan sebenarnya."
                   : "Sumber belum dikonfigurasi. Daftarkan signing secret pada backend Apps Script dan server PM OS."}
               </p>
-              <p>WhatsApp gateway, Meta, dan Slack belum terhubung.</p>
+              <p>WhatsApp gateway dan Meta belum terhubung.</p>
             </div>
           </IntegrationHealthCard>
           <IntegrationHealthCard name="JOB-RETRY-EVENTS" status={m.health}>
@@ -65,14 +65,81 @@ export default async function Page({
               <IntegrationControl />
             </div>
           </IntegrationHealthCard>
+          <IntegrationHealthCard
+            name="Slack alerts"
+            status={m.slackConfigured ? "info" : "not_configured"}
+          >
+            <div className="space-y-3 p-5 text-sm">
+              <p>
+                {m.slackConfigured
+                  ? "Incoming Webhook server-side tersedia. Delivery aktual tercatat pada alert."
+                  : "Webhook Slack belum dikonfigurasi. Alert in-app tetap tersedia."}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <IntegrationControl
+                  job="JOB-NOTIFY-DISPATCH"
+                  label="Dispatch now"
+                />
+                <IntegrationControl
+                  job="JOB-DATA-HEALTH"
+                  label="Check health"
+                />
+                <IntegrationControl
+                  job="JOB-STALE-LEADS"
+                  label="Check stale leads"
+                />
+              </div>
+            </div>
+          </IntegrationHealthCard>
         </div>
         {m.criticalCandidates > 0 && (
           <p role="status" className="rounded border p-3 text-sm">
             {m.criticalCandidates} kondisi membutuhkan perhatian: dead letter
-            atau kegagalan job berulang. Pengiriman alert tersedia mulai Phase
-            9.
+            atau kegagalan job berulang. Tinjau alert pada halaman Today.
           </p>
         )}
+        <SectionCard
+          title="Notification volume"
+          description="Alert yang disertakan dalam delivery Slack per tanggal bisnis dan tipe; satu digest dapat mewakili beberapa alert."
+        >
+          {m.volume.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b bg-muted text-xs text-muted-foreground">
+                  <tr>
+                    <th className="px-5 py-3" scope="col">
+                      Tanggal · WIB
+                    </th>
+                    <th className="px-5 py-3" scope="col">
+                      Alert type
+                    </th>
+                    <th className="px-5 py-3 text-right" scope="col">
+                      Delivered alerts
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {m.volume.map((row) => (
+                    <tr key={`${row.business_date}-${row.type}`}>
+                      <td className="px-5 py-3">{row.business_date}</td>
+                      <td className="px-5 py-3">
+                        {row.type.replaceAll("_", " ")}
+                      </td>
+                      <td className="px-5 py-3 text-right tabular-nums">
+                        {row.notifications}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <EmptyState
+              title="Belum ada delivery Slack"
+              description="Panel hanya menampilkan delivery yang benar-benar berhasil; konfigurasi tidak dianggap sebagai bukti pengiriman."
+            />
+          )}
+        </SectionCard>
         <SectionCard
           title="Riwayat eksekusi"
           description="Payload dan identitas kontak tidak ditampilkan di log."

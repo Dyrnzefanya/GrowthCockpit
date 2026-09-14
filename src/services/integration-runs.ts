@@ -167,7 +167,19 @@ export async function processNext(
 ) {
   const event = await repository.claim(id, trigger, max);
   if (!event) return null;
-  if ("exhausted" in event) return { id: event.id, written: 0, failed: 1 };
+  if ("exhausted" in event) {
+    await (
+      await import("@/services/alerts")
+    ).safelyRaise({
+      type: "dead_letter",
+      source: "integration",
+      entityType: "webhook_event",
+      entityId: event.id,
+      keyParts: [event.id],
+      evidence: { event_id: event.id, reason_code: "ATTEMPTS_EXHAUSTED" },
+    });
+    return { id: event.id, written: 0, failed: 1 };
+  }
   try {
     if (
       ["hubspot", "hubspot_writeback", "hubspot_range"].includes(event.source)
@@ -212,6 +224,21 @@ export async function processNext(
       status: next.status,
       code,
     });
+    if (next.status === "dead_letter")
+      await (
+        await import("@/services/alerts")
+      ).safelyRaise({
+        type: "dead_letter",
+        source: event.source,
+        entityType: "webhook_event",
+        entityId: event.id,
+        keyParts: [event.id],
+        evidence: {
+          event_id: event.id,
+          integration: event.source,
+          reason_code: code,
+        },
+      });
     return { id: event.id, written: 0, failed: 1 };
   }
 }

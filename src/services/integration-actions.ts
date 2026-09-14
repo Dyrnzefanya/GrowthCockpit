@@ -5,6 +5,7 @@ import { requireUser } from "@/services/session";
 import { can } from "@/lib/auth/can";
 import { retry } from "@/repositories/integrations";
 import { runJob } from "@/services/jobs/runner";
+import { jobs } from "@/services/jobs/registry";
 export async function integrationAction(
   _previous: { message: string },
   form: FormData,
@@ -22,7 +23,10 @@ export async function integrationAction(
     }
     if (form.get("operation") !== "run")
       return { message: "Permintaan tidak valid." };
-    const result = await runJob("JOB-RETRY-EVENTS", "manual");
+    const key = z
+      .enum(jobs.map((job) => job.key) as [string, ...string[]])
+      .parse(form.get("job") ?? "JOB-RETRY-EVENTS");
+    const result = await runJob(key, "manual");
     revalidatePath("/integrations");
     revalidatePath("/today");
     return {

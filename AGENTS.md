@@ -28,7 +28,7 @@
 
 ## Current scope
 
-The operator has authorized Phase 8 — HubSpot CRM Integration only. Follow PRD sections 16, 19 and Phase 8; reuse the Phase 6 lead service and Phase 7 integration/job infrastructure. Preserve all prior infrastructure and Operational Validation Backlog items in TASKS.md. Preserve D-014: manual inquiry overrides win locally; mirror HubSpot lifecycle independently and expose divergence. Do not begin Phase 9 or add Meta/Slack connectors, alert delivery, AI, n8n, automated platform metrics, or campaign modification.
+The operator has authorized Phase 9 — Alerts & Slack only. Follow PRD sections 20–21 and Phase 9; reuse Phase 6 lead semantics, Phase 7 jobs/retries and Phase 8 CRM mirrors. Preserve all prior infrastructure and Operational Validation Backlog items in TASKS.md. Add only the alert domain, Slack outbound delivery, the three Phase 9 jobs, Today alerts and notification-volume evidence. Do not begin Phase 10 or add Meta ingest, decision rules, reports, AI, n8n, automated campaign metrics, or campaign modification.
 
 UI conventions: use `src/styles/tokens.css` and semantic Tailwind utilities; use shared components instead of feature-specific replacements. Illustrative data belongs only under the server-gated development gallery. Route pages remain Server Components unless they need interaction. Keep filters and date ranges in URL parameters. Above 500 rows, tables require injected server pagination.
 

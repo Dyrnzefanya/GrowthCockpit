@@ -43,6 +43,33 @@ export async function runJob(key: string, trigger: "manual" | "schedule") {
       written = result.written;
       failed = result.failed;
       hasMore = result.hasMore;
+    } else if (key === "JOB-STALE-LEADS") {
+      const result = await (
+        await import("@/services/alert-jobs")
+      ).runStaleLeads(deadline, maxBatch);
+      read = result.read;
+      written = result.written;
+      failed = result.failed;
+      hasMore = result.hasMore;
+      cursor = result.cursor;
+    } else if (key === "JOB-DATA-HEALTH") {
+      const result = await (
+        await import("@/services/alert-jobs")
+      ).runDataHealth(deadline, maxBatch);
+      read = result.read;
+      written = result.written;
+      failed = result.failed;
+      hasMore = result.hasMore;
+      cursor = result.cursor;
+    } else if (key === "JOB-NOTIFY-DISPATCH") {
+      const result = await (
+        await import("@/services/alert-jobs")
+      ).dispatchNotifications(deadline, maxBatch, maxAttempts);
+      read = result.read;
+      written = result.written;
+      failed = result.failed;
+      hasMore = result.hasMore;
+      cursor = result.cursor;
     } else {
       // Reserve the worst-case 24-second item budget before claiming another item.
       while (read < maxBatch && Date.now() + 24000 < deadline) {

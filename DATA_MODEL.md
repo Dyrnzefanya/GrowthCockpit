@@ -1,5 +1,11 @@
 # Data Model
 
+## Phase 9 alerts
+
+Forward-only migration `0022_alerts.sql` creates `alerts` with a deterministic `alert_key`, type/severity/source/entity reference, operator-facing title/message, allowlisted JSON evidence, occurrence and notification counters, lifecycle timestamps/reasons, delivery state and a 100-event JSON history. A partial unique index permits at most one unresolved row per key while preserving resolved history. Status is `open`, `acknowledged`, `resolved` or `suppressed`; notification status is `pending`, `sent`, `failed` or `suppressed`.
+
+`raise_alert` locks the key and atomically creates, refreshes or reopens the unresolved record. Batch raise is capped at 500. Transition, due-reactivation, condition reconciliation and delivery-recording RPCs preserve audit history and reject invalid state changes. Authenticated sessions have read-only RLS; anonymous access and direct authenticated writes are denied. Service-role mutation RPCs do not grant table deletion. `alert_notification_volume` is a security-invoker read model grouped by Asia/Jakarta business date and alert type. Generated types reflect local migrations 0001–0022; remote application is not claimed by local evidence.
+
 ## Phase 8 CRM mirrors
 
 Forward-only migration `0019_hubspot_mirror.sql` adds no tables: it permits a genuine provider-ID-only CRM contact, seeds null `hubspot.mapping` (sync disabled), and adds a service-only atomic mirror commit. Existing CRM table RLS/grants remain unchanged; anonymous and authenticated users cannot invoke this machine RPC. Stable external IDs prevent duplicate mirror rows; local revision CAS and source timestamps prevent stale overwrites. Manual inquiry audit and first/last touch remain preserved. The RPC accepts only the four existing CRM/inquiry tables and rejects protected audit/override patches.

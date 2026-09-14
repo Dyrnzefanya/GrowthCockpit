@@ -2,10 +2,12 @@ import { defineConfig, devices } from "@playwright/test";
 import { testEnvironment } from "./tests/support/environment";
 
 delete process.env.NO_COLOR;
+Object.assign(process.env, testEnvironment);
 
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
+  workers: process.env.CI ? 2 : 3,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: "html",

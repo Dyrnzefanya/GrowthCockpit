@@ -2,6 +2,7 @@ import { test, expect, admin } from "../support/auth";
 import { testEnvironment } from "../support/environment";
 import { createHmac, randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
+import { toJakartaDate } from "@/domain/dates";
 test("Phase 8 mapping validation, authenticated UI, honest health and real signed webhook replay", async ({
   page,
 }, info) => {
@@ -112,7 +113,7 @@ test("Phase 8 mapping validation, authenticated UI, honest health and real signe
           id: leadId,
           contact_id: contactId,
           inquiry_at: now,
-          inquiry_date: now.slice(0, 10),
+          inquiry_date: toJakartaDate(now),
           channel: "manual",
           platform: "unknown",
           qualification_status: "disqualified",

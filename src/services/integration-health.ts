@@ -4,6 +4,7 @@ import { dashboard } from "@/repositories/integrations";
 import { requireUser } from "@/services/session";
 import { serverEnv } from "@/lib/env.server";
 import { integrationHealth } from "@/domain/integrations";
+import { notificationVolume } from "@/repositories/alerts";
 export async function integrationModel(
   search: Record<string, string | string[] | undefined> = {},
 ) {
@@ -21,7 +22,10 @@ export async function integrationModel(
         .catch(undefined),
     })
     .parse(search);
-  const data = await dashboard(filters.page, filters.status, filters.trigger);
+  const [data, volume] = await Promise.all([
+    dashboard(filters.page, filters.status, filters.trigger),
+    notificationVolume(),
+  ]);
   const state = data.states.find(
     (s) => s.integration === "jobs" && s.resource === "JOB-RETRY-EVENTS",
   );
@@ -32,9 +36,11 @@ export async function integrationModel(
   );
   return {
     ...data,
+    volume,
     filters,
     configured,
     ingestConfigured: Boolean(serverEnv.INGEST_HMAC_SECRET),
+    slackConfigured: Boolean(serverEnv.SLACK_WEBHOOK_URL),
     health: integrationHealth(
       configured,
       state?.last_success_at ?? null,
