@@ -1,5 +1,13 @@
 # Integrations
 
+## Phase 12 weekly report schedule and delivery
+
+`JOB-WEEKLY-REPORT` uses the existing authenticated `/api/jobs/JOB-WEEKLY-REPORT` boundary, Phase 7 lease and integration-run history. The registry and opt-in `weekly-report.yml` declare Monday 07:30 WIB (`30 0 * * 1` UTC). Activate it only with deployment protection and the existing scheduler origin, bearer and bypass configuration. Local verification does not activate a schedule or claim delivery timing.
+
+The job generates an idempotent draft for the previous completed ISO week. Finalisation remains an operator action and raises the existing alert pipeline's `report_ready` event. When Slack is configured, the Phase 9 dispatcher sends an authenticated internal report link plus bounded headline strings; it never sends facts JSON, narrative text, private lead data or credentials. Delivery failure is tracked and retried separately from the frozen report. Markdown download and printing remain authenticated in-app actions; no external document or file-delivery integration is introduced.
+
+**External activation/UAT pending:** two consecutive real reports with less than fifteen minutes of editing, protected scheduler timing, real Slack delivery, and confirmation that Markdown plus print serves the leadership audience.
+
 ## Phase 11 evaluation schedule
 
 `JOB-EVALUATE-RULES` reuses the authenticated manual/bearer scheduler endpoint at `/api/jobs/JOB-EVALUATE-RULES`. The registry and opt-in `decision-rules.yml` declare 07:00 WIB (`0 0 * * *` UTC). Deploy with host protection enabled before activating the existing GitHub fallback through `PMOS_SCHEDULER=github` and `PMOS_DECISIONS_ENABLED=true`; no schedule has been activated by local verification. The fallback resumes bounded batches and fails visibly if the daily evaluation exceeds thirty seconds. Job/measurement failures remain visible through Integrations and Today.

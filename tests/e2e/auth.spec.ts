@@ -24,6 +24,7 @@ test("TEST-2.1 protected routes reject anonymous and forged requests", async ({
     "/workflows",
     "/workflows/templates",
     "/reports",
+    "/reports/11111111-1111-4111-8111-111111111111",
     "/integrations",
     "/settings",
     "/dev/gallery",

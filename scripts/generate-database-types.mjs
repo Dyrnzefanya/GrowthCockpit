@@ -1,6 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 
+const databaseArgs = process.env.LOCAL_DATABASE_URL
+  ? ["--db-url", process.env.LOCAL_DATABASE_URL]
+  : ["--local"];
 const output = execFileSync(
   process.execPath,
   [
@@ -8,7 +11,7 @@ const output = execFileSync(
     "gen",
     "types",
     "typescript",
-    "--local",
+    ...databaseArgs,
   ],
   { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
 );

@@ -1,10 +1,12 @@
 import { result, quiet, missing, type Rule } from "./types";
+export const revenueAllowed = (value: number | null, minimum: number) =>
+  value !== null && value >= minimum;
 export const r09: Rule = (m, s) =>
   m.outcomeCompleteness === null
     ? missing(
         "Outcome completeness tidak tersedia; verdict revenue/ROAS/CAC tidak tersedia.",
       )
-    : m.outcomeCompleteness < s.minOutcome
+    : !revenueAllowed(m.outcomeCompleteness, s.minOutcome)
       ? result(
           "SUPPRESSED",
           true,

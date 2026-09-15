@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   cpql,
+  cac,
   cpl,
   cpsql,
   cpc,
@@ -10,6 +11,7 @@ import {
   ratio,
   minorUnits,
   decimal,
+  roas,
 } from "./formulas";
 import { parseCampaignName } from "@/domain/attribution/naming";
 const nullableText = z.string().nullable();
@@ -208,7 +210,8 @@ export function performanceSummary(
       : null;
   const revenueByCurrency = new Map<string, bigint | null>();
   let opportunities = 0,
-    unallocatedWon = 0;
+    unallocatedWon = 0,
+    won = 0;
   for (const d of facts.deals.filter((d) => d.current_period === current)) {
     if (
       resolveCampaign(index, d.platform, d.campaign_id, d.lt_campaign) &&
@@ -232,7 +235,8 @@ export function performanceSummary(
               minorUnits(d.amount) * BigInt(Math.round(a.weight * 100)),
       );
     }
-    if (!credited) unallocatedWon++;
+    if (credited) won++;
+    else unallocatedWon++;
   }
   const revenueRows = [...revenueByCurrency].map(([currency, units]) => ({
     currency,
@@ -252,6 +256,7 @@ export function performanceSummary(
     mql,
     sql,
     opportunities,
+    won,
     spend,
     currencies,
     zones,
@@ -269,6 +274,11 @@ export function performanceSummary(
     revenue:
       !mixed && revenueRows.length === 1
         ? safeNumber(revenueRows[0].amount)
+        : null,
+    cac: aligned && !mixed ? cac(n, won) : null,
+    roas:
+      aligned && !mixed && revenueRows.length === 1
+        ? roas(safeNumber(revenueRows[0].amount), n)
         : null,
     freshness: !ads.length
       ? freshness([], slaHours, now)

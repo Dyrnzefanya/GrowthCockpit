@@ -9,11 +9,13 @@ export function PageHeader({
   description,
   actions,
   filters,
+  showDateRange = true,
 }: {
   title: string;
   description?: string;
   actions?: ReactNode;
   filters?: ReactNode;
+  showDateRange?: boolean;
 }) {
   return (
     <header className="mb-6 space-y-4">
@@ -27,13 +29,17 @@ export function PageHeader({
           )}
         </div>
         <div className="flex max-w-full flex-wrap items-center gap-2">
-          <Suspense
-            fallback={
-              <span className="text-sm text-muted-foreground">Date range</span>
-            }
-          >
-            <DateRangeControl />
-          </Suspense>
+          {showDateRange && (
+            <Suspense
+              fallback={
+                <span className="text-sm text-muted-foreground">
+                  Date range
+                </span>
+              }
+            >
+              <DateRangeControl />
+            </Suspense>
+          )}
           {actions}
         </div>
       </div>

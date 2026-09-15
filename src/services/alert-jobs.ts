@@ -355,7 +355,12 @@ export async function dispatchNotifications(
           .flatMap((alert) => (alert.entityId ? [alert.entityId] : []))
           .slice(0, 25),
         count: group.alerts.length,
-        url: new URL("/today#alerts", serverEnv.APP_BASE_URL).toString(),
+        url: new URL(
+          first.type === "report_ready" && first.entityId
+            ? `/reports/${first.entityId}`
+            : "/today#alerts",
+          serverEnv.APP_BASE_URL,
+        ).toString(),
         environment: serverEnv.APP_ENV,
         reasonCodes: group.alerts
           .flatMap((alert) =>
@@ -365,6 +370,15 @@ export async function dispatchNotifications(
           )
           .filter((value) => /^[A-Z0-9_:-]{1,120}$/.test(value))
           .slice(0, 10),
+        headline:
+          first.type === "report_ready"
+            ? ["headline_spend", "headline_mql", "headline_cpql"].flatMap(
+                (key) => {
+                  const value = first.evidence[key];
+                  return typeof value === "string" ? [value] : [];
+                },
+              )
+            : [],
       });
       await repository.recordDelivery(
         group.alerts.map((alert) => alert.id),

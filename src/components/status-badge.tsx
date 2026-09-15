@@ -19,6 +19,7 @@ export const statusSemantics = {
   completed: "healthy",
   skipped: "unknown",
   draft: "unknown",
+  final: "healthy",
   published: "healthy",
   archived: "unknown",
   running: "attention",

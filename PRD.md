@@ -2572,15 +2572,15 @@ Status values: `Planned` · `In Progress` · `Implemented` · `Verified`. The co
 | FR-11.8 | 11 | dismissal report | TEST-11.6 | Verified (local; TASKS.md) |
 | FR-11.9 | 11 | settings editor | TEST-11.1 | Verified (local; TASKS.md) |
 | FR-11.10 | 11 | rule versioning | TEST-11.7 | Verified (local; TASKS.md) |
-| FR-12.1 | 12 | assembly service | TEST-12.1 | Planned |
-| FR-12.2 | 12 | assembly inputs | TEST-12.1 | Planned |
-| FR-12.3 | 12 | facts schema | TEST-12.1 | Planned |
-| FR-12.4 | 12 | draft editor | TEST-12.8 | Planned |
-| FR-12.5 | 12 | caveats section | TEST-12.4 | Planned |
-| FR-12.6 | 12 | revenue gate | TEST-12.5 | Planned |
-| FR-12.7 | 12 | immutability trigger | TEST-12.2 | Planned |
-| FR-12.8 | 12 | versioning + export | TEST-12.3, 12.7 | Planned |
-| FR-12.9 | 12 | Slack notify | TEST-12.8 | Planned |
+| FR-12.1 | 12 | assembly service | TEST-12.1 | Verified (local; TASKS.md) |
+| FR-12.2 | 12 | assembly inputs | TEST-12.1 | Verified (local; TASKS.md) |
+| FR-12.3 | 12 | facts schema | TEST-12.1 | Verified (local; TASKS.md) |
+| FR-12.4 | 12 | draft editor | TEST-12.8 | Verified (local; TASKS.md) |
+| FR-12.5 | 12 | caveats section | TEST-12.4 | Verified (local; TASKS.md) |
+| FR-12.6 | 12 | revenue gate | TEST-12.5 | Verified (local; TASKS.md) |
+| FR-12.7 | 12 | immutability trigger | TEST-12.2 | Verified (local; TASKS.md) |
+| FR-12.8 | 12 | versioning + export | TEST-12.3, 12.7 | Verified (local; TASKS.md) |
+| FR-12.9 | 12 | Slack notify | TEST-12.8 | Verified (local; TASKS.md) |
 | FR-13.1 | 13 | RLS audit script | TEST-13.1 | Planned |
 | FR-13.2 | 13 | secret scan | TEST-13.2 | Planned |
 | FR-13.3 | 13 | security suite | TEST-13.3–13.6 | Planned |

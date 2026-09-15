@@ -1,6 +1,13 @@
 import "server-only";
 export const jobs = [
   {
+    key: "JOB-WEEKLY-REPORT",
+    label: "Generate weekly report draft",
+    schedule: "30 7 * * 1 WIB",
+    cadenceMinutes: 10080,
+    budgetMs: 10000,
+  },
+  {
     key: "JOB-EVALUATE-RULES",
     label: "Evaluate decision rules",
     schedule: "0 0 * * *",

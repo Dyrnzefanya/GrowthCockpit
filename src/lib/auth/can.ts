@@ -11,7 +11,8 @@ export async function can(
     | "experiment:write"
     | "lead:write"
     | "integration:write"
-    | "alert:write",
+    | "alert:write"
+    | "report:write",
 ) {
   const user = await requireUser();
   const profile = await readProfile(user.id);

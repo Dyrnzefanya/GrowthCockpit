@@ -31,6 +31,17 @@ describe("Phase 9 Slack transport", () => {
     expect(payload).toContain(input.entityIds[0]);
   });
 
+  it("FR-12.9 includes only bounded report headline metrics", () => {
+    const payload = serializeSlack({
+      ...input,
+      type: "report_ready",
+      entityType: "report",
+      headline: ["Spend: Rp100.000", "MQL: 12", "CPQL: Rp8.333"],
+    });
+    expect(payload.text).toContain("Weekly report ready");
+    expect(payload.text).toContain("CPQL: Rp8.333");
+  });
+
   it("retries rate limits within bounds and never reads provider bodies", async () => {
     const transport = vi
       .fn<typeof fetch>()

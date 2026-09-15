@@ -1,5 +1,13 @@
 # Data Model
 
+## Phase 12 reports
+
+Forward migration `0030_reports.sql` adds the sole Phase 12 table, `reports`. A row stores report type, ISO week start/end, version, status, validated facts JSON, narrative Markdown, creator/finaliser and revision timestamps. The facts include the Asia/Jakarta timezone and `weekly-v1` schema version. `(type, period_start, version)` is unique; only weekly reports are generated. Facts contain current/previous metric components, campaign observations, funnel and workflow summaries, experiment context, notes, unresolved alerts, decision actions, source health and mandatory caveats.
+
+RLS permits authenticated SELECT only. Direct anonymous/authenticated writes and DELETE are denied; narrow service-role functions create an idempotent draft, save a revision-checked narrative and finalise a revision-checked row. The immutable trigger rejects every update or delete whose existing status is final. A final week therefore remains byte-stable; a later generation receives `version + 1`. Forward migration `0031_report_trigger_return.sql` corrects the trigger to return `NEW` for permitted draft updates while preserving final immutability.
+
+The reports table is a frozen presentation snapshot, not a parallel fact model. Assembly reads existing authoritative facts and stores their rendered inputs once. No report metric, export, delivery or narrative table is added. Generated database types include the report row and the three service RPCs.
+
 ## Phase 11 rule evidence and operator actions
 
 Forward migration `0027_rule_evaluations.sql` creates the sole new table, `rule_evaluations`: rule/version, evaluation clock, date window, typed scope/id, verdict, immutable evidence and optional alert FK. Authenticated users have SELECT through RLS; service-role INSERT is allowed, UPDATE/DELETE are denied. A unique rule/version/clock/scope key makes batch retries idempotent without rewriting earlier evaluations. Evidence includes raw numeric inputs, comparison and mature windows, source freshness, the exact settings snapshot, matched condition, effective verdict, precedence, limitations and suggested action.

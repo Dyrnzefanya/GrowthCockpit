@@ -1,5 +1,17 @@
 # Architectural Decisions
 
+## D-019 — Phase 12 frozen weekly reports reuse authoritative metric facts
+
+**Status: Accepted for Phase 12 implementation on 2026-09-16.** Use forward migration 0030 because the PRD's illustrative `0012_reports` number is already occupied. Add only the required `reports` table and transaction functions for draft creation, narrative saves, finalisation and versioning. Authenticated users may read reports through RLS; server-side actions re-check the owner role and perform writes through service-only functions. A trigger rejects every update or delete of a final report, including service-role writes. Draft facts are written only by the report service and remain read-only in the UI.
+
+Weekly periods are Monday–Sunday in Asia/Jakarta and may be past or current; future weeks are rejected and the current week is labelled partial. Assembly reuses `performance_facts`, `performanceSummary`, `summarizeFunnel` and the formula layer rather than defining report-only metrics. `weekly-v1` facts contain the current and previous week, campaign rows, experiment results, workflow completion, notes, unresolved alerts, decision actions and mandatory data-quality caveats. Ordered source records and no generation timestamp inside facts make the same stored data and period deterministic. Missing sections retain an explicit unavailable reason and never prevent a draft.
+
+Revenue, ROAS and CAC share R-09's outcome-completeness gate. They remain null and unavailable in the snapshot and are omitted from presentation/export when the gate fails, with the measured completeness and threshold recorded as the reason. Narrative remains one Markdown field with bounded, deterministic headings for executive summary, interpretation and next priorities; fact tables are never editable. Markdown is generated in the authenticated server action and downloaded by the existing client session. The detail page itself is print-ready, so no public export route, PDF library or sharing service is added. Appendix B question 6 remains operational confirmation; Markdown plus print is the PRD-defined engineering default.
+
+Finalisation raises the existing-style `report_ready` INFO alert with report ID, ISO week and safe headline counts. Phase 9's dispatcher sends the authenticated report link when Slack is configured; failure is retried independently and cannot roll back a frozen report. `JOB-WEEKLY-REPORT` reuses the Phase 7 runner at Monday 07:30 WIB to create the previous complete week's draft idempotently. It does not finalise or invent narrative.
+
+Forward correction 0031 makes the immutability trigger return the proposed row for draft updates; the original trigger returned the old row and therefore prevented the draft-to-final transition it was meant to protect. Final rows still reject every update or delete.
+
 ## D-018 — Phase 11 deterministic decisions and unconfigured benchmarks
 
 **Status: Accepted implementation choices; A11 clarification explicitly authorized by the operator on 2026-09-15.** A11 is operational/business configuration, not an engineering blocker. Target CPQL and its currency default to null. Only R-02/R-05 require this benchmark; they record SUPPRESSED with an unconfigured-benchmark reason until configured. No temporary target, target CPL optimization rule, or AI recommendation is introduced.

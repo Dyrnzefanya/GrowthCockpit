@@ -1,5 +1,15 @@
 # Architecture
 
+## Phase 12 frozen weekly reporting
+
+`services/reports/assemble.ts` coordinates bounded repository reads and constructs one validated `weekly-v1` facts object. Metric calculation remains in the existing Performance and funnel domain modules, and revenue visibility calls the shared R-09 gate. Ordered source records and the absence of a generation timestamp inside facts make a period reproducible. Missing sections, stale sources, attribution coverage, outcome completeness and a partial current week are captured as caveats instead of fabricated values.
+
+`/reports` and `/reports/[id]` remain authenticated Server Components. The list submits a native server action for an ISO week; the detail route reads the frozen facts and permits edits only to the narrative field while the report is a draft. Markdown is assembled server-side and downloaded through the authenticated session. Native print CSS provides the print view. There is no public share/export endpoint, PDF service or client-side metric calculation.
+
+Migration 0030 adds the single reports table and narrow service-only transaction functions. RLS grants authenticated read access; server actions also enforce the owner role before invoking writes. Compare-and-swap revisions prevent stale narrative/finalise actions. A database trigger rejects every update or delete once final, and regeneration creates the next immutable version. Forward migration 0031 corrects the trigger's permitted draft-update return value without changing the applied migration.
+
+`JOB-WEEKLY-REPORT` reuses the Phase 7 runner and existing job endpoint to create the preceding completed week at Monday 07:30 WIB. Finalisation raises a `report_ready` alert containing only the report identity, week and bounded headline metrics; Phase 9's dispatcher supplies the authenticated internal link and retry behavior. D-019 records these choices. No new dependency, provider write, public endpoint, AI narrative or Phase 13 behavior is introduced.
+
 ## Phase 11 decisions and Today v2
 
 `domain/metrics/decision-inputs` validates bounded raw projections, resolves campaign identities with the Phase 10 helper, reuses Phase 6 formulas, and builds current/comparison and mature-cohort windows. `domain/rules` contains eleven pure r1 rules, precedence and priority scoring; it imports only its own directory. Missing/stale/mixed-currency inputs are explicit. Target CPQL is nullable business configuration: only R-02/R-05 depend on it, per the operator's D-018 clarification. Frequency and verified lead-generation campaign IDs also have honest unconfigured states.

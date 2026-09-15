@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
   stale: vi.fn(),
   health: vi.fn(),
   dispatch: vi.fn(),
+  weekly: vi.fn(),
   safeRaise: vi.fn(),
 }));
 const env = vi.hoisted(() => ({
@@ -41,6 +42,7 @@ vi.mock("@/services/alert-jobs", () => ({
 }));
 vi.mock("@/services/alerts", () => ({ safelyRaise: mocks.safeRaise }));
 vi.mock("@/services/meta-health", () => ({ evaluateMetaHealth: vi.fn() }));
+vi.mock("@/services/reports", () => ({ runWeeklyReport: mocks.weekly }));
 import { runJob, dispatchJob } from "./runner";
 import { receiveLead, processNext } from "../integration-runs";
 import { sign } from "@/lib/http/hmac";
@@ -71,6 +73,7 @@ beforeEach(() => {
   mocks.stale.mockResolvedValue(alertJobResult);
   mocks.health.mockResolvedValue(alertJobResult);
   mocks.dispatch.mockResolvedValue(alertJobResult);
+  mocks.weekly.mockResolvedValue(alertJobResult);
   vi.spyOn(console, "info").mockImplementation(() => {});
 });
 afterEach(() => {
@@ -225,6 +228,16 @@ it("TEST-9.10 runs every Phase 9 job through the existing lease and remains repe
     expect(handler).toHaveBeenCalledTimes(2);
     handler.mockClear();
   }
+});
+it("JOB-12.1 runs weekly draft generation through the existing lease and remains repeatable", async () => {
+  expect(await runJob("JOB-WEEKLY-REPORT", "manual")).toMatchObject({
+    status: "success",
+    records_written: 1,
+  });
+  expect(await runJob("JOB-WEEKLY-REPORT", "manual")).toMatchObject({
+    status: "success",
+  });
+  expect(mocks.weekly).toHaveBeenCalledTimes(2);
 });
 it("TEST-7.7 bearer and session paths reject wrong secrets, cross-origin requests and GET sessions", async () => {
   const req = (headers: Record<string, string> = {}, method = "POST") =>

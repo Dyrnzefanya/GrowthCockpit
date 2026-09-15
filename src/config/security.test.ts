@@ -42,6 +42,10 @@ describe("Phase 2 security contracts", () => {
     expect(safeNext("/experiments/55555555-5555-4555-8555-555555555555")).toBe(
       "/experiments/55555555-5555-4555-8555-555555555555",
     );
+    expect(safeNext("/reports/11111111-1111-4111-8111-111111111111")).toBe(
+      "/reports/11111111-1111-4111-8111-111111111111",
+    );
+    expect(safeNext("/reports/not-a-uuid")).toBe("/today");
     expect(safeNext("/experiments/not-a-uuid")).toBe("/today");
     expect(safeNext("/playbook/sop-peluncuran/edit?from=search")).toBe(
       "/playbook/sop-peluncuran/edit?from=search",

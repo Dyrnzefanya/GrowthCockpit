@@ -39,7 +39,16 @@ export async function runJob(
     const { values } = await repository.machineSettings(),
       maxBatch = Math.min(values["jobs.max_batch"], 500),
       maxAttempts = Math.min(values["jobs.max_attempts"], 100);
-    if (key === "JOB-EVALUATE-RULES") {
+    if (key === "JOB-WEEKLY-REPORT") {
+      const result = await (
+        await import("@/services/reports")
+      ).runWeeklyReport();
+      read = result.read;
+      written = result.written;
+      failed = result.failed;
+      hasMore = result.hasMore;
+      cursor = result.cursor;
+    } else if (key === "JOB-EVALUATE-RULES") {
       const result = await (
         await import("@/services/decisions")
       ).runDecisions(run, deadline, maxBatch);

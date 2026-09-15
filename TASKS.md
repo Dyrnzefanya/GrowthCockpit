@@ -1,5 +1,44 @@
 # Tasks
 
+## Phase 12 — Reporting (2026-09-16)
+
+**Status: PASS — ENGINEERING COMPLETE (local). Operational / business validation: PENDING. Phase 13 engineering readiness: READY; implementation is not authorized.**
+
+### Engineering requirements and traceability
+
+- FR-12.1–FR-12.3: `/reports` generates a deterministic `weekly-v1` facts snapshot for any current or past ISO Monday–Sunday week in Asia/Jakarta. Assembly reuses the Performance, funnel, experiment, workflow, note, alert and decision sources; current-week reports disclose that the period is incomplete. The detail UI renders stored facts and never recalculates business metrics.
+- FR-12.4–FR-12.6: only the bounded Markdown narrative is editable. Mandatory caveats record attribution coverage, outcome completeness, stale/missing sources and incomplete periods. Revenue, ROAS and CAC reuse R-09 and are absent with an explicit reason when outcome completeness is insufficient.
+- FR-12.7–FR-12.8: service-only transaction functions create idempotent drafts, compare revisions for narrative saves and finalisation, freeze final rows at the database level, and create `version + 1` when a final week is regenerated. Authenticated Markdown download and the report detail print stylesheet use the frozen snapshot; no public export route or export dependency was added.
+- FR-12.9 / JOB-12.1: finalisation raises a safe `report_ready` alert for the existing Slack dispatcher. `JOB-WEEKLY-REPORT` reuses the Phase 7 runner and declares Monday 07:30 WIB in an opt-in GitHub fallback. It creates the previous complete week's draft and never finalises automatically.
+- D-019 records the minimal table/RPC design, shared metric ownership, `weekly-v1` snapshot contract, R-09 gate, Markdown/print delivery and scheduler reuse. Forward correction 0031 fixes the draft-update trigger without editing applied migration 0030.
+
+### Engineering quality evidence
+
+- Focused report/domain/job/Slack tests: PASS, including hand-calculated metrics, exact parity with `performanceSummary`, ISO boundaries, current/empty/partial data, stable repeated assembly, R-09 suppression, caveats, Markdown and job idempotency.
+- `npm run test:db`: PASS after local migrations 0030–0031. Report RLS/grants, authenticated write denial, service-only RPCs, idempotent draft generation, narrative revision checks, final immutability and version increment pass alongside all prior database suites. Local schema lint reports no errors; generated types match the local database.
+- Focused authenticated TEST-12.8: PASS with 1,000 persisted synthetic leads. Generation-to-render stays below ten seconds; narrative save, Markdown download, finalisation, direct database mutation rejection and regeneration to version 2 pass. Axe and 390/1280/1920 responsive checks pass; the 390 px rendering was visually reviewed.
+- `npm run lint`, `npm run typecheck`, `npm test`: PASS; 29 files / 148 unit and service tests. TEST-12.1 and TEST-12.4–12.7 cover hand-calculated current/previous metrics, parity with `performanceSummary`, ISO boundaries, empty/partial data, stable repeated assembly, R-09 suppression, caveats and Markdown output. Job and Slack tests cover idempotent generation and bounded headlines.
+- `npm run test:e2e -- --workers=1 --reporter=line`: PASS, 24/24 (4.9 minutes). TEST-12.8 generates from 1,000 persisted leads within NFR-12.1's ten-second bound, edits narrative, downloads Markdown, finalises, proves direct database mutation fails, regenerates version 2, runs axe A/AA, and checks 390/1280/1920 widths. The 390 px report was visually reviewed without document overflow.
+- Production-mode `npm run build`, `npm run secrets:client` and `npm run test:production`: PASS, 4/4 (21.8 seconds). Existing gates report signed-ingest p95 20.0 ms, 50k-lead pages 386–513 ms, and 90-day Today loads 614–652 ms. These are local warm-server measurements, not production evidence.
+- `npm run format:check`, `npm run secrets:check`, `git diff --check`: PASS. No dependency, public export route, provider write, automated finalisation, AI narrative or Phase 13 implementation was added.
+- Verification used only the observed local Supabase API/database/mail ports 55321/55322/55324. Browser fixtures refuse remote Supabase, create/delete synthetic local identities and remove their targeted report facts. Migrations were applied only to the local database; no deployment, scheduler activation or Slack message occurred.
+
+### Deliverables
+
+- Domain/schema: `src/config/report-schema.ts`, `src/domain/reports.ts`, shared `domain/metrics/performance.ts` and `domain/rules/r09.ts` exports.
+- Coordination/persistence: `src/services/reports/`, `src/services/report-actions.ts`, `src/repositories/reports.ts`, and the existing jobs/alerts/Slack paths.
+- UI: report index/detail Server Components, narrative controls, facts-only report view and print rules. Campaign display is bounded to 500 rows while the frozen facts and Markdown retain the full snapshot.
+- Migrations/tests: `0030_reports.sql`, `0031_report_trigger_return.sql`, `supabase/tests/reports.sql`, focused unit tests and `tests/e2e/reports.spec.ts`.
+
+### Operational / business evidence — PENDING
+
+- PRD DoD: two consecutive real weekly reports delivered with less than fifteen minutes of manual edit time. Synthetic fixtures cannot satisfy this evidence.
+- Appendix B question 6: confirm that Markdown plus print is sufficient for the VP Marketing audience. Google Docs/Slides delivery is not implemented without that requirement.
+- Activate and observe the protected weekly scheduler and existing Slack integration with real configuration. No workflow, deployment or external message was activated in local verification.
+- Preserve all earlier Operational Validation Backlog items, including A11 Target CPQL approval/configuration.
+
+**Next step:** retain the operational evidence backlog and stop after the Phase 12 commit. Phase 13 requires a separate instruction.
+
 ## Phase 11 — Decision Engine & Today v2 (2026-09-16)
 
 **Status: PASS — ENGINEERING COMPLETE (local). Operational / business validation: PENDING. Phase 12 engineering readiness: READY; implementation is not authorized.**
@@ -318,6 +357,10 @@ All nine PRD technical acceptance criteria pass with the evidence above: manual 
 - Remote Phase 3–6 migrations are not applied in this turn; no manual remote deployment or integration configuration occurs. Git publication can trigger the repository's existing deployment automation and must not be represented as remote database verification.
 
 ## Operational Validation Backlog
+
+Phase 12: two consecutive real weekly reports delivered with less than fifteen minutes of manual editing, Appendix B report-format confirmation, protected Monday 07:30 WIB scheduler evidence and real `report_ready` Slack delivery remain **PENDING**. Local fixtures prove deterministic generation, immutability and delivery routing but are not operational evidence.
+
+Phase 11: A11 business-approved Target CPQL/currency, optional frequency and campaign-ID configuration, and one week of real Today use remain **PENDING**. Benchmark-dependent rules stay suppressed until configured.
 
 Phase 10: A5/A7 account/token/currency/timezone verification, naming adoption/compliance, protected deployed 06:00→07:00 ingest cadence and one week of Performance use remain **PENDING**. No real Meta connection or operational results are claimed from mocked/local tests. Retain all Phase 2–9 items below.
 

@@ -150,6 +150,9 @@ it("preserves won allocation currency and counts each deal only once", () => {
   const m = performanceSummary({ ...facts, deals: [d] });
   expect(m.revenue).toBe(500);
   expect(m.opportunities).toBe(1);
+  expect(m.won).toBe(1);
+  expect(m.cac).toBe(1200.1);
+  expect(m.roas).toBeCloseTo(500 / 1200.1);
   expect(
     performanceSummary({
       ...facts,

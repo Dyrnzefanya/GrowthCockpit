@@ -1143,6 +1143,69 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string
+          created_by: string
+          facts: Json
+          finalized_at: string | null
+          finalized_by: string | null
+          id: string
+          narrative_md: string
+          period_end: string
+          period_start: string
+          status: string
+          type: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          facts: Json
+          finalized_at?: string | null
+          finalized_by?: string | null
+          id?: string
+          narrative_md?: string
+          period_end: string
+          period_start: string
+          status?: string
+          type: string
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          facts?: Json
+          finalized_at?: string | null
+          finalized_by?: string | null
+          id?: string
+          narrative_md?: string
+          period_end?: string
+          period_start?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_finalized_by_fkey"
+            columns: ["finalized_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rule_evaluations: {
         Row: {
           alert_id: string | null
@@ -1599,6 +1662,16 @@ export type Database = {
         }
         Returns: string
       }
+      create_weekly_report_draft: {
+        Args: {
+          p_actor: string
+          p_end: string
+          p_facts: Json
+          p_narrative: string
+          p_start: string
+        }
+        Returns: string
+      }
       crm_snapshot: { Args: { p_scope: Json }; Returns: Json }
       decision_action: {
         Args: {
@@ -1612,6 +1685,35 @@ export type Database = {
         Returns: undefined
       }
       decision_facts: { Args: { p_from: string; p_to: string }; Returns: Json }
+      finalize_report: {
+        Args: {
+          p_actor: string
+          p_expected: string
+          p_id: string
+          p_narrative: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          facts: Json
+          finalized_at: string | null
+          finalized_by: string | null
+          id: string
+          narrative_md: string
+          period_end: string
+          period_start: string
+          status: string
+          type: string
+          updated_at: string
+          version: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reports"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       finish_integration_run: {
         Args: {
           p_cursor: string
@@ -1720,6 +1822,10 @@ export type Database = {
         Returns: number
       }
       retry_webhook: { Args: { p_id: string }; Returns: boolean }
+      save_report_narrative: {
+        Args: { p_expected: string; p_id: string; p_narrative: string }
+        Returns: string
+      }
       search_playbook: {
         Args: {
           p_category?: string

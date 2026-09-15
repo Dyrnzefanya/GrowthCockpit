@@ -2,6 +2,12 @@ import { jakartaDateTime, shiftDate, toJakartaDate } from "@/domain/dates";
 import { retryOutcome } from "@/domain/integrations";
 
 export const alertDefinitions = {
+  report_ready: {
+    severity: "info",
+    slack: true,
+    title: "Weekly report ready",
+    message: "Review the weekly report in GrowthCockpit.",
+  },
   decision_recommendation: {
     severity: "info",
     slack: false,

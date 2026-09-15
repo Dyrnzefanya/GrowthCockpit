@@ -15,6 +15,7 @@ const messageSchema = z
       .array(z.string().regex(/^[A-Z0-9_:-]{1,120}$/))
       .max(10)
       .default([]),
+    headline: z.array(z.string().trim().min(1).max(120)).max(3).default([]),
   })
   .strict();
 export type SlackMessage = z.input<typeof messageSchema>;
@@ -31,6 +32,7 @@ const labels: Record<string, string> = {
   job_failure_streak: "Job failure streak",
   attribution_coverage_low: "Attribution coverage low",
   scheduler_overdue: "Scheduler overdue",
+  report_ready: "Weekly report ready",
 };
 
 export function serializeSlack(value: SlackMessage) {
@@ -46,6 +48,7 @@ export function serializeSlack(value: SlackMessage) {
     ...(input.reasonCodes.length
       ? [`Reason codes: ${input.reasonCodes.join(", ")}`]
       : []),
+    ...input.headline,
     `Environment: ${input.environment}`,
     `Open GrowthCockpit: ${input.url}`,
   ];
