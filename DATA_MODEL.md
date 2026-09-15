@@ -1,5 +1,13 @@
 # Data Model
 
+## Phase 11 rule evidence and operator actions
+
+Forward migration `0027_rule_evaluations.sql` creates the sole new table, `rule_evaluations`: rule/version, evaluation clock, date window, typed scope/id, verdict, immutable evidence and optional alert FK. Authenticated users have SELECT through RLS; service-role INSERT is allowed, UPDATE/DELETE are denied. A unique rule/version/clock/scope key makes batch retries idempotent without rewriting earlier evaluations. Evidence includes raw numeric inputs, comparison and mature windows, source freshness, the exact settings snapshot, matched condition, effective verdict, precedence, limitations and suggested action.
+
+Existing `alerts` gains snooze/dismiss expiry, reason, total dismissal count and dismissal timestamps/actors in `action_dismissals`. Existing delivery history remains bounded independently. Narrow machine RPCs persist application-computed alerts/evaluations under the live job lease and compare revisions for operator actions. `sync_state(decisions,evaluation)` retains the atomic resume cursor separately from runner finalization. No action-dismissals table is added. Settings gain an append-only audit array protected from direct authenticated column updates; its trigger records old/new values, actor and time.
+
+New `rules.*` settings contain nullable target CPQL/currency, nullable frequency threshold, explicit lead-generation campaign IDs and PRD relative-change defaults. Existing health/sample/maturity settings are reused. Missing target CPQL is preserved as JSON null, never zero or a guessed business target. `0028_decision_evidence_context.sql` extends the bounded projection with linked open-pipeline facts, includes yesterday's overdue outcome cutoff, and records the precise snooze override reason. `0029_decision_tracking_clock.sql` includes current-day inquiries in tracking evidence while cohort windows stay complete-day only, and fences stale snooze override revisions. All three are forward-only; applied Phase 0–10 migrations remain unchanged. Generated types include the new evidence/action/audit fields.
+
 ## Phase 10 paid-media facts
 
 `0023_ad_metrics.sql` adds only `ad_accounts` and `ad_metrics_daily` with RLS, read-only authenticated grants, restricted machine writes and no service-role DELETE grant. The account key is `(platform, external_account_id)`; the fact key is `(ad_account_id, metric_date, campaign_id, adset_id, ad_id)`. Current ingest writes campaign grain, with empty adset/ad IDs. Store numeric(18,2) spend, currency, source timezone, raw impressions/clicks, optional reach/frequency, and explicitly selected platform result type/count/cost. Null optional metrics stay null. Provider results never populate inquiry counts.

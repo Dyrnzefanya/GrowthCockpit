@@ -1,5 +1,11 @@
 # Integrations
 
+## Phase 11 evaluation schedule
+
+`JOB-EVALUATE-RULES` reuses the authenticated manual/bearer scheduler endpoint at `/api/jobs/JOB-EVALUATE-RULES`. The registry and opt-in `decision-rules.yml` declare 07:00 WIB (`0 0 * * *` UTC). Deploy with host protection enabled before activating the existing GitHub fallback through `PMOS_SCHEDULER=github` and `PMOS_DECISIONS_ENABLED=true`; no schedule has been activated by local verification. The fallback resumes bounded batches and fails visibly if the daily evaluation exceeds thirty seconds. Job/measurement failures remain visible through Integrations and Today.
+
+No new provider connection is needed. R-06 uses the existing Slack delivery policy for a critical tracking suspicion; other decision recommendations stay in app. Target CPQL and currency are configured later in Settings after business approval. Missing benchmark suppresses only R-02/R-05; missing frequency threshold or explicit lead-generation campaign ID suppresses the corresponding rule. This phase never changes a campaign or calculates/applies a budget.
+
 ## Phase 10 Meta Ads — current contract
 
 Meta is a read-only performance source. Graph **v26.0** is pinned in `src/config/integrations.ts`, with verification date **2026-09-15**, based on [Meta's official SDK version](https://github.com/facebook/facebook-nodejs-business-sdk/blob/main/src/api.js), [account fields](https://github.com/facebook/facebook-nodejs-business-sdk/blob/main/src/objects/ad-account.js), and [insight fields](https://github.com/facebook/facebook-nodejs-business-sdk/blob/main/src/objects/ads-insights.js). Meta documentation endpoints returned HTTP 429 during inspection; this is source verification, not a live-account smoke test. Version changes require a deliberate decision.

@@ -88,6 +88,15 @@ test("TEST-2.1 protected routes reject anonymous and forged requests", async ({
   ).toEqual([]);
 });
 
+const mailOrigin = new URL(
+  process.env.TEST_MAIL_URL ?? "http://127.0.0.1:54324",
+);
+if (
+  !["127.0.0.1", "localhost"].includes(mailOrigin.hostname) ||
+  mailOrigin.username ||
+  mailOrigin.password
+)
+  throw new Error("Mail fixture requires local Supabase");
 test("TEST-2.5 real email login, settings audit, logout and two-tab expiry", async ({
   page,
   context,
@@ -105,7 +114,7 @@ test("TEST-2.5 real email login, settings audit, logout and two-tab expiry", asy
     let emailLink = "";
     await expect
       .poll(async () => {
-        const response = await fetch("http://127.0.0.1:54324/api/v1/messages");
+        const response = await fetch(new URL("/api/v1/messages", mailOrigin));
         const inbox = await response.json();
         const message = inbox.messages.find(
           (item: { To: { Address: string }[] }) =>
@@ -113,7 +122,7 @@ test("TEST-2.5 real email login, settings audit, logout and two-tab expiry", asy
         );
         if (!message) return false;
         const mail = await (
-          await fetch(`http://127.0.0.1:54324/api/v1/message/${message.ID}`)
+          await fetch(new URL(`/api/v1/message/${message.ID}`, mailOrigin))
         ).json();
         emailLink =
           String(mail.HTML)

@@ -1,5 +1,42 @@
 # Tasks
 
+## Phase 11 — Decision Engine & Today v2 (2026-09-16)
+
+**Status: PASS — ENGINEERING COMPLETE (local). Operational / business validation: PENDING. Phase 12 engineering readiness: READY; implementation is not authorized.**
+
+### Engineering requirements and traceability
+
+- FR-11.1–FR-11.5 / FR-11.10: r1 rules R-00–R-10, ordered gate/tracking/quality/scale handling, sample guard, immutable evidence including quiet/suppressed/error outcomes, mature-cohort and prior-window facts. Formula and campaign identity helpers are reused. No rule imports an external module or can modify an ad platform.
+- FR-11.6–FR-11.8: Today shows at most five ranked actions with score inputs, evidence, suppression causes, duration-based snooze and reason-based dismiss. Expired snoozes reactivate before reading action revisions. Material worsening can reopen snoozes; three dismissals in thirty days are visible in Settings. Linked experiment context, prefilled campaign references and existing Playbook procedures support operator documentation.
+- FR-11.9: validated grouped threshold editor, reset defaults, and old/new/actor/time audit on settings changes. Target CPQL/currency and frequency threshold default to null; no guessed benchmark.
+- BE-11.1–11.5 / JOB-11.1: forward-only migrations 0027–0029; append-only rule_evaluations, action state on existing alerts, bounded read projection and fenced atomic batches. Reuse the Phase 7 job runner and sync_state cursor. The opt-in scheduler declares 07:00 WIB. No new dependency, public endpoint, provider write or Phase 12 feature.
+- D-018 records A11 clarification, precedence, mature windows, exact priority choices, stability evidence, missing frequency/objective inputs, snooze worsening, persistence and bounds.
+
+### Final engineering quality evidence
+
+- `npm run lint`, `npm run typecheck`, `npm test`: PASS; 28 files / 142 unit and service tests. Focused Phase 11 rules, facts and coordination: 34 tests. TEST-11.1–11.8 cover firing/quiet rules, exact boundaries, missing benchmarks/inputs, contradictory verdicts, priority ties, immutable versioned evidence, stable repeat/resume, lifecycle and rule-error isolation. NFR-11.2 verifies rules import only their own directory and contain no I/O.
+- `npm run test:db`: PASS after 0029, including RLS/service-only RPC grants, append-only history, settings audit/tamper rejection, idempotent replay, durable cursor, three dismissals, expired leases, stale snooze revisions and material worsening. Existing provisioning and concurrency suites remain passing. Final schema lint reports no errors; generated types reflect the local schema.
+- `npm run test:e2e -- --workers=1 --reporter=line`: PASS, 23/23 (6.2 minutes). TEST-11.9 / FE-11.1–11.4 verify persisted stale-data suppression, unconfigured CPQL disclosure, score/evidence controls, snooze expiry/dismiss across reevaluation, validated/audited settings/reset, campaign history and experiment prefill. Real local authenticated job evaluation meets NFR-11.1's 30-second bound on the fixture. Axe A/AA and 390/1280/1920 screenshots pass; rendered mobile evidence was visually reviewed without page overflow.
+- Production-mode `npm run build` and `npm run secrets:client`: PASS. `npm run test:production`: 4/4 PASS (25.6 seconds), including gallery exclusion/auth and paint budget, signed ingest p95 32.2 ms, 50k-lead pages 428–544 ms, and 90-day Today loads 595–753 ms. These are local warm-server measurements, not production traffic evidence.
+- `npm run format:check`, `npm run secrets:check` and `git diff --check`: PASS. No new dependencies. Source, migration and permission changes reviewed; no campaign write path exists.
+- Local Docker exposes API/database/mail on 55321/55322/55324; CLI defaults report 54321/54322/54324. Verification uses only the observed local ports. All three migrations were applied only to the local database. Browser fixtures create/delete synthetic local identities and refuse remote Supabase.
+
+### Deliverables and configured values
+
+- Rules and tests: `src/domain/rules/`; trusted metric assembly: `src/domain/metrics/decision-inputs.ts`; coordination/actions: `src/services/decisions.ts`, `decision-actions.ts`; persistence: `src/repositories/decisions.ts`.
+- UI: shared-style `src/components/decisions.tsx`, `decision-controls.tsx`; existing Today, Settings, Performance/Meta history and experiment-new routes. FE-11.1–11.4 add operational controls without replacing the application shell or workflows.
+- Migrations: `0027_rule_evaluations.sql`, `0028_decision_evidence_context.sql`, `0029_decision_tracking_clock.sql`. D-018 records the migration numbering, bounded projection, precedence and operator-approved A11 interpretation.
+- Read-only local configuration verification after fixtures: target CPQL/currency/frequency = null; lead-generation campaign IDs = []; CPL rise 20%, CPQL fall 10%, quality/CTR fall 25%; minimum coverage 70%, outcome completeness 60%, sample 10 MQL, maturity 14 days. These are configured software defaults, not business approval of a target. Production settings and observation-week verdict counts remain PENDING.
+
+### Operational / business configuration — PENDING
+
+- **A11:** the operator confirmed that Target CPQL is not business-approved and explicitly authorized continued engineering with an unconfigured state. This supersedes the initial preflight blocker. R-02/R-05 remain unavailable until an approved amount and matching currency are entered in Settings; independent supported rules continue. Target CPL remains undecided and is not an optimization target or a new rule.
+- Frequency threshold and explicit lead-generation campaign IDs require operator configuration for R-10/R-06; absent inputs suppress the affected rule only.
+- One week of real Today action/dismissal, actual configured threshold values and observed verdict counts remain PENDING. Synthetic tests do not satisfy that evidence.
+- Preserve the existing Operational Validation Backlog, real provider setup and deployed host-protection/auth gates. No deployment or external messaging was performed.
+
+**Next step:** commit this verified Phase 11 change and stop. Obtain business configuration and real observation evidence separately; begin Phase 12 only after explicit authorization. The projection has a documented 10,000-group-per-family ceiling and fails visibly on overflow; a larger workspace requires paging before claiming the same performance bound.
+
 ## Phase 10 — Meta Ads & Performance
 
 **Status: PASS - ENGINEERING COMPLETE (local). Operational / external activation: PENDING. Phase 11 engineering readiness: READY; implementation is not authorized.**
@@ -609,7 +646,7 @@ The first local build correctly rejected a missing modern publishable-key variab
 - **Phase 7:** local foundation decisions resolved in D-013. Source registration, host protection, hosting plan and deployed scheduler evidence remain pending; scheduler-wide outage alerting belongs to Phase 9.
 - **Phase 8:** manual qualification override versus HubSpot lifecycle authority resolved by D-014; external configuration/UAT remains pending.
 - **Phase 9:** Slack INFO routing.
-- **Phase 11:** R-01 versus R-02 sample-gate precedence.
+- **Phase 11:** R-01/R-02 precedence resolved by FR-11.3 and D-018; A11 remains pending operational/business configuration.
 - **Phase 13 / deployment planning:** production and real-data sequencing where still applicable.
 
 These are not Phase 0 blockers and must not be resolved speculatively.

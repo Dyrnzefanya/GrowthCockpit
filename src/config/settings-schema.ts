@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { decisionShape, decisionDefaults } from "./decision-schema";
 export const qualificationKeys = [
   "qualification.min_quantity",
   "qualification.free_email_domains",
@@ -7,6 +8,7 @@ export const qualificationKeys = [
 ] as const;
 export const qualificationKey = z.enum(qualificationKeys);
 export const settingsSchema = z.object({
+  ...decisionShape,
   "meta.primary_result_type": z
     .string()
     .regex(/^[a-zA-Z0-9_.]+$/)
@@ -41,6 +43,7 @@ export const settingsSchema = z.object({
   "follow_up.sql_workdays": z.number().int().positive(),
 });
 export const settingsDefaults: z.infer<typeof settingsSchema> = {
+  ...decisionDefaults,
   "meta.primary_result_type": null,
   "meta.freshness_hours": 24,
   "workspace.timezone": "Asia/Jakarta",

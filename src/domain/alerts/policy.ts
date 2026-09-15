@@ -2,6 +2,20 @@ import { jakartaDateTime, shiftDate, toJakartaDate } from "@/domain/dates";
 import { retryOutcome } from "@/domain/integrations";
 
 export const alertDefinitions = {
+  decision_recommendation: {
+    severity: "info",
+    slack: false,
+    title: "Rekomendasi keputusan",
+    message: "Tinjau bukti dan tindakan di Priority actions.",
+  },
+  tracking_failure: {
+    severity: "critical",
+    slack: true,
+    title: "Dugaan kegagalan tracking kampanye",
+    message:
+      "Spend tercatat tanpa lead CRM selama lebih dari 24 jam. Periksa pelacakan.",
+    playbook: "checklist-qa-pelacakan",
+  },
   meta_token_expiring: {
     severity: "warning",
     slack: true,

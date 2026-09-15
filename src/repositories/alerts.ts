@@ -80,6 +80,7 @@ export async function today() {
     .from("alerts")
     .select("*")
     .eq("status", "open")
+    .neq("source", "decisions")
     .order("severity")
     .order("last_seen_at", { ascending: false })
     .limit(100);

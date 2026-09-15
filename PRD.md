@@ -2562,16 +2562,16 @@ Status values: `Planned` · `In Progress` · `Implemented` · `Verified`. The co
 | FR-10.10 | 10 | freshness badge | TEST-10.7 | Planned |
 | FR-10.11 | 10 | naming parser | TEST-10.5 | Planned |
 | FR-10.12 | 10 | manual re-ingest | manual | Planned |
-| FR-11.1 | 11 | rule_evaluations | TEST-11.7 | Planned |
-| FR-11.2 | 11 | gate rule R-00 | TEST-11.2 | Planned |
-| FR-11.3 | 11 | sample rule R-01 | TEST-11.3 | Planned |
-| FR-11.4 | 11 | domain/rules/* | TEST-11.1, 11.8 | Planned |
-| FR-11.5 | 11 | evidence renderer | TEST-11.1 | Planned |
-| FR-11.6 | 11 | priority section | TEST-11.5 | Planned |
-| FR-11.7 | 11 | snooze/dismiss | TEST-11.6 | Planned |
-| FR-11.8 | 11 | dismissal report | TEST-11.6 | Planned |
-| FR-11.9 | 11 | settings editor | TEST-11.1 | Planned |
-| FR-11.10 | 11 | rule versioning | TEST-11.7 | Planned |
+| FR-11.1 | 11 | rule_evaluations | TEST-11.7 | Verified (local; TASKS.md) |
+| FR-11.2 | 11 | gate rule R-00 | TEST-11.2 | Verified (local; TASKS.md) |
+| FR-11.3 | 11 | sample rule R-01 | TEST-11.3 | Verified (local; TASKS.md) |
+| FR-11.4 | 11 | domain/rules/* | TEST-11.1, 11.8 | Verified (local; A11 per D-018) |
+| FR-11.5 | 11 | evidence renderer | TEST-11.1 | Verified (local; TASKS.md) |
+| FR-11.6 | 11 | priority section | TEST-11.5 | Verified (local; TASKS.md) |
+| FR-11.7 | 11 | snooze/dismiss | TEST-11.6 | Verified (local; TASKS.md) |
+| FR-11.8 | 11 | dismissal report | TEST-11.6 | Verified (local; TASKS.md) |
+| FR-11.9 | 11 | settings editor | TEST-11.1 | Verified (local; TASKS.md) |
+| FR-11.10 | 11 | rule versioning | TEST-11.7 | Verified (local; TASKS.md) |
 | FR-12.1 | 12 | assembly service | TEST-12.1 | Planned |
 | FR-12.2 | 12 | assembly inputs | TEST-12.1 | Planned |
 | FR-12.3 | 12 | facts schema | TEST-12.1 | Planned |

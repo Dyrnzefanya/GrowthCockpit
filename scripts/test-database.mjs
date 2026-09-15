@@ -30,6 +30,7 @@ execFileSync(
       "hubspot",
       "alerts",
       "meta",
+      "decisions",
     ]
       .map((name) => readFileSync(`supabase/tests/${name}.sql`, "utf8"))
       .join("\n"),

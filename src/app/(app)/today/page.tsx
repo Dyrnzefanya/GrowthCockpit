@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { LeadQueue } from "@/components/lead-queue";
 import { DataHealth } from "@/components/data-health";
 import { Alerts } from "@/components/alerts";
+import { PriorityActions } from "@/components/decisions";
 import { Toaster } from "@/components/ui/sonner";
 import { PageHeader, SectionCard } from "@/components/operational";
 import { EmptyState } from "@/components/states";
@@ -34,6 +35,9 @@ export default async function Page({
         }
       />
       <div className="space-y-5">
+        <Suspense fallback={<p role="status">Memuat priority actions…</p>}>
+          <PriorityActions />
+        </Suspense>
         <p className="text-xs text-muted-foreground">
           Checklist mengikuti hari ini di Asia/Jakarta; rentang pelaporan tidak
           mengubah jadwal.
@@ -182,14 +186,6 @@ export default async function Page({
         <Suspense fallback={<p role="status">Memuat alerts…</p>}>
           <Alerts />
         </Suspense>
-        <SectionCard
-          title="Bagian berikutnya"
-          description="Bagian ini belum aktif; tidak ada data yang dibuat-buat."
-        >
-          <ul className="grid gap-3 p-5 text-sm text-muted-foreground sm:grid-cols-2">
-            <li>Priority actions · Phase 11</li>
-          </ul>
-        </SectionCard>
         <Suspense fallback={<p role="status">Memuat data health…</p>}>
           <DataHealth />
         </Suspense>

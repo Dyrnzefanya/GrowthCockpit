@@ -39,7 +39,16 @@ export async function runJob(
     const { values } = await repository.machineSettings(),
       maxBatch = Math.min(values["jobs.max_batch"], 500),
       maxAttempts = Math.min(values["jobs.max_attempts"], 100);
-    if (key === "JOB-META-INGEST") {
+    if (key === "JOB-EVALUATE-RULES") {
+      const result = await (
+        await import("@/services/decisions")
+      ).runDecisions(run, deadline, maxBatch);
+      read = result.read;
+      written = result.written;
+      failed = result.failed;
+      hasMore = result.hasMore;
+      cursor = result.cursor;
+    } else if (key === "JOB-META-INGEST") {
       const result = await (
         await import("@/services/ad-metrics")
       ).ingestMeta(run, deadline, maxBatch, range);

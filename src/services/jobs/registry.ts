@@ -1,6 +1,13 @@
 import "server-only";
 export const jobs = [
   {
+    key: "JOB-EVALUATE-RULES",
+    label: "Evaluate decision rules",
+    schedule: "0 0 * * *",
+    cadenceMinutes: 1440,
+    budgetMs: 29000,
+  },
+  {
     key: "JOB-META-INGEST",
     label: "Ingest Meta campaign metrics",
     schedule: "0 23 * * *",

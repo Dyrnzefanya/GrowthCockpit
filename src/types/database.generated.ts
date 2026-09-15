@@ -154,8 +154,12 @@ export type Database = {
         Row: {
           acknowledged_at: string | null
           acknowledged_by: string | null
+          action_dismissals: Json
           alert_key: string
           created_at: string
+          dismissal_count: number
+          dismissed_reason: string | null
+          dismissed_until: string | null
           entity_id: string | null
           entity_type: string
           evidence: Json
@@ -173,6 +177,7 @@ export type Database = {
           resolved_at: string | null
           resolved_reason: string | null
           severity: string
+          snooze_until: string | null
           source: string
           status: string
           suppressed_at: string | null
@@ -186,8 +191,12 @@ export type Database = {
         Insert: {
           acknowledged_at?: string | null
           acknowledged_by?: string | null
+          action_dismissals?: Json
           alert_key: string
           created_at?: string
+          dismissal_count?: number
+          dismissed_reason?: string | null
+          dismissed_until?: string | null
           entity_id?: string | null
           entity_type: string
           evidence?: Json
@@ -205,6 +214,7 @@ export type Database = {
           resolved_at?: string | null
           resolved_reason?: string | null
           severity: string
+          snooze_until?: string | null
           source: string
           status?: string
           suppressed_at?: string | null
@@ -218,8 +228,12 @@ export type Database = {
         Update: {
           acknowledged_at?: string | null
           acknowledged_by?: string | null
+          action_dismissals?: Json
           alert_key?: string
           created_at?: string
+          dismissal_count?: number
+          dismissed_reason?: string | null
+          dismissed_until?: string | null
           entity_id?: string | null
           entity_type?: string
           evidence?: Json
@@ -237,6 +251,7 @@ export type Database = {
           resolved_at?: string | null
           resolved_reason?: string | null
           severity?: string
+          snooze_until?: string | null
           source?: string
           status?: string
           suppressed_at?: string | null
@@ -266,6 +281,7 @@ export type Database = {
       }
       app_settings: {
         Row: {
+          audit_history: Json
           created_at: string
           description: string
           key: string
@@ -274,6 +290,7 @@ export type Database = {
           value: Json
         }
         Insert: {
+          audit_history?: Json
           created_at?: string
           description: string
           key: string
@@ -282,6 +299,7 @@ export type Database = {
           value: Json
         }
         Update: {
+          audit_history?: Json
           created_at?: string
           description?: string
           key?: string
@@ -1125,6 +1143,59 @@ export type Database = {
         }
         Relationships: []
       }
+      rule_evaluations: {
+        Row: {
+          alert_id: string | null
+          created_at: string
+          evaluated_at: string
+          evidence: Json
+          id: string
+          rule_key: string
+          rule_version: string
+          scope_id: string
+          scope_type: string
+          verdict: string
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          alert_id?: string | null
+          created_at?: string
+          evaluated_at: string
+          evidence: Json
+          id?: string
+          rule_key: string
+          rule_version: string
+          scope_id: string
+          scope_type: string
+          verdict: string
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          alert_id?: string | null
+          created_at?: string
+          evaluated_at?: string
+          evidence?: Json
+          id?: string
+          rule_key?: string
+          rule_version?: string
+          scope_id?: string
+          scope_type?: string
+          verdict?: string
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rule_evaluations_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sync_state: {
         Row: {
           consecutive_failures: number
@@ -1460,6 +1531,10 @@ export type Database = {
         Args: { p_deal: Json; p_lead_revision: string; p_revision: string }
         Returns: undefined
       }
+      commit_decisions: {
+        Args: { p_cursor: string; p_rows: Json; p_run: string }
+        Returns: number
+      }
       commit_hubspot_mirror: {
         Args: {
           p_changes: Json
@@ -1525,6 +1600,18 @@ export type Database = {
         Returns: string
       }
       crm_snapshot: { Args: { p_scope: Json }; Returns: Json }
+      decision_action: {
+        Args: {
+          p_actor: string
+          p_id: string
+          p_operation: string
+          p_reason: string
+          p_revision: string
+          p_until: string
+        }
+        Returns: undefined
+      }
+      decision_facts: { Args: { p_from: string; p_to: string }; Returns: Json }
       finish_integration_run: {
         Args: {
           p_cursor: string
@@ -1571,8 +1658,12 @@ export type Database = {
         Returns: {
           acknowledged_at: string | null
           acknowledged_by: string | null
+          action_dismissals: Json
           alert_key: string
           created_at: string
+          dismissal_count: number
+          dismissed_reason: string | null
+          dismissed_until: string | null
           entity_id: string | null
           entity_type: string
           evidence: Json
@@ -1590,6 +1681,7 @@ export type Database = {
           resolved_at: string | null
           resolved_reason: string | null
           severity: string
+          snooze_until: string | null
           source: string
           status: string
           suppressed_at: string | null
@@ -1669,8 +1761,12 @@ export type Database = {
         Returns: {
           acknowledged_at: string | null
           acknowledged_by: string | null
+          action_dismissals: Json
           alert_key: string
           created_at: string
+          dismissal_count: number
+          dismissed_reason: string | null
+          dismissed_until: string | null
           entity_id: string | null
           entity_type: string
           evidence: Json
@@ -1688,6 +1784,7 @@ export type Database = {
           resolved_at: string | null
           resolved_reason: string | null
           severity: string
+          snooze_until: string | null
           source: string
           status: string
           suppressed_at: string | null

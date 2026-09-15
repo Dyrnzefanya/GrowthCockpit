@@ -46,9 +46,11 @@ function refValue(value: Experiment["external_refs"], key: string) {
 export function ExperimentEditor({
   experiment,
   defaults,
+  initialCampaignId = "",
 }: {
   experiment?: Experiment;
   defaults: Defaults;
+  initialCampaignId?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -83,7 +85,8 @@ export function ExperimentEditor({
   const [effort, setEffort] = useState(experiment?.effort ?? 3);
   const [platform, setPlatform] = useState(experiment?.platform ?? "");
   const [campaignId, setCampaignId] = useState(
-    refValue(experiment?.external_refs ?? {}, "campaign_id"),
+    refValue(experiment?.external_refs ?? {}, "campaign_id") ||
+      initialCampaignId,
   );
   const [adsetId, setAdsetId] = useState(
     refValue(experiment?.external_refs ?? {}, "adset_id"),

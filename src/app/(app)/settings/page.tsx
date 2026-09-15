@@ -1,5 +1,5 @@
 import { PageHeader, SectionCard } from "@/components/operational";
-import { EmptyState } from "@/components/states";
+import { DecisionSettings } from "@/components/decisions";
 import {
   ProfileForm,
   PreferencesForm,
@@ -86,11 +86,7 @@ export default async function Settings() {
           )}
         </SectionCard>
         <SectionCard title="Decision thresholds">
-          <EmptyState
-            title="Configuration not active yet"
-            description="Versioned thresholds for deterministic recommendations."
-            phase={11}
-          />
+          <DecisionSettings values={settings.values} editable={editable} />
         </SectionCard>
       </div>
     </>
