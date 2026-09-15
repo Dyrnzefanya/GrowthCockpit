@@ -107,16 +107,35 @@ export function MetricDelta({
 export function MetricCard({
   title,
   metric,
+  compact = false,
+  context,
 }: {
   title: string;
   metric: MetricView;
+  compact?: boolean;
+  context?: string;
 }) {
   return (
-    <section className="space-y-3 rounded-lg border bg-card p-5">
+    <section
+      className={cn(
+        "min-w-0 rounded-lg border bg-card",
+        compact ? "space-y-2 p-3" : "space-y-3 p-5",
+      )}
+    >
       <h3 className="text-sm text-muted-foreground">{title}</h3>
-      <p className="text-2xl font-semibold tabular-nums">
+      {context && <p className="text-xs text-muted-foreground">{context}</p>}
+      <p
+        className={cn(
+          "break-words font-semibold tabular-nums",
+          compact ? "text-xl" : "text-2xl",
+        )}
+      >
         {metric.value === null ? (
-          "Unavailable"
+          compact ? (
+            <span title="No data">—</span>
+          ) : (
+            "Unavailable"
+          )
         ) : (
           <>
             {metric.value.toLocaleString("en-US")}{" "}

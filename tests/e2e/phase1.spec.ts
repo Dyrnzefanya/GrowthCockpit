@@ -39,10 +39,15 @@ test("TEST-1.1 all twelve routes are honest and reachable", async ({
         "leads/new",
         "funnel",
         "integrations",
+        "performance",
       ].includes(route)
     )
       await expect(page.locator("main")).toContainText(/Phase \d/);
-    if (!["workflows", "leads", "funnel", "integrations"].includes(route))
+    if (
+      !["workflows", "leads", "funnel", "integrations", "performance"].includes(
+        route,
+      )
+    )
       await expect(page.locator("tbody tr")).toHaveCount(0);
     if (route !== "login") {
       const settings = page

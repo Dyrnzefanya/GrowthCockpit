@@ -2,6 +2,24 @@ import { jakartaDateTime, shiftDate, toJakartaDate } from "@/domain/dates";
 import { retryOutcome } from "@/domain/integrations";
 
 export const alertDefinitions = {
+  meta_token_expiring: {
+    severity: "warning",
+    slack: true,
+    title: "Token Meta mendekati kedaluwarsa",
+    message: "Rotasi token read-only dan verifikasi ingest.",
+  },
+  meta_currency_mismatch: {
+    severity: "warning",
+    slack: true,
+    title: "Currency performance berbeda",
+    message: "Total lintas currency ditolak. Tinjau akun dan mata uang CRM.",
+  },
+  meta_stale: {
+    severity: "warning",
+    slack: true,
+    title: "Data Meta melewati SLA",
+    message: "Tinjau run dan lanjutkan rentang ingest yang tertunda.",
+  },
   new_mql: {
     severity: "info",
     slack: true,

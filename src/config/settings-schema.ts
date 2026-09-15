@@ -7,6 +7,12 @@ export const qualificationKeys = [
 ] as const;
 export const qualificationKey = z.enum(qualificationKeys);
 export const settingsSchema = z.object({
+  "meta.primary_result_type": z
+    .string()
+    .regex(/^[a-zA-Z0-9_.]+$/)
+    .max(150)
+    .nullable(),
+  "meta.freshness_hours": z.number().int().min(1).max(168),
   "workspace.timezone": z.literal("Asia/Jakarta"),
   "qualification.min_quantity": z.number().int().positive(),
   "qualification.free_email_domains": z
@@ -35,6 +41,8 @@ export const settingsSchema = z.object({
   "follow_up.sql_workdays": z.number().int().positive(),
 });
 export const settingsDefaults: z.infer<typeof settingsSchema> = {
+  "meta.primary_result_type": null,
+  "meta.freshness_hours": 24,
   "workspace.timezone": "Asia/Jakarta",
   "qualification.min_quantity": 50,
   "qualification.free_email_domains": [
@@ -80,6 +88,7 @@ export function parseSettings(rows: { key: string; value: unknown }[]) {
     rows.some(
       (row) =>
         row.key !== "hubspot.mapping" &&
+        row.key !== "meta.token_metadata" &&
         !Object.hasOwn(settingsDefaults, row.key),
     )
   )

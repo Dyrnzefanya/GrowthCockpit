@@ -1,5 +1,13 @@
 # Data Model
 
+## Phase 10 paid-media facts
+
+`0023_ad_metrics.sql` adds only `ad_accounts` and `ad_metrics_daily` with RLS, read-only authenticated grants, restricted machine writes and no service-role DELETE grant. The account key is `(platform, external_account_id)`; the fact key is `(ad_account_id, metric_date, campaign_id, adset_id, ad_id)`. Current ingest writes campaign grain, with empty adset/ad IDs. Store numeric(18,2) spend, currency, source timezone, raw impressions/clicks, optional reach/frequency, and explicitly selected platform result type/count/cost. Null optional metrics stay null. Provider results never populate inquiry counts.
+
+`0024_performance_read_models.sql` supplies the narrow health projection and extends `vw_lead_quality_by_campaign` with discriminated `inquiry` and `spend` fact rows. Consumers must respect `row_kind`: this avoids duplicating a campaign's spend across lead currency groups. The Performance service uses `performance_facts` for raw aggregate components and performs the final identity join and all ratios in the domain. `0025_meta_failure_fence.sql` protects failure metadata with the same job lease as page commits. `0026_meta_range_recovery.sql` clears pending progress only under an acquired lease, preserving facts and failed-run history. Generated types reflect local migrations 0001–0026. Existing migrations were not edited; remote migrations were not applied.
+
+`app_settings` holds a nullable explicit primary result action, daily freshness hours, and provider-verified expiry metadata without tokens. Existing settings audit behavior remains in force. `sync_state` holds the pending source account/date/page and completed-day count; `integration_runs` holds job status, record counts and correlation IDs. Revenue uses persisted won-deal allocations, retaining their original rule version and currency; no attribution or CRM-owned record is rewritten. Fractional minor units are retained through won-revenue allocation and rounded once per currency aggregate, avoiding per-allocation truncation.
+
 ## Phase 9 alerts
 
 Forward-only migration `0022_alerts.sql` creates `alerts` with a deterministic `alert_key`, type/severity/source/entity reference, operator-facing title/message, allowlisted JSON evidence, occurrence and notification counters, lifecycle timestamps/reasons, delivery state and a 100-event JSON history. A partial unique index permits at most one unresolved row per key while preserving resolved history. Status is `open`, `acknowledged`, `resolved` or `suppressed`; notification status is `pending`, `sent`, `failed` or `suppressed`.

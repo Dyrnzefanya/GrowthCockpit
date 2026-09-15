@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 export const secretPatterns = [
+  ["Meta access token", /EAA[A-Za-z0-9]{70,}/g],
   ["Supabase secret key", /sb_secret_[A-Za-z0-9_-]{20,}/g],
   [
     "JWT credential",

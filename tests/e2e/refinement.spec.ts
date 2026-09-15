@@ -33,7 +33,12 @@ for (const width of [1280, 1920, 390]) {
       ).toBe(true);
       expect((await heading.boundingBox())!.y).toBeLessThan(125);
       if (route === "performance" && width >= 1280) {
-        const card = page.locator("main > section");
+        const card = page.locator("section").filter({
+          has: page.getByRole("heading", {
+            name: "Meta Ads belum terhubung",
+            exact: true,
+          }),
+        });
         expect((await card.boundingBox())!.width).toBeLessThanOrEqual(768);
       }
       await page.screenshot({

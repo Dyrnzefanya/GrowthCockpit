@@ -34,6 +34,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_accounts: {
+        Row: {
+          created_at: string
+          currency: string
+          external_account_id: string
+          id: string
+          is_active: boolean
+          name: string
+          platform: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency: string
+          external_account_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          platform: string
+          timezone: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          external_account_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          platform?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ad_metrics_daily: {
+        Row: {
+          ad_account_id: string
+          ad_id: string
+          ad_name: string | null
+          adset_id: string
+          adset_name: string | null
+          campaign_id: string
+          campaign_name: string
+          clicks: number
+          currency: string
+          frequency: number | null
+          id: string
+          impressions: number
+          ingested_at: string
+          metric_date: string
+          platform: string
+          platform_cost_per_result: number | null
+          platform_result_type: string | null
+          platform_results: number | null
+          reach: number | null
+          source_timezone: string
+          spend: number
+        }
+        Insert: {
+          ad_account_id: string
+          ad_id?: string
+          ad_name?: string | null
+          adset_id?: string
+          adset_name?: string | null
+          campaign_id: string
+          campaign_name: string
+          clicks: number
+          currency: string
+          frequency?: number | null
+          id?: string
+          impressions: number
+          ingested_at?: string
+          metric_date: string
+          platform: string
+          platform_cost_per_result?: number | null
+          platform_result_type?: string | null
+          platform_results?: number | null
+          reach?: number | null
+          source_timezone: string
+          spend: number
+        }
+        Update: {
+          ad_account_id?: string
+          ad_id?: string
+          ad_name?: string | null
+          adset_id?: string
+          adset_name?: string | null
+          campaign_id?: string
+          campaign_name?: string
+          clicks?: number
+          currency?: string
+          frequency?: number | null
+          id?: string
+          impressions?: number
+          ingested_at?: string
+          metric_date?: string
+          platform?: string
+          platform_cost_per_result?: number | null
+          platform_result_type?: string | null
+          platform_results?: number | null
+          reach?: number | null
+          source_timezone?: string
+          spend?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_metrics_daily_ad_account_id_fkey"
+            columns: ["ad_account_id"]
+            isOneToOne: false
+            referencedRelation: "ad_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alerts: {
         Row: {
           acknowledged_at: string | null
@@ -1301,6 +1417,7 @@ export type Database = {
       vw_lead_quality_by_campaign: {
         Row: {
           attributed: number | null
+          campaign_id: string | null
           currency: string | null
           deals: number | null
           disqualified: number | null
@@ -1315,6 +1432,8 @@ export type Database = {
           past_expected_closed: number | null
           platform: string | null
           revenue: string | null
+          row_kind: string | null
+          source_timezone: string | null
           spend: number | null
           sql: number | null
           won: number | null
@@ -1332,6 +1451,7 @@ export type Database = {
           type: string
         }[]
       }
+      cancel_meta_range: { Args: { p_run: string }; Returns: undefined }
       claim_webhook: {
         Args: { p_id: string; p_max: number; p_trigger: string }
         Returns: Json
@@ -1357,6 +1477,17 @@ export type Database = {
       commit_lead_override: {
         Args: { p_event: Json; p_id: string; p_patch: Json; p_revision: string }
         Returns: undefined
+      }
+      commit_meta_page: {
+        Args: {
+          p_account: Json
+          p_complete: boolean
+          p_cursor: string
+          p_resource: string
+          p_rows: Json
+          p_run: string
+        }
+        Returns: number
       }
       commit_workflow_item: {
         Args: {
@@ -1430,6 +1561,11 @@ export type Database = {
         }
         Returns: string
       }
+      meta_health_facts: { Args: never; Returns: Json }
+      performance_facts: {
+        Args: { p_from: string; p_previous: string; p_to: string }
+        Returns: Json
+      }
       raise_alert: {
         Args: { p_alert: Json }
         Returns: {
@@ -1482,6 +1618,10 @@ export type Database = {
           p_outcome: string
         }
         Returns: number
+      }
+      record_meta_failure: {
+        Args: { p_code: string; p_run: string }
+        Returns: undefined
       }
       resolve_missing_alerts: {
         Args: { p_active_keys: string[]; p_before: string; p_types: string[] }

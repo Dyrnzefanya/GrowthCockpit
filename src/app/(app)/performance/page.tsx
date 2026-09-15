@@ -1,4 +1,9 @@
-import { RouteSkeleton } from "@/components/route-skeleton";
-export default function Page() {
-  return <RouteSkeleton route="/performance" />;
+import { performanceModel } from "@/services/performance";
+import { Performance } from "@/components/performance";
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  return <Performance m={await performanceModel(await searchParams)} />;
 }

@@ -1,8 +1,12 @@
 import { existsSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 if (existsSync(".env.local")) process.loadEnvFile(".env.local");
-if (process.env.HUBSPOT_ACCESS_TOKEN)
-  throw new Error("Local fixtures refuse inherited live HubSpot credentials.");
+if (
+  process.env.HUBSPOT_ACCESS_TOKEN ||
+  process.env.META_ACCESS_TOKEN ||
+  process.env.SLACK_WEBHOOK_URL
+)
+  throw new Error("Local fixtures refuse inherited live provider credentials.");
 export const testEnvironment = {
   HUBSPOT_PORTAL_ID: "12345",
   HUBSPOT_WEBHOOK_SECRET: (process.env.PHASE8_TEST_SECRET ??=

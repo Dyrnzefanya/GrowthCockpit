@@ -1,8 +1,50 @@
 # Tasks
 
+## Phase 10 — Meta Ads & Performance
+
+**Status: PASS - ENGINEERING COMPLETE (local). Operational / external activation: PENDING. Phase 11 engineering readiness: READY; implementation is not authorized.**
+
+### Engineering requirements and traceability
+
+- [x] Read Phase 10, §§15/22–24, metric/attribution ownership, jobs/alerts and A5/A7. Previous Phase 9 main revision `8cf093023cfe4a768c3c43e1aa858fe63501c06b` has successful GitHub CI run 34902527524. No unrelated phase audit.
+- [x] FR-10.1/10.3; BE-10.1: two platform-agnostic tables, campaign-grain unique identity, empty adset/ad IDs, RLS and generated database types. Forward migrations 0023–0026 only; prior migrations and remote schema unchanged.
+- [x] FR-10.2/10.5/10.6; BE-10.2–10.4; JOB-10.1: pinned Graph v26.0 (SDK source verified 2026-09-15), read-only client, account/token validation, bounded timeout/retry, cursor-only pagination, four-date restatement window and durable resumable page commits. Token expiry metadata and 14-day warning contain no credentials.
+- [x] FR-10.4/10.9; BE-10.6; TEST-10.3/10.6: exact decimal spend aggregation, mixed-currency refusal/alert, stable campaign-ID precedence, ambiguity refusal and explicit unjoined spend/inquiry reconciliation. Fixture: 1,000.10 spend / 4 MQL = 250.025 CPQL; extra 200.00 spend remains unjoined and 3 of 13 inquiries remain unattributed. Meta-reported results=99 does not replace 10 inquiry events.
+- [x] FR-10.7/10.8/10.10; FE-10.1–10.4: Performance and Meta drill-in routes, cohort KPI comparison, native accessible daily trend, funnel context, campaign table with URL search/sort and server pagination/column control, oldest-source freshness and sample disclosure. Non-WIB source dates are shown without shifting; cross-boundary cost ratios are unavailable. No Meta-derived CRM qualification or attribution updates.
+- [x] FR-10.11; BE-10.5; TEST-10.5: campaign/adset/ad naming parser; Integrations displays observed campaign-label compliance. Ad-level ingest and creative analysis remain out of scope.
+- [x] FR-10.12; NFR-10.2: authorized arbitrary historical range entry and durable completed-day/page progress; pending range cannot be silently replaced. Audited cancellation under the existing lease recovers permanently invalid ranges without deleting facts. The opt-in GitHub daily fallback continues bounded invocations; no paid-plan assumption or new scheduler runtime.
+- [x] NFR-10.1: local 200,000-row / 90-day raw aggregate query measured 275-345 ms, below 1 second. Data is aggregated before transfer; no PostgREST 1,000-row truncation.
+- [x] NFR-10.3: page rendering reads only local mirrors; provider outage cannot block Today, Leads or other operational pages. Meta conditions reuse Phase 9 alerts and its Slack dispatcher. Unconfigured Meta is excluded from scheduler-overdue noise.
+
+### Engineering evidence
+
+- [x] Local forward migration application, schema lint, generated types and SQL RLS/grant/idempotency/fencing checks pass. SQL benchmark fixtures roll back. Existing Phase 2–9 SQL gates remain passing.
+- [x] Focused provider/domain/service tests pass: null vs zero, account/timezone mapping, lookback repeat, safe pagination, rate limits, scope/expiry checks, failed-page resume, hand-calculated joins, attribution preservation and naming.
+- [x] Real local Meta integration test mocks only provider HTTP: two-page sync, repeated upsert, late spend restatement, permanent error recovery and 90-day backfill with persistent database rows. A recovered two-day fixture has four unique rows, followed by 180 unique backfill rows; no remote API or CRM mutation.
+- [x] Final formatting, ESLint, strict TypeScript and 108/108 unit/service tests pass (25 files). Phase 6 retained branch gate passes 159/159 branches. `test:meta` and `test:hubspot` pass with real local persistence and mocked provider HTTP. No real provider calls or remote schema changes.
+- [x] Full Playwright suite passes 22/22 using one worker. After final chart-label/rounding edits, the focused Performance test passes again (28.3 s), including 390/1280/1920 widths, URL filter, keyboard column menu, settings save/reload/restore and zero axe A/AA violations.
+- [x] Final production build and browser-artifact scan pass, including synthetic Meta token/account sentinels and the configured local Supabase secret. Production gates pass 4/4 (17.6 s): gallery exclusion/paint, signed-ingest p95 19.0 ms, 50k-lead pages 316-340 ms and 90-day Today 539-662 ms. Repository secret scan passes; npm audit reports zero vulnerabilities.
+- [x] Migrations 0023-0026 apply locally; schema lint, complete SQL/RLS suite and generated-type validation pass. Latest 200k-row/90-day benchmark: 345.244 ms. Test setup temporarily used ports 55321-55324 because Windows reserved the default ports; committed configuration is restored unchanged.
+- [x] Actual rendered screenshots reviewed at 390/1280/1920: readable native date labels, compact metrics, table horizontal scrolling, column controls, no page overflow and preserved shell. Browser artifacts are local ignored test outputs; test paths and assertions are committed.
+- [x] Complete Phase 10 diff reviewed: two required tables, forward-only recovery/read-model migrations, shared jobs/alerts, no added dependency or public API endpoint. Revenue allocations retain fractional minor units until currency aggregation; regression verifies two half allocations preserve 500.01. No Phase 11 implementation.
+- [x] Commit scope excludes pre-existing operator prompt-file moves under `Docs/Prompt`. Phase 10 is committed locally on main at closure; no push/deployment or remote Phase 10 CI success is claimed. The verified GitHub CI above belongs to the Phase 9 baseline.
+
+### Operational / external evidence
+
+- [ ] INT-10.1 / A5: operator-managed system-user token, `ads_read` scope, actual account currency and timezone. No local Meta credentials were present; actual values are not invented.
+- [ ] A7: naming convention adopted upstream; actual campaign/ad compliance observed after connection. Synthetic names do not satisfy adoption.
+- [ ] Yesterday's actual spend visible by 07:00 WIB after deployed 06:00 scheduling. GitHub fallback can be delayed; this remains measured infrastructure evidence.
+- [ ] One week in which Performance answers qualified-pipeline cost questions without spreadsheets, with reconciliation visible. MVP Integration engineering and operational activation are tracked separately.
+
+### Bounded Phase 7–10 integration review
+
+Phase 7 remains the shared authenticated/bearer job entry point, lease and run history. Phase 8 CRM ownership and mirror writes are unchanged. Phase 9 owns alert lifecycle/delivery; Meta adds only currency, freshness and expiry producers. Phase 10 reads campaign facts and existing inquiry/deal attribution. The review fixed an unconfigured-Meta scheduler-noise condition and fenced Meta failure/cancel writers. No parallel queue, Meta webhook, Slack redesign, automated campaign write, n8n, or Phase 11 rule engine.
+
+Local full-suite browser fixtures share one database. A parallel run exposed a pre-existing retry-queue timing collision; the final suite uses the committed CI setting of one worker. Activated-Performance shell tests were updated from skeleton-only expectations. SVG title hydration resetting the search input was fixed and the same interaction reverified. Phase 6's 100% branch gate now explicitly names its original formulas/funnel files; Phase 10's additional domain is independently tested rather than silently changing the Phase 6 coverage scope.
+
 ## Phase 9 — Alerts & Slack
 
-**Status: PASS — ENGINEERING COMPLETE (local). Operational / external activation: PENDING. Phase 10 is not authorized.**
+**Status: PASS — ENGINEERING COMPLETE (local). Operational / external activation: PENDING.** The subsequent Phase 10 authorization and work are recorded above.
 
 ### Implementation plan
 
@@ -239,6 +281,8 @@ All nine PRD technical acceptance criteria pass with the evidence above: manual 
 - Remote Phase 3–6 migrations are not applied in this turn; no manual remote deployment or integration configuration occurs. Git publication can trigger the repository's existing deployment automation and must not be represented as remote database verification.
 
 ## Operational Validation Backlog
+
+Phase 10: A5/A7 account/token/currency/timezone verification, naming adoption/compliance, protected deployed 06:00→07:00 ingest cadence and one week of Performance use remain **PENDING**. No real Meta connection or operational results are claimed from mocked/local tests. Retain all Phase 2–9 items below.
 
 Phase 9: A4 / INT-9.1 Slack workspace app, distinct production/development channels and webhooks, protected deployed scheduler cadence, one real MQL delivery and one week without duplicate notifications or missed critical conditions remain **PENDING**. Local fixtures prove behavior but are not operational evidence.
 

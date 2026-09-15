@@ -40,6 +40,7 @@ vi.mock("@/services/alert-jobs", () => ({
   dispatchNotifications: mocks.dispatch,
 }));
 vi.mock("@/services/alerts", () => ({ safelyRaise: mocks.safeRaise }));
+vi.mock("@/services/meta-health", () => ({ evaluateMetaHealth: vi.fn() }));
 import { runJob, dispatchJob } from "./runner";
 import { receiveLead, processNext } from "../integration-runs";
 import { sign } from "@/lib/http/hmac";

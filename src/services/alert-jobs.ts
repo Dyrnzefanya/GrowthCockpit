@@ -218,6 +218,11 @@ export async function runDataHealth(
   if (serverEnv.JOBS_ENABLED === "true")
     for (const job of jobs) {
       if (
+        job.key === "JOB-META-INGEST" &&
+        (!serverEnv.META_ACCESS_TOKEN || !serverEnv.META_AD_ACCOUNT_ID)
+      )
+        continue;
+      if (
         job.key === "JOB-HUBSPOT-RECONCILE" &&
         !serverEnv.HUBSPOT_ACCESS_TOKEN
       )

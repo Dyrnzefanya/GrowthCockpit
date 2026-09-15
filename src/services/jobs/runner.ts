@@ -8,7 +8,11 @@ import { serverEnv } from "@/lib/env.server";
 import { equalSecret } from "@/lib/http/hmac";
 import { authenticatedUser } from "@/repositories/auth";
 import { can } from "@/lib/auth/can";
-export async function runJob(key: string, trigger: "manual" | "schedule") {
+export async function runJob(
+  key: string,
+  trigger: "manual" | "schedule",
+  range?: { from: string; to: string },
+) {
   const job = registeredJob(key);
   if (!job) return { http: 404, status: "not_found" };
   const correlation = randomUUID();
@@ -35,7 +39,16 @@ export async function runJob(key: string, trigger: "manual" | "schedule") {
     const { values } = await repository.machineSettings(),
       maxBatch = Math.min(values["jobs.max_batch"], 500),
       maxAttempts = Math.min(values["jobs.max_attempts"], 100);
-    if (key === "JOB-HUBSPOT-RECONCILE") {
+    if (key === "JOB-META-INGEST") {
+      const result = await (
+        await import("@/services/ad-metrics")
+      ).ingestMeta(run, deadline, maxBatch, range);
+      read = result.read;
+      written = result.written;
+      failed = result.failed;
+      hasMore = result.hasMore;
+      cursor = result.cursor;
+    } else if (key === "JOB-HUBSPOT-RECONCILE") {
       const result = await (
         await import("@/services/crm-sync")
       ).reconcileHubspot(deadline, maxBatch);
@@ -56,6 +69,7 @@ export async function runJob(key: string, trigger: "manual" | "schedule") {
       const result = await (
         await import("@/services/alert-jobs")
       ).runDataHealth(deadline, maxBatch);
+      await (await import("@/services/meta-health")).evaluateMetaHealth();
       read = result.read;
       written = result.written;
       failed = result.failed;

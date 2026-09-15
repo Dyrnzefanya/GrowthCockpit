@@ -46,6 +46,22 @@ beforeEach(() => {
   vi.resetAllMocks();
   mocks.notified.mockResolvedValue([]);
 });
+it("Phase 10 unconfigured Meta does not create scheduler noise", async () => {
+  mocks.health.mockResolvedValue({
+    events: [],
+    states: [],
+    coverage: [],
+    runs: [],
+  });
+  mocks.unresolved.mockResolvedValue([]);
+  mocks.resolveMissing.mockResolvedValue(0);
+  await runDataHealth(Date.now() + 10000, 500);
+  expect(
+    mocks.raiseMany.mock.calls[0][0].some((candidate: { keyParts: string[] }) =>
+      candidate.keyParts.includes("JOB-META-INGEST"),
+    ),
+  ).toBe(false);
+});
 
 it("dispatches one eligible MQL alert exactly once and records the send", async () => {
   const alert = {

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { metaApi } from "@/config/integrations";
 
 export const publicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
@@ -46,9 +47,12 @@ export const serverEnvSchema = publicEnvSchema
         );
       }, "Expected a Slack Incoming Webhook URL.")
       .optional(),
-    META_AD_ACCOUNT_ID: z.string().min(1).optional(),
+    META_AD_ACCOUNT_ID: z
+      .string()
+      .regex(/^\d{1,30}$/)
+      .optional(),
     META_ACCESS_TOKEN: z.string().min(1).optional(),
-    META_API_VERSION: z.string().min(1).optional(),
+    META_API_VERSION: z.literal(metaApi.version).optional(),
   })
   .superRefine((v, context) => {
     const keys = [

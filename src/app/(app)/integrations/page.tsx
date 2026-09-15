@@ -14,6 +14,7 @@ import {
 import { integrationModel } from "@/services/integration-health";
 import { jakartaDateTime } from "@/domain/dates";
 import { HubspotHealth } from "@/components/hubspot-health";
+import { MetaHealth } from "@/components/meta-health";
 export default async function Page({
   searchParams,
 }: {
@@ -38,6 +39,7 @@ export default async function Page({
       />
       <div className="space-y-5">
         <HubspotHealth />
+        <MetaHealth />
         <div className="grid items-start gap-5 lg:grid-cols-2">
           <IntegrationHealthCard
             name="Landing page · Apps Script"
@@ -49,7 +51,7 @@ export default async function Page({
                   ? "Endpoint signed ingest dikonfigurasi. Riwayat di bawah menunjukkan penerimaan sebenarnya."
                   : "Sumber belum dikonfigurasi. Daftarkan signing secret pada backend Apps Script dan server PM OS."}
               </p>
-              <p>WhatsApp gateway dan Meta belum terhubung.</p>
+              <p>WhatsApp gateway belum terhubung.</p>
             </div>
           </IntegrationHealthCard>
           <IntegrationHealthCard name="JOB-RETRY-EVENTS" status={m.health}>

@@ -1,5 +1,13 @@
 # Architecture
 
+## Phase 10 Meta performance
+
+The read-only Meta adapter uses pinned Graph v26.0 and validated campaign-grain insights. `services/ad-metrics` coordinates the existing job runner, provider validation, and `repositories/ad-metrics`; the atomic page RPC fences each write using the existing job lease and commits its resume cursor with its rows. A failed date retains prior good rows and its exact account/date/page position. The failure RPC is fenced too, so an expired worker cannot overwrite newer progress. No provider call occurs while rendering Today, Performance, or Integrations.
+
+`domain/metrics/performance` owns identity resolution, currency refusal, cohort aggregation, reconciliation and display semantics; it reuses the sole formula module. PostgreSQL groups raw components before transfer, avoiding the PostgREST row limit and any join that multiplies spend. Campaign IDs win over labels; an ambiguous name or unknown platform never acquires Meta attribution. Performance renders the same shared shell, MetricCards, DataTable, URL filters, and server pagination. D-017 records the native accessible SVG substitution and the two required tables. No Meta writes or Phase 11 decision rules exist.
+
+Meta health conditions use Phase 9 alert keys/lifecycle and Slack dispatch; the Phase 7 runner remains the only job entry point. The opt-in GitHub scheduler triggers daily at 06:00 WIB and follows resumable batches with a bounded overall deadline. Real credentials, host protection, scheduler timing and one-week use remain separate external/UAT evidence.
+
 ## Phase 9 alerts and Slack
 
 Alert policy is deterministic application logic in `src/domain/alerts`: stable keys, severity, channel routing, quiet hours, per-day caps, digest grouping, retry classification and scheduler-overdue rules. `src/services/alerts.ts` is the shared producer boundary for Phase 6 lead/deal changes and Phase 8 CRM mirrors. `src/services/alert-jobs.ts` coordinates persisted facts, lifecycle reconciliation and delivery. Route pages and controls remain presentational; Supabase access stays in `src/repositories/alerts.ts`, and the Slack transport stays in `src/integrations/slack/client.ts`.

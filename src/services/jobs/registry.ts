@@ -1,6 +1,13 @@
 import "server-only";
 export const jobs = [
   {
+    key: "JOB-META-INGEST",
+    label: "Ingest Meta campaign metrics",
+    schedule: "0 23 * * *",
+    cadenceMinutes: 1440,
+    budgetMs: 40000,
+  },
+  {
     key: "JOB-HUBSPOT-RECONCILE",
     label: "Reconcile HubSpot CRM",
     schedule: "*/30 * * * *",
