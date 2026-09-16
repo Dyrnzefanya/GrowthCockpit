@@ -15,6 +15,7 @@ import { integrationModel } from "@/services/integration-health";
 import { jakartaDateTime } from "@/domain/dates";
 import { HubspotHealth } from "@/components/hubspot-health";
 import { MetaHealth } from "@/components/meta-health";
+import { StatusBadge } from "@/components/status-badge";
 export default async function Page({
   searchParams,
 }: {
@@ -43,7 +44,7 @@ export default async function Page({
         <div className="grid items-start gap-5 lg:grid-cols-2">
           <IntegrationHealthCard
             name="Landing page · Apps Script"
-            status={m.ingestConfigured ? "info" : "not_configured"}
+            status={m.ingest.status}
           >
             <div className="space-y-2 p-5 text-sm">
               <p>
@@ -51,49 +52,93 @@ export default async function Page({
                   ? "Endpoint signed ingest dikonfigurasi. Riwayat di bawah menunjukkan penerimaan sebenarnya."
                   : "Sumber belum dikonfigurasi. Daftarkan signing secret pada backend Apps Script dan server PM OS."}
               </p>
-              <p>WhatsApp gateway belum terhubung.</p>
-            </div>
-          </IntegrationHealthCard>
-          <IntegrationHealthCard name="JOB-RETRY-EVENTS" status={m.health}>
-            <div className="space-y-2 p-5 text-sm">
+              <p>SLA: diproses saat diterima; retry setiap 10 menit.</p>
               <p>
-                Target cadence: setiap 10 menit.{" "}
-                {m.configured
-                  ? "Verifikasi scheduler melalui waktu eksekusi."
-                  : "Scheduler belum aktif; tidak ada asumsi paket Vercel Pro."}
+                Last run / success: {date(m.ingest.lastRun)} /{" "}
+                {date(m.ingest.lastSuccess)}
               </p>
-              <p>Last run: {date(m.last?.started_at ?? null)}</p>
-              <p>Last success: {date(m.lastSuccess)}</p>
-              <IntegrationControl />
+              <p>
+                Consecutive failures / recent error: {m.ingest.failures} /{" "}
+                {m.ingest.error ?? "Tidak ada"}
+              </p>
+              <p>WhatsApp gateway belum terhubung.</p>
+              <IntegrationControl
+                job="JOB-RETRY-EVENTS"
+                label="Process / retry now"
+              />
             </div>
           </IntegrationHealthCard>
-          <IntegrationHealthCard
-            name="Slack alerts"
-            status={m.slackConfigured ? "info" : "not_configured"}
-          >
+          <IntegrationHealthCard name="Slack alerts" status={m.slack.status}>
             <div className="space-y-3 p-5 text-sm">
               <p>
                 {m.slackConfigured
                   ? "Incoming Webhook server-side tersedia. Delivery aktual tercatat pada alert."
                   : "Webhook Slack belum dikonfigurasi. Alert in-app tetap tersedia."}
               </p>
-              <div className="flex flex-wrap gap-2">
-                <IntegrationControl
-                  job="JOB-NOTIFY-DISPATCH"
-                  label="Dispatch now"
-                />
-                <IntegrationControl
-                  job="JOB-DATA-HEALTH"
-                  label="Check health"
-                />
-                <IntegrationControl
-                  job="JOB-STALE-LEADS"
-                  label="Check stale leads"
-                />
-              </div>
+              <p>SLA: dispatch setiap 5 menit.</p>
+              <p>
+                Last run / success: {date(m.slack.lastRun)} /{" "}
+                {date(m.slack.lastSuccess)}
+              </p>
+              <p>
+                Consecutive failures / recent error: {m.slack.failures} /{" "}
+                {m.slack.error ?? "Tidak ada"}
+              </p>
+              <IntegrationControl
+                job="JOB-NOTIFY-DISPATCH"
+                label="Dispatch now"
+              />
             </div>
           </IntegrationHealthCard>
         </div>
+        <SectionCard
+          title="Job health"
+          description="SLA, eksekusi terakhir, kegagalan beruntun, dan tindakan manual untuk setiap job terdaftar. Jadwal produksi memerlukan scheduler aktif."
+        >
+          <div className="grid gap-px bg-border sm:grid-cols-2 xl:grid-cols-3">
+            {m.jobHealth.map((job) => (
+              <article className="space-y-3 bg-card p-5 text-sm" key={job.key}>
+                <div className="flex items-start justify-between gap-3">
+                  <h3>{job.label}</h3>
+                  <StatusBadge status={job.health} />
+                </div>
+                <dl className="space-y-2">
+                  <div>
+                    <dt className="text-muted-foreground">Job / schedule</dt>
+                    <dd className="break-all">
+                      {job.key} · {job.schedule}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">SLA</dt>
+                    <dd>
+                      {job.cadenceMinutes === null
+                        ? "Setiap hari kerja setelah 08:00 WIB"
+                        : `${job.cadenceMinutes} menit`}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">
+                      Last run / success
+                    </dt>
+                    <dd>
+                      {date(job.lastRun)} / {date(job.lastSuccess)}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-muted-foreground">
+                      Consecutive failures / recent error
+                    </dt>
+                    <dd className="break-all">
+                      {job.failures} / {job.error ?? "Tidak ada"}
+                    </dd>
+                  </div>
+                </dl>
+                <IntegrationControl job={job.key} label="Run now" />
+              </article>
+            ))}
+          </div>
+        </SectionCard>
         {m.criticalCandidates > 0 && (
           <p role="status" className="rounded border p-3 text-sm">
             {m.criticalCandidates} kondisi membutuhkan perhatian: dead letter

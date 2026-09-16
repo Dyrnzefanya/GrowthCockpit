@@ -1,5 +1,9 @@
 # Data Model
 
+## Phase 13 retention
+
+Forward migration `0032_retention.sql` adds no table or index. Its service-role-only `run_retention` function nulls `webhook_events.payload` after 90 days and deletes `integration_runs` after 12 months using a supplied/effective clock. Repeated execution returns zero additional changes. Event identity, status, result and correlation evidence remain after payload removal. The existing `sync_state` rows retain the latest bounded operational status after old run history is pruned.
+
 ## Phase 12 reports
 
 Forward migration `0030_reports.sql` adds the sole Phase 12 table, `reports`. A row stores report type, ISO week start/end, version, status, validated facts JSON, narrative Markdown, creator/finaliser and revision timestamps. The facts include the Asia/Jakarta timezone and `weekly-v1` schema version. `(type, period_start, version)` is unique; only weekly reports are generated. Facts contain current/previous metric components, campaign observations, funnel and workflow summaries, experiment context, notes, unresolved alerts, decision actions, source health and mandatory caveats.
@@ -38,7 +42,7 @@ Forward-only migration `0019_hubspot_mirror.sql` adds no tables: it permits a ge
 
 ## Phase 7 plumbing
 
-Local migration 0016 adds webhook_events, integration_runs, sync_state and leads.source_event_id. It permits a null stage actor for machine processing without creating a fake profile. All three new tables enable RLS at creation: authenticated SELECT only, privileged repository writes. Service-role DELETE is explicitly revoked by forward migration 0018 because Supabase's default table grant otherwise includes it. Operational history is retained; payload retention remains Phase 13 work.
+Local migration 0016 adds webhook_events, integration_runs, sync_state and leads.source_event_id. It permits a null stage actor for machine processing without creating a fake profile. All three new tables enable RLS at creation: authenticated SELECT only, privileged repository writes. Service-role DELETE is explicitly revoked by forward migration 0018 because Supabase's default table grant otherwise includes it. Phase 13's narrow security-definer retention function is the only delete path for expired run history and the only bulk payload-nulling path.
 
 Webhook idempotency uses a unique key. Migration 0017 also makes the authenticated request digest unique, preventing an attacker from swapping the unsigned Idempotency-Key on an otherwise identical valid signature. Raw JSON is retained only for authenticated requests. Receipt/outcome and correlation IDs allow safe replay without an additional write. Claim IDs fence atomic event/lead completion; SKIP LOCKED claims recover expired workers and retain attempt logs.
 

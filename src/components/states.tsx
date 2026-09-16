@@ -62,9 +62,11 @@ export function NotConnectedState({
 export function ErrorState({
   title = "This section could not load",
   onRetry,
+  correlation,
 }: {
   title?: string;
   onRetry: () => void;
+  correlation?: string | null;
 }) {
   return (
     <div role="alert" className="state-panel">
@@ -74,6 +76,11 @@ export function ErrorState({
         <p className="text-muted-foreground">
           Try again. Navigation and other sections are still available.
         </p>
+        {correlation && (
+          <p className="break-all text-xs text-muted-foreground">
+            Correlation ID: {correlation}
+          </p>
+        )}
         <Button variant="outline" onClick={onRetry}>
           Try again
         </Button>

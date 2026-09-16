@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   health: vi.fn(),
   dispatch: vi.fn(),
   weekly: vi.fn(),
+  runRetention: vi.fn(),
   safeRaise: vi.fn(),
 }));
 const env = vi.hoisted(() => ({
@@ -74,6 +75,10 @@ beforeEach(() => {
   mocks.health.mockResolvedValue(alertJobResult);
   mocks.dispatch.mockResolvedValue(alertJobResult);
   mocks.weekly.mockResolvedValue(alertJobResult);
+  mocks.runRetention.mockResolvedValue({
+    payloads_cleared: 2,
+    runs_pruned: 3,
+  });
   vi.spyOn(console, "info").mockImplementation(() => {});
 });
 afterEach(() => {
@@ -238,6 +243,17 @@ it("JOB-12.1 runs weekly draft generation through the existing lease and remains
     status: "success",
   });
   expect(mocks.weekly).toHaveBeenCalledTimes(2);
+});
+it("TEST-13.7 runs retention through the existing lease and remains repeatable", async () => {
+  expect(await runJob("JOB-RETENTION", "manual")).toMatchObject({
+    status: "success",
+    records_read: 5,
+    records_written: 5,
+  });
+  expect(await runJob("JOB-RETENTION", "manual")).toMatchObject({
+    status: "success",
+  });
+  expect(mocks.runRetention).toHaveBeenCalledTimes(2);
 });
 it("TEST-7.7 bearer and session paths reject wrong secrets, cross-origin requests and GET sessions", async () => {
   const req = (headers: Record<string, string> = {}, method = "POST") =>

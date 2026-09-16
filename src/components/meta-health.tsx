@@ -5,14 +5,12 @@ import { metaApi } from "@/config/integrations";
 
 import { IntegrationControl } from "@/components/integration-controls";
 import { MetaControls } from "@/components/meta-controls";
+import { jakartaDateTime } from "@/domain/dates";
 export async function MetaHealth() {
   const data = await metaHealthModel();
   const configured = data.configured;
   return (
-    <IntegrationHealthCard
-      name="Meta Ads · read-only"
-      status={configured ? (data.error ? "warning" : "info") : "not_configured"}
-    >
+    <IntegrationHealthCard name="Meta Ads · read-only" status={data.health}>
       <div className="space-y-3 p-5 text-sm">
         <p>
           {configured
@@ -31,8 +29,18 @@ export async function MetaHealth() {
               : ""}
           </p>
         ))}
+        <p>SLA: {data.slaHours} jam.</p>
         <p>
-          Last success: {data.lastSuccess ?? "Belum ada"}. {data.error ?? ""}
+          Last run / success:{" "}
+          {data.lastRun ? jakartaDateTime(new Date(data.lastRun)) : "Belum ada"}
+          {" / "}
+          {data.lastSuccess
+            ? jakartaDateTime(new Date(data.lastSuccess))
+            : "Belum ada"}
+        </p>
+        <p>
+          Consecutive failures / recent error: {data.failures} /{" "}
+          {data.error ?? "Tidak ada"}
         </p>
         <p>
           Naming compliance:{" "}

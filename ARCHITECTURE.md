@@ -1,5 +1,13 @@
 # Architecture
 
+## Phase 13 production hardening
+
+Production hardening preserves the two-managed-service runtime and the existing application boundaries. Forward migration `0032_retention.sql` adds one service-only, repeatable retention function; `JOB-RETENTION` runs it through the existing registry, lease, runner, run history and authenticated manual control. No table, queue, endpoint or dependency was added. `/integrations` merges the static registry with `sync_state` so every job exposes its schedule/SLA, last run/success, failure streak, redacted error and recovery action without per-job queries.
+
+CI now audits every public table through PostgreSQL catalogs, scans the full Git history plus built client artifacts for configured credentials, and checks Playwright output for email/phone patterns. The authenticated client error boundary records a scrubbed stack with a server correlation ID; global/route fallbacks keep recovery available. HSTS applies to every route.
+
+`vercel.json` is the canonical production schedule declaration and uses only the existing bearer-authenticated GET adapter. GitHub schedulers remain guarded fallbacks; `PMOS_SCHEDULER=github` must stay disabled while Vercel Cron is active. Deployment plan/cadence, dedicated production data, provider setup, managed restore and cutover are external evidence recorded in `RUNBOOK.md` and `TASKS.md`, never inferred from local fixtures. D-020 records these choices.
+
 ## Phase 12 frozen weekly reporting
 
 `services/reports/assemble.ts` coordinates bounded repository reads and constructs one validated `weekly-v1` facts object. Metric calculation remains in the existing Performance and funnel domain modules, and revenue visibility calls the shared R-09 gate. Ordered source records and the absence of a generation timestamp inside facts make a period reproducible. Missing sections, stale sources, attribution coverage, outcome completeness and a partial current week are captured as caveats instead of fabricated values.
@@ -50,7 +58,7 @@ The three plumbing tables have authenticated read RLS and privileged repository 
 
 At Phase 7 closure only JOB-RETRY-EVENTS was registered; Phase 8 adds JOB-HUBSPOT-RECONCILE as documented above. Bearer-authenticated scheduler POST/GET and same-origin session-authenticated manual POST share one bounded runner. Server actions also verify session/authorization. Scheduled calls require production + JOBS_ENABLED; the GET adapter cannot use cookies. `/api/health` exposes only status/version/commit/database reachability. The proxy exempts only these three machine endpoint paths; each boundary authenticates independently.
 
-The operator selected Apps Script first and prohibited assuming Vercel Pro. The repository keeps native cron empty for Hobby compatibility, declares the cadence in the registry, and supplies an opt-in GitHub Actions fallback. Deployment cadence/source registration are separate infrastructure evidence; no remote setup or scheduler activation is implied. See D-013 and INTEGRATIONS.md. Existing Phase 2 verification gaps and Phase 3–6 UAT remain open.
+The Phase 7 implementation initially kept native cron empty until the hosting plan could be verified and supplied an opt-in GitHub Actions fallback. Phase 13 now checks the production schedule declaration into `vercel.json`; actual plan support and first observed runs remain required cutover evidence. See D-013, D-020 and INTEGRATIONS.md.
 
 `/integrations` and Today render actual job health, last-run/success evidence, server-paginated runs, dead letters and rejection metadata. Shared DataTable, health cards, drawer, buttons and toast feedback preserve the shell. Payloads and secrets are never sent to these components. Critical conditions are candidates from durable state only; Phase 9 will deliver alerts. No Phase 8 connector is implemented.
 

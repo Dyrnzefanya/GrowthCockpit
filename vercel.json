@@ -1,4 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": []
+  "crons": [
+    { "path": "/api/jobs/JOB-NOTIFY-DISPATCH", "schedule": "*/5 * * * *" },
+    { "path": "/api/jobs/JOB-RETRY-EVENTS", "schedule": "*/10 * * * *" },
+    { "path": "/api/jobs/JOB-HUBSPOT-RECONCILE", "schedule": "*/30 * * * *" },
+    { "path": "/api/jobs/JOB-DATA-HEALTH", "schedule": "0 * * * *" },
+    { "path": "/api/jobs/JOB-META-INGEST", "schedule": "0 23 * * *" },
+    { "path": "/api/jobs/JOB-EVALUATE-RULES", "schedule": "0 0 * * *" },
+    { "path": "/api/jobs/JOB-WEEKLY-REPORT", "schedule": "30 0 * * 1" },
+    { "path": "/api/jobs/JOB-STALE-LEADS", "schedule": "0 1 * * 1-5" },
+    { "path": "/api/jobs/JOB-RETENTION", "schedule": "0 19 * * *" }
+  ]
 }

@@ -12,16 +12,25 @@ export async function hubspotModel() {
       config.mapping &&
       config.mapping.portal_id === serverEnv.HUBSPOT_PORTAL_ID,
     );
-    const success =
-      data.states
-        .filter((s) => ["contacts", "companies", "deals"].includes(s.resource))
-        .map((s) => s.last_success_at)
-        .filter((v): v is string => Boolean(v))
-        .sort()[0] ?? null;
+    const successes = data.states
+      .filter((s) => ["contacts", "companies", "deals"].includes(s.resource))
+      .map((s) => s.last_success_at)
+      .filter((v): v is string => Boolean(v))
+      .sort();
+    const healthSuccess = successes[0] ?? null;
+    const lastSuccess = successes.at(-1) ?? null;
     const failures = Math.max(
       0,
       ...data.states.map((s) => s.consecutive_failures),
     );
+    const lastRun =
+      data.runs[0]?.started_at ??
+      data.states
+        .map((state) => state.last_run_at)
+        .filter((value): value is string => Boolean(value))
+        .sort()
+        .at(-1) ??
+      null;
     return {
       ...data,
       ...config,
@@ -31,13 +40,20 @@ export async function hubspotModel() {
           ? ("failing" as const)
           : integrationHealth(
               configured,
-              success,
+              healthSuccess,
               failures,
               data.runs[0]?.status === "partial",
               1800000,
               Date.now(),
             ),
       configured,
+      lastRun,
+      lastSuccess,
+      failures,
+      error:
+        data.runs.find((run) => run.error_summary)?.error_summary ??
+        data.states.find((state) => state.last_error)?.last_error ??
+        null,
     };
   } catch {
     return {
@@ -48,6 +64,10 @@ export async function hubspotModel() {
       rule: "lead_last_touch",
       health: "failing" as const,
       configured: false,
+      lastRun: null,
+      lastSuccess: null,
+      failures: 0,
+      error: "STATUS_UNAVAILABLE",
     };
   }
 }

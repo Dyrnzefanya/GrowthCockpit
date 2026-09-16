@@ -102,6 +102,10 @@ export async function runJob(
       failed = result.failed;
       hasMore = result.hasMore;
       cursor = result.cursor;
+    } else if (key === "JOB-RETENTION") {
+      const result = await repository.runRetention();
+      read = result.payloads_cleared + result.runs_pruned;
+      written = read;
     } else {
       // Reserve the worst-case 24-second item budget before claiming another item.
       while (read < maxBatch && Date.now() + 24000 < deadline) {

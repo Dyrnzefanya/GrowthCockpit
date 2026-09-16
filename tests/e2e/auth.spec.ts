@@ -6,7 +6,7 @@ import { admin, invitedSession } from "../support/auth";
 import { testEnvironment } from "../support/environment";
 test.describe.configure({ mode: "serial" });
 
-test("TEST-2.1 protected routes reject anonymous and forged requests", async ({
+test("TEST-2.1/13.1 protected routes and business rows reject anonymous and forged requests", async ({
   request,
   page,
 }) => {
@@ -72,6 +72,10 @@ test("TEST-2.1 protected routes reject anonymous and forged requests", async ({
   ).not.toBeNull();
   expect((await anon.from("profiles").select("*")).error).not.toBeNull();
   expect((await anon.from("app_settings").select("*")).error).not.toBeNull();
+  expect((await anon.from("leads").select("id")).error).not.toBeNull();
+  expect(
+    (await anon.from("integration_runs").select("id")).error,
+  ).not.toBeNull();
   await page
     .getByLabel("Email", { exact: true })
     .fill(`unknown-${randomUUID()}@example.test`);

@@ -81,6 +81,7 @@ test("Phase 9 Today alert lifecycle, detail, notification volume and responsive 
     await snooze.getByLabel("Snooze").selectOption("240");
     await snooze.getByRole("button", { name: "Snooze", exact: true }).click();
     await expect(page.getByText("Phase 9 snooze fixture")).toHaveCount(0);
+    await expect(page.locator("[data-sonner-toast]")).toHaveCount(0);
 
     for (const width of [390, 1280, 1920]) {
       await page.setViewportSize({ width, height: 900 });

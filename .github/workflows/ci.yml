@@ -13,6 +13,8 @@ jobs:
       APP_TIMEZONE: Asia/Jakarta
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -44,5 +46,10 @@ jobs:
       - run: npm run build
       - run: npm run secrets:client
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e -- --workers=1
+      - name: Browser tests and PII log audit
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:e2e -- --workers=1 2>&1 | tee "$RUNNER_TEMP/e2e.log"
+          npm run logs:check -- "$RUNNER_TEMP/e2e.log"
       - run: npm run test:production -- --workers=1

@@ -1,5 +1,49 @@
 # Tasks
 
+## Phase 13 — Production Hardening (2026-09-16)
+
+**Status: FAIL — PRODUCTION ACTIVATION PENDING. Local engineering checkpoint: COMPLETE. Production readiness: NOT READY.** The hardening implementation and every available local technical gate pass. The PRD gate remains open because no dedicated production Supabase project is identified, no managed production backup has been restored into a managed scratch project, the reviewed revision is not deployed, and no production schedule has an observed run. These are explicit FR-13.4, FR-13.9, acceptance and Definition-of-Done requirements rather than fixture-replaceable UAT.
+
+### Requirements and implementation
+
+- **FR-13.1 / TEST-13.1:** `supabase/tests/hardening.sql`, invoked by `scripts/test-database.mjs` and CI, fails when any `public` table lacks RLS or a policy. The local catalog passes for every table.
+- **FR-13.2 / TEST-13.2:** `scripts/check-secrets.mjs` scans the working tree and complete Git history for credential shapes and configured privileged values without printing them. CI uses a full-history checkout. `scripts/check-client-secrets.mjs` separately scans the built browser artifacts.
+- **FR-13.3 / TEST-13.3–13.6:** executable database, unit, integration and browser tests cover forged/replayed ingest, unauthorized job calls, anonymous `leads` and `integration_runs` reads, client-bundle credentials, malformed HubSpot input and oversized payloads. Failed request logs exclude bodies.
+- **FR-13.4 / TEST-13.10:** a separately named local scratch Supabase project applied migrations 0001–0032 from zero in 64 seconds. A data-only logical backup restored in 0.3 seconds; exact source/target counts matched and the RLS/retention audits passed. This proves the repository path only. The PRD-required managed production backup restore remains **PENDING** and is recorded in `RUNBOOK.md`.
+- **FR-13.5 / TEST-13.7–13.8:** Playwright covers login/session/logout, daily checklist, lead creation/qualification/import, experiment lifecycle, report generation/finalisation, HubSpot/Meta/Slack/scheduler failure evidence, all activated routes, keyboard flows and responsive layouts.
+- **FR-13.6:** `/integrations` now projects Landing ingest, HubSpot, Meta, Slack and all nine registered jobs with configuration/status, SLA, last run, last success, consecutive failures, redacted recent error and authenticated recovery action from existing run/sync evidence.
+- **FR-13.7 / TEST-13.9:** forward migration `0032_retention.sql` adds service-only, repeat-safe `run_retention`; `JOB-RETENTION` uses the existing registry, lease, runner and run history at 02:00 WIB. Exact 90-day/12-month boundaries and a double run pass.
+- **FR-13.8:** `RUNBOOK.md` documents every secret rotation, integration recovery, job replay, critical alert type, scheduler outage, restore procedure and repeatable cutover.
+- **FR-13.9:** HSTS and all nine UTC Vercel schedules are checked in; the existing bearer adapter remains fail-closed outside enabled production. Separate production values, the deployed `PROD` badge and first observed scheduled runs remain **PENDING**.
+- **FR-13.10:** production-like database/browser measurements meet their budgets: final 50,000-row lead page database query 1.598 ms; final 200,000-row/90-day aggregate 292.634 ms; browser 50,000-row first page 297–371 ms; Today 90-day history 574–613 ms; signed ingest p95 18.6 ms. No missing index was measured, so no speculative index migration was added.
+
+### Files and migration
+
+- Data/runner: `supabase/migrations/0032_retention.sql`, `supabase/tests/hardening.sql`, `src/services/jobs/{registry,runner}.ts`, `src/repositories/integrations.ts`.
+- Operations/UI: `src/services/integration-health.ts`, `/integrations`, HubSpot/Meta health cards, authenticated error recording, route/global error fallbacks, HSTS, and hydration-safe shared date/table controls.
+- Audit/deployment: `scripts/check-{secrets,logs}.mjs`, CI full-history/client/log checks, and `vercel.json` production schedules. No dependency, table, service, provider write, campaign mutation or new product feature was added.
+- Documentation: `RUNBOOK.md`, `ARCHITECTURE.md`, `DATA_MODEL.md`, `INTEGRATIONS.md`, `DECISIONS.md` (D-020), `PRD.md` traceability and this record.
+
+### Quality and acceptance evidence
+
+- Formatting, ESLint, strict TypeScript and `git diff --check`: PASS. Production build: PASS, 25 application pages generated.
+- Unit/service: 32 files, 153 tests PASS. Lead/formula coverage: 12 tests and 100% statements/branches/functions/lines. HubSpot and Meta integration configurations: PASS.
+- Database: migrations 0001–0032 from empty PASS; schema lint PASS; all SQL suites including dynamic public-table RLS/policy and repeat-safe retention PASS. Generated types are current.
+- Browser: final complete authenticated suite 24/24 PASS in 4.6 minutes. The final hydration implementation also passed all seven affected authentication/table/date/accessibility scenarios. Axe reported zero WCAG A/AA critical violations on every activated route.
+- Production-mode browser: 4/4 PASS; gallery excluded, shell/Today budgets pass, 50,000-row lead page passes, signed ingest p95 is below 500 ms.
+- Security: dependency audit reports zero vulnerabilities; repository + full-history secret scan PASS; browser-artifact credential scan PASS; exact final Playwright log PII scan PASS; local forged/replay/auth/RLS/input-size threats PASS.
+
+### External audit and blockers
+
+- **BLOCKER — production data/recovery:** the linked Supabase project is `growth-cockpit-dev` and its remote migration history stops at 0004. A second account project is not identified as GrowthCockpit production, so it was not modified. FR-13.4 and the production zero-to-head migration remain unverified.
+- **BLOCKER — deployment/scheduler:** `https://growthcockpitdyrn.vercel.app` is healthy and serves HSTS, but reports commit `8cf0930` (Phase 9), while the reviewed local base is Phase 12 plus these uncommitted Phase 13 changes. Vercel project/plan access was unavailable; no `PROD` badge or first scheduled runs can be claimed. The selected plan must support the checked-in five-, ten- and thirty-minute schedules.
+- **HIGH — production activation:** Supabase Auth, landing ingest, HubSpot webhook/credentials, Slack channel webhook and Meta account/token have not been configured or exercised against this revision. Operational UAT has not begun.
+- Earlier real-operator/real-data evidence remains in the Operational Validation Backlog, including A11 Target CPQL configuration. No fixture closes it.
+
+**Architectural decision:** D-020 reuses the existing job/run/sync/error boundaries, makes Vercel Cron canonical with GitHub as a mutually exclusive fallback, and requires measured evidence before adding indexes.
+
+**Recommended next step:** identify or create the dedicated production Supabase project and managed scratch project; confirm a Vercel plan that supports every cadence and grant project access; then apply migrations from zero, configure production-only values/providers, deploy the reviewed revision through `main`, execute the managed restore drill, verify production authentication and landing ingest, and observe every schedule once. Complete the documented smoke/security checks and operational UAT before evaluating PASS.
+
 ## Phase 12 — Reporting (2026-09-16)
 
 **Status: PASS — ENGINEERING COMPLETE (local). Operational / business validation: PENDING. Phase 13 engineering readiness: READY; implementation is not authorized.**
@@ -357,6 +401,8 @@ All nine PRD technical acceptance criteria pass with the evidence above: manual 
 - Remote Phase 3–6 migrations are not applied in this turn; no manual remote deployment or integration configuration occurs. Git publication can trigger the repository's existing deployment automation and must not be represented as remote database verification.
 
 ## Operational Validation Backlog
+
+Phase 13: dedicated production Supabase and zero-to-head migration, a managed production-backup restore into a managed scratch project, Vercel plan/cron compatibility, separate production values and `PROD` badge, production Supabase Auth, landing ingest, HubSpot, Slack and Meta configuration, production smoke/UAT, and one observed success for every schedule remain **PENDING**. These items are hard Phase 13 gate requirements; the local scratch rehearsal and automated suite do not satisfy them.
 
 Phase 12: two consecutive real weekly reports delivered with less than fifteen minutes of manual editing, Appendix B report-format confirmation, protected Monday 07:30 WIB scheduler evidence and real `report_ready` Slack delivery remain **PENDING**. Local fixtures prove deterministic generation, immutability and delivery routing but are not operational evidence.
 

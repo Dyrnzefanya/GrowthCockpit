@@ -1,5 +1,11 @@
 # Integrations
 
+## Phase 13 production operation
+
+`vercel.json` now declares all nine production schedules in UTC. Vercel Cron calls the existing bearer-authenticated GET adapter and supplies `CRON_SECRET`; scheduled calls still fail closed unless `APP_ENV=production` and `JOBS_ENABLED=true`. The GitHub workflows remain guarded fallbacks and must not be selected with `PMOS_SCHEDULER=github` while Vercel Cron is active. Hosting-plan support and each first observed run are deployment evidence, not established by the checked-in file.
+
+`JOB-RETENTION` runs daily at 02:00 WIB through the same lease/run-history path. It nulls authenticated webhook payloads older than 90 days and prunes job/integration run rows older than 12 months. `/integrations` displays all registered jobs with their registry schedule/SLA and existing `sync_state` evidence. `RUNBOOK.md` is the operator source for rotations, provider recovery, job replay, scheduler outage, restore and cutover.
+
 ## Phase 12 weekly report schedule and delivery
 
 `JOB-WEEKLY-REPORT` uses the existing authenticated `/api/jobs/JOB-WEEKLY-REPORT` boundary, Phase 7 lease and integration-run history. The registry and opt-in `weekly-report.yml` declare Monday 07:30 WIB (`30 0 * * 1` UTC). Activate it only with deployment protection and the existing scheduler origin, bearer and bypass configuration. Local verification does not activate a schedule or claim delivery timing.
@@ -160,11 +166,11 @@ The per-job transaction advisory lock serializes acquisition; a running integrat
 
 ### Scheduler binding and infrastructure evidence
 
-Operator decision: native ten-minute Vercel Cron is **not available until the actual plan is verified**. `vercel.json` deliberately contains no active cron, preserving Hobby compatibility and adding no paid dependency. The job registry declares JOB-RETRY-EVENTS with target `*/10 * * * *`. [Vercel documents Hobby's daily limit and GET invocation](https://vercel.com/docs/cron-jobs/manage-cron-jobs).
+Phase 7 treated native ten-minute Vercel Cron as unavailable until the plan was verified and kept only the registry target plus an opt-in fallback. Phase 13 requires the production declarations in `vercel.json`; deployment must still verify that the selected Vercel plan supports them. [Vercel documents Cron invocation and plan limits](https://vercel.com/docs/cron-jobs/manage-cron-jobs).
 
 `.github/workflows/retry-events.yml` provides the PRD-approved optional fallback. It stays inactive unless repository variable `PMOS_SCHEDULER=github`; configure `PMOS_ORIGIN` as the HTTPS deployment origin, repository secret `PMOS_CRON_SECRET`, and (only when required) scoped `PMOS_PROTECTION_BYPASS`. It calls the same bearer POST endpoint and refuses redirects. The off-hour offset runs at minutes 7/17/27/37/47/57. [GitHub permits intervals down to five minutes but can delay scheduled runs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows); this is not a guaranteed ten-minute SLA.
 
-If native cadence is later verified and approved, disable the fallback and replace the empty crons array with `[{"path":"/api/jobs/JOB-RETRY-EVENTS","schedule":"*/10 * * * *"}]`. Vercel's GET adapter accepts bearer auth only; cookie-authorized manual requests use same-origin POST. Never activate both schedulers. No pg_cron/pg_net extension or n8n infrastructure is introduced.
+Vercel's GET adapter accepts bearer auth only; cookie-authorized manual requests use same-origin POST. Never activate Vercel and GitHub for the same schedule. No pg_cron/pg_net extension or n8n infrastructure is introduced.
 
 Deployed scheduler cadence and source registration remain infrastructure evidence to collect before integrated operation. Local foundation completion does not assert that a scheduled deployment fired. The current host protection and Phase 2 deployment backlog remain binding. Scheduler-wide outage alerts remain Phase 9; Phase 7 displays last-run/last-success evidence without pretending that absence is healthy.
 

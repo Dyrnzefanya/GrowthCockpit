@@ -1822,6 +1822,7 @@ export type Database = {
         Returns: number
       }
       retry_webhook: { Args: { p_id: string }; Returns: boolean }
+      run_retention: { Args: { p_now?: string }; Returns: Json }
       save_report_narrative: {
         Args: { p_expected: string; p_id: string; p_narrative: string }
         Returns: string

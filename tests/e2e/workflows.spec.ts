@@ -41,9 +41,12 @@ test("TEST-3.1/3.5/3.6 real checklist, snapshots, optimistic recovery and anothe
     });
     expect(malformed.error).toBeNull();
     await page.reload();
-    await expect(page.locator("main").getByRole("alert")).toContainText(
-      "Checklist belum dapat dimuat atau dibuat",
-    );
+    await expect(
+      page
+        .locator("main")
+        .getByRole("alert")
+        .filter({ hasText: "Checklist belum dapat dimuat atau dibuat" }),
+    ).toBeVisible();
     await expect(
       page.getByLabel("Catatan cepat hari ini", { exact: true }),
     ).toBeEnabled();
@@ -54,7 +57,12 @@ test("TEST-3.1/3.5/3.6 real checklist, snapshots, optimistic recovery and anothe
     expect(removed.error).toBeNull();
     templateId = undefined;
     await page.getByRole("button", { name: "Try again", exact: true }).click();
-    await expect(page.locator("main").getByRole("alert")).toHaveCount(0);
+    await expect(
+      page
+        .locator("main")
+        .getByRole("alert")
+        .filter({ hasText: "Checklist belum dapat dimuat atau dibuat" }),
+    ).toHaveCount(0);
     await page.goto("/workflows/templates");
     const form = page.locator("section").filter({
       has: page.getByRole("heading", { name: "Template baru", exact: true }),

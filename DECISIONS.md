@@ -1,5 +1,17 @@
 # Architectural Decisions
 
+## D-020 — Phase 13 production hardening uses the existing job and evidence boundaries
+
+**Status: Accepted for Phase 13 implementation on 2026-09-16.** Add `JOB-RETENTION` to the existing registry, runner, lease and run history. A forward-only service-role function nulls authenticated webhook payloads older than 90 days and deletes integration runs older than 12 months. It is deliberately safe to repeat and introduces no new table, service or queue.
+
+The Integrations page derives every registered job's SLA, last run, last success, consecutive failures and redacted error from the existing registry, `integration_runs` and `sync_state`. One bounded authenticated read-model function avoids per-job queries. Existing manual controls remain the only operator actions; credentials and payloads never enter this projection.
+
+Repository audits are executable scripts: PostgreSQL catalog inspection verifies RLS and policies on every public table, the existing secret scan also inspects complete Git history, and browser-test logs are checked for email and phone patterns without echoing matched values. CI checks out full history so those results are repeatable. No scanning dependency is added.
+
+Vercel Cron is the canonical production scheduler because Phase 13 requires checked-in production schedules. Existing GitHub scheduler workflows remain disabled fallbacks and must never run at the same time. The deployed Vercel plan, cron firing, provider credentials, managed-backup restore and final cutover remain operational evidence; local tests must not claim them. HSTS and correlated error fallbacks use native Next.js behavior and the existing authenticated service boundary.
+
+Production-like query measurements determine whether an index is needed. No index or cache is added without a measured regression.
+
 ## D-019 — Phase 12 frozen weekly reports reuse authoritative metric facts
 
 **Status: Accepted for Phase 12 implementation on 2026-09-16.** Use forward migration 0030 because the PRD's illustrative `0012_reports` number is already occupied. Add only the required `reports` table and transaction functions for draft creation, narrative saves, finalisation and versioning. Authenticated users may read reports through RLS; server-side actions re-check the owner role and perform writes through service-only functions. A trigger rejects every update or delete of a final report, including service-role writes. Draft facts are written only by the report service and remain read-only in the UI.

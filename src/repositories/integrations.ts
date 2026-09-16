@@ -108,6 +108,16 @@ export async function dueExists() {
   check(error);
   return Boolean(count);
 }
+export async function runRetention() {
+  const { data, error } = await adminClient()
+    .rpc("run_retention")
+    .abortSignal(AbortSignal.timeout(10000));
+  check(error);
+  return data as unknown as {
+    payloads_cleared: number;
+    runs_pruned: number;
+  };
+}
 export async function dashboard(
   page: number,
   status?: string,
@@ -122,7 +132,7 @@ export async function dashboard(
     .range(page * 20, page * 20 + 19);
   if (status) runsQuery = runsQuery.eq("status", status);
   if (trigger) runsQuery = runsQuery.eq("trigger", trigger);
-  const [runs, dead, states, last, rejected] = await Promise.all([
+  const [runs, dead, states, rejected] = await Promise.all([
     runsQuery,
     client
       .from("webhook_events")
@@ -137,12 +147,6 @@ export async function dashboard(
       .select("*")
       .in("integration", ["jobs", "lead_ingest"]),
     client
-      .from("integration_runs")
-      .select("*")
-      .eq("job_key", "JOB-RETRY-EVENTS")
-      .order("started_at", { ascending: false })
-      .limit(1),
-    client
       .from("webhook_events")
       .select("id,source,last_error,correlation_id,received_at", {
         count: "exact",
@@ -151,14 +155,13 @@ export async function dashboard(
       .order("received_at", { ascending: false })
       .range(page * 20, page * 20 + 19),
   ]);
-  for (const r of [runs, dead, states, last, rejected]) check(r.error);
+  for (const r of [runs, dead, states, rejected]) check(r.error);
   return {
     runs: runs.data ?? [],
     total: runs.count ?? 0,
     dead: dead.data ?? [],
     deadTotal: dead.count ?? 0,
     states: states.data ?? [],
-    last: last.data?.[0] ?? null,
     rejected: rejected.data ?? [],
     rejectedTotal: rejected.count ?? 0,
   };

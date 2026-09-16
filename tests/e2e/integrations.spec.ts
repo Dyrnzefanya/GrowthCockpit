@@ -6,7 +6,7 @@ import { test, expect, admin } from "../support/auth";
 import { testEnvironment } from "../support/environment";
 import { cleanupLeads } from "../support/crm";
 import { sign } from "../../src/lib/http/hmac";
-test("Phase 7 signed Apps Script inquiry, concurrent replay, job recovery, RLS and UI", async ({
+test("TEST-7/13.3 signed inquiry, recovery, security headers, job health and UI", async ({
   page,
 }, info) => {
   test.setTimeout(180000);
@@ -137,7 +137,11 @@ test("Phase 7 signed Apps Script inquiry, concurrent replay, job recovery, RLS a
     expect(
       (await page.request.get("/api/jobs/JOB-RETRY-EVENTS")).status(),
     ).toBe(401);
-    expect((await page.request.get("/api/health")).status()).toBe(200);
+    const healthResponse = await page.request.get("/api/health");
+    expect(healthResponse.status()).toBe(200);
+    expect(healthResponse.headers()["strict-transport-security"]).toBe(
+      "max-age=31536000; includeSubDomains",
+    );
     // A durable expired worker is retryable. The existing business replay key prevents a second lead.
     await admin
       .from("webhook_events")
@@ -207,6 +211,28 @@ test("Phase 7 signed Apps Script inquiry, concurrent replay, job recovery, RLS a
     db(
       "drop trigger phase7_test_failure on public.leads; drop function public.phase7_test_failure();",
     );
+    for (const [jobKey, errorCode] of [
+      ["JOB-META-INGEST", "UPSTREAM_UNAVAILABLE"],
+      ["JOB-NOTIFY-DISPATCH", "UPSTREAM_RATE_LIMITED"],
+      ["JOB-DATA-HEALTH", "SCHEDULE_OVERDUE"],
+    ] as const) {
+      const started = await admin.rpc("start_job", {
+        p_key: jobKey,
+        p_trigger: "schedule",
+        p_correlation: randomUUID(),
+      });
+      expect(started.error).toBeNull();
+      const finished = await admin.rpc("finish_integration_run", {
+        p_id: started.data!,
+        p_status: "failed",
+        p_read: 0,
+        p_written: 0,
+        p_failed: 1,
+        p_error: errorCode,
+        p_cursor: null!,
+      });
+      expect(finished.error).toBeNull();
+    }
     await page.goto("/integrations");
     await expect(
       page.getByRole("heading", { name: "Integrations", exact: true }),
@@ -219,7 +245,22 @@ test("Phase 7 signed Apps Script inquiry, concurrent replay, job recovery, RLS a
         )
         .first(),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Run now", exact: true }).click();
+    await expect(
+      page.getByText("JOB-RETENTION", { exact: false }),
+    ).toBeVisible();
+    for (const errorCode of [
+      "UPSTREAM_UNAVAILABLE",
+      "UPSTREAM_RATE_LIMITED",
+      "SCHEDULE_OVERDUE",
+    ])
+      await expect(
+        page.getByText(errorCode, { exact: false }).first(),
+      ).toBeVisible();
+    await page
+      .getByRole("article")
+      .filter({ hasText: "JOB-RETRY-EVENTS" })
+      .getByRole("button", { name: "Run now", exact: true })
+      .click();
     await expect(
       page.getByRole("status").filter({ hasText: "Job: success" }),
     ).toBeVisible();

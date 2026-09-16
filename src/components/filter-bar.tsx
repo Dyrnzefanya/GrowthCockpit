@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useId, useState, type FormEvent } from "react";
+import { useId, useState, useSyncExternalStore, type FormEvent } from "react";
 import { Search, CalendarDays, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { readViewParams } from "@/lib/view-params";
@@ -141,6 +141,11 @@ export function DateRangeControl() {
   const params = useSearchParams();
   const { from, to } = readViewParams(new URLSearchParams(params));
   const [open, setOpen] = useState(false);
+  const ready = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const range =
     from && to
       ? `${from} – ${to}`
@@ -154,6 +159,8 @@ export function DateRangeControl() {
       <DialogTrigger asChild>
         <Button
           variant="outline"
+          disabled={!ready}
+          className="disabled:opacity-100"
           aria-label={`Date range: ${from || to ? range : "not selected"}`}
         >
           <CalendarDays aria-hidden="true" />

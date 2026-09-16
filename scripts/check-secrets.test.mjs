@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { findSecretTypes } from "./check-secrets.mjs";
+import {
+  findConfiguredSecretNames,
+  findSecretTypes,
+} from "./check-secrets.mjs";
 
 describe("secret scanner", () => {
   it("detects supported secret shapes without flagging variable names", () => {
@@ -21,5 +24,11 @@ describe("secret scanner", () => {
         "OPENAI_API_KEY= and Authorization: Bearer ${CRON_SECRET}",
       ),
     ).toEqual([]);
+  });
+  it("detects configured opaque secrets without exposing their values", () => {
+    const environment = { CRON_SECRET: "opaque-value-with-enough-length" };
+    expect(
+      findConfiguredSecretNames("opaque-value-with-enough-length", environment),
+    ).toEqual(["CRON_SECRET"]);
   });
 });

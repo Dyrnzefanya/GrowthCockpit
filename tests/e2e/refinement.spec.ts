@@ -50,8 +50,8 @@ for (const width of [1280, 1920, 390]) {
 
     await page.goto("/performance?keep=yes&from=bad&to=2026-02-30");
     const trigger = page.getByRole("button", { name: /^Date range:/ });
-    await trigger.focus();
-    await page.keyboard.press("Enter");
+    await expect(trigger).toBeEnabled();
+    await trigger.press("Enter");
     const dialog = page.getByRole("dialog", { name: "Reporting date range" });
     const from = dialog.getByLabel("From", { exact: true });
     const to = dialog.getByLabel("To", { exact: true });

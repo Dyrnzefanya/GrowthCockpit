@@ -56,6 +56,13 @@ export const jobs = [
     cadenceMinutes: 5,
     budgetMs: 40000,
   },
+  {
+    key: "JOB-RETENTION",
+    label: "Apply data retention",
+    schedule: "0 2 * * * WIB",
+    cadenceMinutes: 1440,
+    budgetMs: 10000,
+  },
 ] as const;
 export function registeredJob(key: string) {
   return jobs.find((job) => job.key === key);

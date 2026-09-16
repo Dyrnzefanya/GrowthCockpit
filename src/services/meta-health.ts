@@ -10,6 +10,7 @@ import { raiseAlerts } from "@/services/alerts";
 import { resolveMissing } from "@/repositories/alerts";
 import { alertKey } from "@/domain/alerts/keys";
 import type { AlertCandidate } from "@/services/alerts";
+import { integrationHealth } from "@/domain/integrations";
 const healthFacts = z.object({
   names: z.array(z.object({ campaign_name: z.string() })),
   currencies: z.array(z.object({ currency: z.string() })),
@@ -40,6 +41,10 @@ export async function metaHealthModel(machine = false) {
       .safeParse(JSON.parse(data.state.cursor));
     if (parsed.success) progress = parsed.data;
   }
+  const configured = Boolean(
+    serverEnv.META_ACCESS_TOKEN && serverEnv.META_AD_ACCOUNT_ID,
+  );
+  const slaHours = values["meta.freshness_hours"];
   return {
     accounts: data.accounts.map((account) => ({
       ...account,
@@ -51,10 +56,18 @@ export async function metaHealthModel(machine = false) {
           .formatToParts(new Date())
           .find((p) => p.type === "timeZoneName")?.value ?? "",
     })),
-    configured: Boolean(
-      serverEnv.META_ACCESS_TOKEN && serverEnv.META_AD_ACCOUNT_ID,
+    configured,
+    health: integrationHealth(
+      configured,
+      data.state?.last_success_at ?? null,
+      data.state?.consecutive_failures ?? 0,
+      Boolean(progress),
+      slaHours * 3600000,
+      Date.now(),
     ),
+    lastRun: data.state?.last_run_at ?? null,
     lastSuccess: data.state?.last_success_at ?? null,
+    failures: data.state?.consecutive_failures ?? 0,
     error: data.state?.last_error ?? null,
     progress,
     expiry: metadata.success ? metadata.data.expires_at : null,
@@ -65,7 +78,7 @@ export async function metaHealthModel(machine = false) {
     ),
     mixed: facts.currencies.length > 1,
     resultType: values["meta.primary_result_type"],
-    slaHours: values["meta.freshness_hours"],
+    slaHours,
   };
 }
 export async function evaluateMetaHealth(now = new Date()) {

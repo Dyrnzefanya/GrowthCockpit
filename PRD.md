@@ -2581,16 +2581,16 @@ Status values: `Planned` · `In Progress` · `Implemented` · `Verified`. The co
 | FR-12.7 | 12 | immutability trigger | TEST-12.2 | Verified (local; TASKS.md) |
 | FR-12.8 | 12 | versioning + export | TEST-12.3, 12.7 | Verified (local; TASKS.md) |
 | FR-12.9 | 12 | Slack notify | TEST-12.8 | Verified (local; TASKS.md) |
-| FR-13.1 | 13 | RLS audit script | TEST-13.1 | Planned |
-| FR-13.2 | 13 | secret scan | TEST-13.2 | Planned |
-| FR-13.3 | 13 | security suite | TEST-13.3–13.6 | Planned |
-| FR-13.4 | 13 | restore drill | TEST-13.10 | Planned |
-| FR-13.5 | 13 | E2E suite | TEST-13.7, 13.8 | Planned |
-| FR-13.6 | 13 | /integrations complete | TEST-13.8 | Planned |
-| FR-13.7 | 13 | JOB-RETENTION | TEST-13.9 | Planned |
-| FR-13.8 | 13 | RUNBOOK.md | manual | Planned |
-| FR-13.9 | 13 | env separation + schedules | manual | Planned |
-| FR-13.10 | 13 | index migrations | manual | Planned |
+| FR-13.1 | 13 | RLS audit script | TEST-13.1 | Verified (local; TASKS.md) |
+| FR-13.2 | 13 | secret scan | TEST-13.2 | Verified (local; TASKS.md) |
+| FR-13.3 | 13 | security suite | TEST-13.3–13.6 | Verified (local; TASKS.md) |
+| FR-13.4 | 13 | restore drill | TEST-13.10 | In progress (local rehearsal passed; managed production restore pending) |
+| FR-13.5 | 13 | E2E suite | TEST-13.7, 13.8 | Verified (local; TASKS.md) |
+| FR-13.6 | 13 | /integrations complete | TEST-13.8 | Verified (local; TASKS.md) |
+| FR-13.7 | 13 | JOB-RETENTION | TEST-13.9 | Verified (local; TASKS.md) |
+| FR-13.8 | 13 | RUNBOOK.md | manual | Verified (local; TASKS.md) |
+| FR-13.9 | 13 | env separation + schedules | manual | In progress (deployed production and observed schedules pending) |
+| FR-13.10 | 13 | index migrations | manual | Verified (local measurements required no index; TASKS.md) |
 
 ---
 

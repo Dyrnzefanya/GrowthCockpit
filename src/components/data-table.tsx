@@ -1,5 +1,5 @@
 "use client";
-import { useState, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -54,6 +54,11 @@ export function DataTable<T>({
   } | null>(null);
   const [hidden, setHidden] = useState<string[]>([]);
   const [page, setPage] = useState(0);
+  const ready = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   // PRD: callers provide server-paged rows above 500; this component performs no fetching.
   if (!pagination && rows.length > 500)
     throw new Error("DataTable requires server pagination above 500 rows.");
@@ -96,7 +101,12 @@ export function DataTable<T>({
         </p>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" variant="outline">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!ready}
+              className="disabled:opacity-100"
+            >
               <SlidersHorizontal className="size-3.5" />
               Columns
             </Button>
