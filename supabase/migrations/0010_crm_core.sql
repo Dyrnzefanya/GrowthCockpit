@@ -2,14 +2,14 @@
 create table public.companies (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
-  external_id text, source_system text not null default 'manual', source_updated_at timestamptz, synced_at timestamptz, hubspot_company_id text unique, name text not null, domain citext unique,
+  external_id text, source_system text not null default 'manual', source_updated_at timestamptz, synced_at timestamptz, hubspot_company_id text unique, name text not null, domain extensions.citext unique,
   name_key text not null, segment text, industry text
 );
 create index companies_name_idx on public.companies(name_key);
 create table public.contacts (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
-  external_id text, source_system text not null default 'manual', source_updated_at timestamptz, synced_at timestamptz, hubspot_contact_id text unique, email citext, phone_e164 text,
+  external_id text, source_system text not null default 'manual', source_updated_at timestamptz, synced_at timestamptz, hubspot_contact_id text unique, email extensions.citext, phone_e164 text,
   full_name text, company_id uuid references public.companies(id),
   lifecycle_stage text, lifecycle_stage_at timestamptz, hubspot_owner_id text,
   ft_source text, ft_medium text, ft_campaign text, ft_content text, ft_term text, ft_landing_page text, ft_referrer text, ft_at timestamptz,
@@ -238,4 +238,3 @@ grant execute on function public.commit_lead_override(uuid,timestamptz,jsonb,jso
 
 revoke all on function public.commit_deal(jsonb,timestamptz,timestamptz) from public,anon,authenticated;
 grant execute on function public.commit_deal(jsonb,timestamptz,timestamptz) to service_role;
-

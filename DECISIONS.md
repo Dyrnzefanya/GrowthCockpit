@@ -228,6 +228,16 @@ Use the required shadcn/ui Radix primitives for accessible overlays and controls
 
 **Reason:** The human-approved Phase 0 clarification makes these foundations Phase 0 deliverables and prohibits fabricated remote evidence.
 
+## D-022 — Explicit citext schema qualification for CRM migration
+
+**Status:** Accepted — controlled migration correction
+
+**Phase:** 13.1 / Personal UAT migration
+
+**Decision:** Keep `citext` provisioned by `0001_extensions.sql` in the `extensions` schema, and qualify the two `0010_crm_core.sql` columns as `extensions.citext`.
+
+**Reason:** The linked development database has the extension and type in `extensions`, but the remote migration executor did not expose that schema while parsing `0010`. The correction preserves the existing schema design, avoids reset or migration-history repair, and makes fresh, development, and future production runs independent of executor search-path defaults. `0010` was not applied in the linked development database; the local rehearsal already has the equivalent schema.
+
 ## D-004 — Minimal Phase 0 shadcn/ui state
 
 **Status:** Accepted
