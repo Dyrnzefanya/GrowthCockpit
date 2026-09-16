@@ -1,16 +1,20 @@
 import "server-only";
 import { configuration, statusData } from "@/repositories/hubspot";
-import { serverEnv } from "@/lib/env.server";
 import { integrationHealth } from "@/domain/integrations";
 import { requireUser } from "@/services/session";
+import { resolveHubspotCredentials } from "@/services/provider-credentials";
 export async function hubspotModel() {
   await requireUser();
   try {
-    const [config, data] = await Promise.all([configuration(), statusData()]);
+    const [config, data, provider] = await Promise.all([
+      configuration(),
+      statusData(),
+      resolveHubspotCredentials(),
+    ]);
     const configured = Boolean(
-      serverEnv.HUBSPOT_ACCESS_TOKEN &&
+      provider.credentials &&
       config.mapping &&
-      config.mapping.portal_id === serverEnv.HUBSPOT_PORTAL_ID,
+      config.mapping.portal_id === provider.credentials.portalId,
     );
     const successes = data.states
       .filter((s) => ["contacts", "companies", "deals"].includes(s.resource))
@@ -35,7 +39,7 @@ export async function hubspotModel() {
       ...data,
       ...config,
       health:
-        (!config.mapping && serverEnv.HUBSPOT_ACCESS_TOKEN) ||
+        (!config.mapping && provider.credentials) ||
         data.runs[0]?.status === "failed"
           ? ("failing" as const)
           : integrationHealth(

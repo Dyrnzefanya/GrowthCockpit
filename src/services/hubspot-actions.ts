@@ -7,8 +7,8 @@ import { can } from "@/lib/auth/can";
 import { saveMapping, configuration } from "@/repositories/hubspot";
 import { accept } from "@/repositories/integrations";
 import { kindSchema, providerId } from "@/integrations/hubspot/mapping";
-import { serverEnv } from "@/lib/env.server";
 import { runJob } from "@/services/jobs/runner";
+import { resolveHubspotCredentials } from "@/services/provider-credentials";
 export async function hubspotAction(
   _previous: { message: string },
   form: FormData,
@@ -24,8 +24,11 @@ export async function hubspotAction(
       revalidatePath("/integrations/hubspot");
       return { message: "Mapping tersimpan dengan audit operator." };
     }
-    const config = await configuration();
-    if (!config.mapping || !serverEnv.HUBSPOT_ACCESS_TOKEN)
+    const [config, provider] = await Promise.all([
+      configuration(),
+      resolveHubspotCredentials(),
+    ]);
+    if (!config.mapping || !provider.credentials)
       return {
         message:
           "HubSpot belum dikonfigurasi. Tidak ada sinkronisasi dijalankan.",

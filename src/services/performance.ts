@@ -11,7 +11,7 @@ import {
   safeNumber,
 } from "@/domain/metrics/performance";
 import { shiftDate, toJakartaDate } from "@/domain/dates";
-import { serverEnv } from "@/lib/env.server";
+import { resolveMetaCredentials } from "@/services/provider-credentials";
 export async function performanceModel(
   search: Record<string, string | string[] | undefined>,
 ) {
@@ -21,10 +21,11 @@ export async function performanceModel(
     to = z.iso.date().catch(yesterday).parse(search.to);
   if (from > to) throw new Error("INVALID_DATE_RANGE");
   const previous = previousWindow(from, to);
-  const [{ values }, raw, state] = await Promise.all([
+  const [{ values }, raw, state, provider] = await Promise.all([
     readSettings(),
     performanceFacts(from, to, previous.from),
     metaState(false),
+    resolveMetaCredentials(),
   ]);
   const facts = performanceFactsSchema.parse(raw),
     current = performanceSummary(
@@ -95,9 +96,7 @@ export async function performanceModel(
     to,
     previous,
     current,
-    configured: Boolean(
-      serverEnv.META_ACCESS_TOKEN && serverEnv.META_AD_ACCOUNT_ID,
-    ),
+    configured: Boolean(provider.credentials),
     metrics: metrics.map(([title, value, old, unit]) => ({
       title,
       metric: {

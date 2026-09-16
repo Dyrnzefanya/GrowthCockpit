@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
-import { serverEnv } from "@/lib/env.server";
 import { retryOutcome } from "@/domain/integrations";
+import { resolveHubspotCredentials } from "@/services/provider-credentials";
 import {
   recordSchema,
   pageSchema,
@@ -22,13 +22,14 @@ export async function hubspotRequest<T>(
     retrySafe?: boolean;
   } = {},
 ) {
-  if (!serverEnv.HUBSPOT_ACCESS_TOKEN) throw new Error("NOT_CONFIGURED");
   if (
     (!path.startsWith("/crm/") && path !== "/account-info/v3/details") ||
     path.includes("..") ||
     path.includes("\\")
   )
     throw new Error("VALIDATION_FAILED");
+  const { credentials } = await resolveHubspotCredentials();
+  if (!credentials) throw new Error("NOT_CONFIGURED");
   const deadline = options.deadline ?? Date.now() + 12000;
   for (let attempt = 1; attempt <= 5; attempt++) {
     // ponytail: throttle per warm instance; provider 429 and the job lease cover cross-instance contention.
@@ -41,7 +42,7 @@ export async function hubspotRequest<T>(
       response = await fetch("https://api.hubapi.com" + path, {
         method: options.method ?? "GET",
         headers: {
-          Authorization: `Bearer ${serverEnv.HUBSPOT_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${credentials.accessToken}`,
           "Content-Type": "application/json",
         },
         body:
@@ -302,8 +303,9 @@ let validated: {
 export async function validatePortal(
   portal: string,
   deadline = Date.now() + 12000,
+  force = false,
 ) {
-  if (validated?.portal === portal && validated.until > Date.now())
+  if (!force && validated?.portal === portal && validated.until > Date.now())
     return validated;
   const account = await hubspotRequest(
     "/account-info/v3/details",

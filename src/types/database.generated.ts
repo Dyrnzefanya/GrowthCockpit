@@ -705,6 +705,97 @@ export type Database = {
           },
         ]
       }
+      integration_credential_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          correlation_id: string
+          error_code: string | null
+          id: string
+          occurred_at: string
+          provider: string
+          success: boolean
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          correlation_id: string
+          error_code?: string | null
+          id?: string
+          occurred_at?: string
+          provider: string
+          success: boolean
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          correlation_id?: string
+          error_code?: string | null
+          id?: string
+          occurred_at?: string
+          provider?: string
+          success?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_credential_audit_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_provider_configs: {
+        Row: {
+          config: Json
+          configured_at: string | null
+          credentials_updated_at: string | null
+          disconnected_at: string | null
+          last_error_code: string | null
+          last_verified_at: string | null
+          provider: string
+          provider_identity: Json
+          secret_refs: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          configured_at?: string | null
+          credentials_updated_at?: string | null
+          disconnected_at?: string | null
+          last_error_code?: string | null
+          last_verified_at?: string | null
+          provider: string
+          provider_identity?: Json
+          secret_refs?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          configured_at?: string | null
+          credentials_updated_at?: string | null
+          disconnected_at?: string | null
+          last_error_code?: string | null
+          last_verified_at?: string | null
+          provider?: string
+          provider_identity?: Json
+          secret_refs?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_provider_configs_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_runs: {
         Row: {
           correlation_id: string
@@ -1813,9 +1904,28 @@ export type Database = {
         }
         Returns: number
       }
+      record_integration_verification: {
+        Args: {
+          p_actor: string
+          p_correlation: string
+          p_error: string
+          p_identity: Json
+          p_provider: string
+          p_success: boolean
+        }
+        Returns: undefined
+      }
       record_meta_failure: {
         Args: { p_code: string; p_run: string }
         Returns: undefined
+      }
+      remove_integration_provider: {
+        Args: { p_actor: string; p_correlation: string; p_provider: string }
+        Returns: undefined
+      }
+      resolve_integration_provider: {
+        Args: { p_provider: string }
+        Returns: Json
       }
       resolve_missing_alerts: {
         Args: { p_active_keys: string[]; p_before: string; p_types: string[] }
@@ -1823,6 +1933,16 @@ export type Database = {
       }
       retry_webhook: { Args: { p_id: string }; Returns: boolean }
       run_retention: { Args: { p_now?: string }; Returns: Json }
+      save_integration_provider: {
+        Args: {
+          p_actor: string
+          p_config: Json
+          p_correlation: string
+          p_provider: string
+          p_secrets: Json
+        }
+        Returns: undefined
+      }
       save_report_narrative: {
         Args: { p_expected: string; p_id: string; p_narrative: string }
         Returns: string

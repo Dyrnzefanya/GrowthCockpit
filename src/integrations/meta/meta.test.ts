@@ -1,14 +1,13 @@
 // @vitest-environment node
 import { expect, it, vi, beforeEach } from "vitest";
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/env.server", () => ({
-  serverEnv: {
-    META_ACCESS_TOKEN: "synthetic-meta-token",
-    META_AD_ACCOUNT_ID: "123",
-  },
-}));
 import { metaClient } from "./client";
 import { normalizeInsight, accountSchema } from "./transform";
+const credentials = {
+  accessToken: "synthetic-meta-token",
+  adAccountId: "123",
+  apiVersion: "v26.0" as const,
+};
 const account = {
   account_id: "123",
   name: "Fixture",
@@ -68,7 +67,7 @@ it("pins version, read-only calls, cursor-only pagination and authentication hea
       }),
     )
     .mockResolvedValueOnce(Response.json({ data: [] }));
-  const client = metaClient(Date.now() + 60000, transport);
+  const client = metaClient(credentials, Date.now() + 60000, transport);
   expect((await client.insights("2026-09-01", null, 20)).after).toBe("page2");
   expect((await client.insights("2026-09-01", "page2", 20)).after).toBeNull();
   for (const [url, options] of transport.mock.calls) {
@@ -94,7 +93,7 @@ it("handles rate limits and sanitizes permanent, transient, timeout and malforme
       ),
     );
   await expect(
-    metaClient(Date.now() + 60000, permanent).account(),
+    metaClient(credentials, Date.now() + 60000, permanent).account(),
   ).rejects.toMatchObject({ code: "META_TOKEN_INVALID", retryable: false });
   expect(permanent).toHaveBeenCalledOnce();
   const limited = vi
@@ -106,24 +105,25 @@ it("handles rate limits and sanitizes permanent, transient, timeout and malforme
       ),
     );
   await expect(
-    metaClient(Date.now() + 10000, limited).account(),
+    metaClient(credentials, Date.now() + 10000, limited).account(),
   ).rejects.toMatchObject({ retryable: true, retryAfterMs: 60000 });
   const timeout = vi
     .fn<typeof fetch>()
     .mockRejectedValue(new Error("secret-body"));
   await expect(
-    metaClient(Date.now() + 10000, timeout).account(),
+    metaClient(credentials, Date.now() + 10000, timeout).account(),
   ).rejects.toThrow("META_TIMEOUT");
   const malformed = vi
     .fn<typeof fetch>()
     .mockResolvedValue(Response.json({ unexpected: 1 }));
   await expect(
-    metaClient(Date.now() + 10000, malformed).account(),
+    metaClient(credentials, Date.now() + 10000, malformed).account(),
   ).rejects.toThrow();
 });
 it("checks account identity, scope, expiry and rejects stalled pagination", async () => {
   const client = (body: unknown) =>
     metaClient(
+      credentials,
       Date.now() + 60000,
       vi.fn<typeof fetch>().mockResolvedValue(Response.json(body)),
     );

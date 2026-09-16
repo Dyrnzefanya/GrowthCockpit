@@ -2,10 +2,23 @@
 import { it, expect, vi, afterEach } from "vitest";
 import { z } from "zod";
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/env.server", () => ({
-  serverEnv: { HUBSPOT_ACCESS_TOKEN: "synthetic-test-token" },
+vi.mock("@/services/provider-credentials", () => ({
+  resolveHubspotCredentials: vi.fn().mockResolvedValue({
+    source: "environment",
+    credentials: {
+      accessToken: "synthetic-test-token",
+      portalId: "123",
+      webhookSecret: "synthetic-webhook-secret",
+    },
+    environmentFallbackAvailable: true,
+  }),
 }));
-import { hubspotRequest, writeRecord, readBatch } from "./client";
+import {
+  hubspotRequest,
+  writeRecord,
+  readBatch,
+  validatePortal,
+} from "./client";
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.useRealTimers();
@@ -118,4 +131,46 @@ it("partial association batch errors yield to retry instead of pretending record
   await vi.runAllTimersAsync();
   await result;
   expect(fetch).toHaveBeenCalledTimes(2);
+});
+
+it("connection validation reads account and property metadata without mutating CRM", async () => {
+  const contactProperties = [
+    "original_utm_source",
+    "original_utm_medium",
+    "original_utm_campaign",
+    "original_utm_content",
+    "original_utm_term",
+    "original_landing_page",
+    "original_click_id",
+    "original_click_id_type",
+    "lead_product_interest",
+    "estimated_quantity",
+    "lead_quality_reason",
+    "pmos_lead_id",
+    "pmos_qualified_at",
+  ];
+  const fetch = vi.fn(
+    async (input: string | URL | Request, options?: RequestInit) => {
+      expect(options?.method).toBe("GET");
+      const path = new URL(String(input)).pathname;
+      if (path === "/account-info/v3/details")
+        return Response.json({ portalId: 123, companyCurrency: "IDR" });
+      if (path === "/crm/v3/properties/contacts")
+        return Response.json({
+          results: contactProperties.map((name) => ({ name })),
+        });
+      return Response.json({
+        results: ["pmos_lead_id", "estimated_quantity", "required_by_date"].map(
+          (name) => ({ name }),
+        ),
+      });
+    },
+  );
+  vi.stubGlobal("fetch", fetch);
+  await expect(
+    validatePortal("123", Date.now() + 12000, true),
+  ).resolves.toMatchObject({ portal: "123", currency: "IDR" });
+  expect(fetch).toHaveBeenCalledTimes(3);
+  for (const [, options] of fetch.mock.calls)
+    expect(options).toMatchObject({ method: "GET" });
 });

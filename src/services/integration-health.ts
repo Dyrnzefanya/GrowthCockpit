@@ -7,6 +7,10 @@ import { integrationHealth } from "@/domain/integrations";
 import { notificationVolume } from "@/repositories/alerts";
 import { jobs } from "@/services/jobs/registry";
 import { weekdayJobOverdue } from "@/domain/alerts/policy";
+import {
+  resolveHubspotCredentials,
+  resolveMetaCredentials,
+} from "@/services/provider-credentials";
 export async function integrationModel(
   search: Record<string, string | string[] | undefined> = {},
 ) {
@@ -24,9 +28,11 @@ export async function integrationModel(
         .catch(undefined),
     })
     .parse(search);
-  const [data, volume] = await Promise.all([
+  const [data, volume, meta, hubspot] = await Promise.all([
     dashboard(filters.page, filters.status, filters.trigger),
     notificationVolume(),
+    resolveMetaCredentials(),
+    resolveHubspotCredentials(),
   ]);
   const state = data.states.find(
     (candidate) =>
@@ -45,12 +51,8 @@ export async function integrationModel(
         candidate.integration === "jobs" && candidate.resource === job.key,
     );
     const providerConfigured =
-      (job.key !== "JOB-META-INGEST" ||
-        Boolean(serverEnv.META_ACCESS_TOKEN && serverEnv.META_AD_ACCOUNT_ID)) &&
-      (job.key !== "JOB-HUBSPOT-RECONCILE" ||
-        Boolean(
-          serverEnv.HUBSPOT_ACCESS_TOKEN && serverEnv.HUBSPOT_PORTAL_ID,
-        )) &&
+      (job.key !== "JOB-META-INGEST" || Boolean(meta.credentials)) &&
+      (job.key !== "JOB-HUBSPOT-RECONCILE" || Boolean(hubspot.credentials)) &&
       (job.key !== "JOB-NOTIFY-DISPATCH" ||
         Boolean(serverEnv.SLACK_WEBHOOK_URL));
     const isConfigured = configured && providerConfigured;

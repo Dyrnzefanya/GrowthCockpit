@@ -1,5 +1,15 @@
 # Architectural Decisions
 
+## D-021 — Phase 13.1 uses Supabase Vault and a typed provider registry
+
+**Status: Accepted for the bounded Phase 13.1 enhancement on 2026-09-16.** Use the existing Supabase deployment rather than adding a credential service or custom cryptography. Forward migration 0033 enables Supabase Vault, adds a service-only provider configuration row and secret-free audit table, and exposes narrow service-role functions for save, resolve, verification evidence, and removal. Browser roles have no table or function privilege. Forward correction 0034 fixes JSON UUID decoding after local migration application; 0033 remains unchanged.
+
+A static typed registry is sufficient. It drives generic cards, state, fields, and capabilities without a marketplace or runtime plugin framework. Meta Ads and HubSpot are functional; GA4, Google Search Console, and Google Ads remain fieldless `COMING_SOON` entries. Slack and landing ingest retain their existing environment/operational setup because this enhancement does not authorize expanding their credential lifecycle.
+
+The centralized resolver uses complete Settings-managed credentials first, existing server environment values second, and an honest unconfigured result last. It never combines partial settings with environment secrets or copies environment values into Vault. Removing a Settings credential securely deletes its Vault values and may reveal an existing environment fallback. Provider clients remain the only external API implementations.
+
+Existing owner-only `integration:write` authorization guards Configure, Replace, Test, and Remove. Secret inputs are write-only. Safe read models contain booleans, source, timestamps, sanitized codes, masked identities, and non-secret configuration only. Meta verification remains GET-only and rejects `ads_management`; HubSpot verification reads account/property metadata only. Existing CRM ownership and manual qualification-override behavior do not change.
+
 ## D-020 — Phase 13 production hardening uses the existing job and evidence boundaries
 
 **Status: Accepted for Phase 13 implementation on 2026-09-16.** Add `JOB-RETENTION` to the existing registry, runner, lease and run history. A forward-only service-role function nulls authenticated webhook payloads older than 90 days and deletes integration runs older than 12 months. It is deliberately safe to repeat and introduces no new table, service or queue.

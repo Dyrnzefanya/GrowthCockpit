@@ -24,6 +24,21 @@ vi.mock("@/repositories/alerts", () => ({
   notificationVolume: mocks.notificationVolume,
 }));
 vi.mock("@/lib/env.server", () => ({ serverEnv: environment }));
+vi.mock("@/services/provider-credentials", () => ({
+  resolveMetaCredentials: vi.fn().mockResolvedValue({
+    source: "none",
+    credentials: null,
+    environmentFallbackAvailable: false,
+  }),
+  resolveHubspotCredentials: vi.fn().mockResolvedValue({
+    source: "environment",
+    credentials: {
+      accessToken: "configured",
+      portalId: "123",
+    },
+    environmentFallbackAvailable: true,
+  }),
+}));
 
 import { integrationModel } from "./integration-health";
 

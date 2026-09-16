@@ -15,6 +15,17 @@ vi.mock("@/repositories/integrations", () => ({
 }));
 vi.mock("@/repositories/alerts", () => ({ resolveMissing: m.resolve }));
 vi.mock("@/services/alerts", () => ({ raiseAlerts: m.raise }));
+vi.mock("@/services/provider-credentials", () => ({
+  resolveMetaCredentials: vi.fn().mockResolvedValue({
+    source: "environment",
+    credentials: {
+      accessToken: "synthetic-meta-token-value",
+      adAccountId: "123",
+      apiVersion: "v26.0",
+    },
+    environmentFallbackAvailable: true,
+  }),
+}));
 vi.mock("@/lib/env.server", () => ({
   serverEnv: { META_ACCESS_TOKEN: "synthetic", META_AD_ACCOUNT_ID: "123" },
 }));

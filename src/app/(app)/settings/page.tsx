@@ -10,6 +10,8 @@ import { readProfile, readSettings } from "@/repositories/settings";
 import { can } from "@/lib/auth/can";
 import { configuration } from "@/repositories/hubspot";
 import { HubspotForm } from "@/components/hubspot-forms";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 export default async function Settings() {
   const user = await requireUser();
   const hubspot = await configuration();
@@ -38,6 +40,16 @@ export default async function Settings() {
         </div>
       )}
       <div className="grid gap-5 xl:grid-cols-2">
+        <SectionCard
+          title="Integrations"
+          description="Configure credentials, verify provider connections, and review availability."
+        >
+          <div className="p-5">
+            <Button asChild>
+              <Link href="/settings/integrations">Open Integration Center</Link>
+            </Button>
+          </div>
+        </SectionCard>
         <SectionCard
           title="Profile & access"
           description="Invite-only workspace access. Phase 2."

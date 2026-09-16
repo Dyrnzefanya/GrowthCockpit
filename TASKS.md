@@ -1,5 +1,33 @@
 # Tasks
 
+## Phase 13.1 — Secure & Extensible Integration Center (2026-09-16)
+
+**Status: PASS — ENGINEERING COMPLETE (local). Meta Personal Trial: READY. HubSpot Personal Trial: READY. Real personal-account UAT: NOT PERFORMED. Phase 13 remains FAIL — PRODUCTION ACTIVATION PENDING.** No Du Anyam production infrastructure, credentials, scheduler, or provider configuration was changed.
+
+### Implementation and security evidence
+
+- A typed static provider registry drives `/settings/integrations`. Meta Ads and HubSpot are functional. GA4, Google Search Console, and Google Ads are fieldless `COMING_SOON / NOT IMPLEMENTED` entries with no Configure, Test Connection, or Sync action. Slack and landing ingest retain their existing operational/environment paths.
+- Forward migration `0033_integration_credentials.sql` enables Supabase Vault, adds server-only safe configuration and credential-audit tables, RLS/service-role policies, and narrow save/resolve/verify/remove RPCs. Applied correction `0034_integration_credential_refs.sql` fixes Vault UUID decoding without changing 0033. Existing data and migrations 0001–0032 are unchanged.
+- Secrets are write-only. Meta Access Token, HubSpot Private App Token, and HubSpot Webhook Signing Secret live in Vault; `public` rows hold only Vault UUID references. Meta account/API version and HubSpot portal ID remain non-secret configuration. No browser role can select either credential table or execute credential RPCs.
+- One server-only resolver supplies both existing adapters. Complete Settings-managed credentials precede environment fallback; environment values are never copied into Vault. Removing Settings-managed values deletes Vault records and may reactivate the documented environment fallback. HubSpot API and webhook fallback contracts remain independently usable, preserving existing signed-webhook behavior.
+- Existing owner-only `integration:write` authorization guards Configure, Replace, Test, and Remove. Safe audits record provider/action/operator/time/result/correlation only. Meta testing uses its GET-only client, requires `ads_read`, and rejects `ads_management`. HubSpot testing reads account/property metadata only. CRM field ownership and the D-014 manual qualification override are unchanged.
+- The generic UI receives only safe summaries. Saved secrets are cleared from inputs after submission and never returned, rendered, logged, stored in run history, or embedded in browser assets. Replacement and removal retain no retrievable old Vault value. Sanitized provider codes and correlation IDs preserve Phase 13 error handling.
+
+### Verification
+
+- Formatting, ESLint, strict TypeScript, and `git diff --check`: PASS.
+- Unit/service: 36 files, 169 tests PASS, including registry states/extensibility, resolver precedence/fallback, authorization, write-only responses, safe errors, read-only connection tests, coming-soon refusal, and missing configuration.
+- Database/RLS: `npm run test:db` PASS; anonymous/authenticated credential reads and modifications are denied; Vault save/resolve/replace/remove and safe audit/history checks pass. Local schema lint reports no errors; generated types include migrations 0033–0034.
+- Provider regression: `npm run test:meta` 1/1 PASS and `npm run test:hubspot` 1/1 PASS against the isolated local database with mocked provider HTTP only.
+- Focused authenticated Playwright: 7/7 PASS for authentication/authorization, signed HubSpot webhook replay, Integration Center save/replace/write-only HTML and browser-response checks, integrations, Meta performance, axe WCAG A/AA, and 390/1280 px overflow checks.
+- Production build: PASS with `/settings/integrations` included. Browser-artifact secret scan, repository/history secret scan, and final Playwright log PII scan PASS.
+- Production-mode browser: 4/4 PASS; gallery exclusion and existing ingest, 50k-lead, shell, and Today performance budgets remain green.
+
+### Remaining operational evidence
+
+- Personal Meta and HubSpot credentials were not requested or configured. Personal trial success remains development UAT evidence only after an operator performs Save, Test Connection, and the existing ingest/reconciliation flows.
+- Dedicated production Supabase, production migrations, managed backup/restore, Vercel plan/cron compatibility, production provider configuration, landing ingest, production authentication, deployed scheduled-job observation, and operational UAT remain pending exactly as recorded below and in `RUNBOOK.md`. FR-13.4 and FR-13.9 remain incomplete.
+
 ## Phase 13 — Production Hardening (2026-09-16)
 
 **Status: FAIL — PRODUCTION ACTIVATION PENDING. Local engineering checkpoint: COMPLETE. Production readiness: NOT READY.** The hardening implementation and every available local technical gate pass. The PRD gate remains open because no dedicated production Supabase project is identified, no managed production backup has been restored into a managed scratch project, the reviewed revision is not deployed, and no production schedule has an observed run. These are explicit FR-13.4, FR-13.9, acceptance and Definition-of-Done requirements rather than fixture-replaceable UAT.

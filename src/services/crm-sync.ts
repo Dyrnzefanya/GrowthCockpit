@@ -20,6 +20,10 @@ import * as repo from "@/repositories/hubspot";
 import * as queue from "@/repositories/integrations";
 import { readLead } from "@/repositories/leads";
 import type { Json } from "@/types/database.generated";
+import {
+  resolveHubspotCredentials,
+  resolveHubspotWebhookCredentials,
+} from "@/services/provider-credentials";
 const digest = (value: string) =>
   createHash("sha256").update(value).digest("hex");
 export async function syncRecord(
@@ -29,10 +33,14 @@ export async function syncRecord(
   deadline = Date.now() + 18000,
   force = false,
 ) {
-  const config = await repo.configuration(true);
+  const [config, provider] = await Promise.all([
+    repo.configuration(true),
+    resolveHubspotCredentials(),
+  ]);
   if (
     !config.mapping ||
-    config.mapping.portal_id !== serverEnv.HUBSPOT_PORTAL_ID
+    !provider.credentials ||
+    config.mapping.portal_id !== provider.credentials.portalId
   )
     throw new Error("MAPPING_INVALID");
   await hubspot.validatePortal(config.mapping.portal_id, deadline);
@@ -109,7 +117,9 @@ export async function processHubspotEvent(
     })
     .safeParse(payload);
   if (!task.success) throw new Error("VALIDATION_FAILED");
-  await hubspot.validatePortal(serverEnv.HUBSPOT_PORTAL_ID!);
+  const { credentials } = await resolveHubspotCredentials();
+  if (!credentials) throw new Error("NOT_CONFIGURED");
+  await hubspot.validatePortal(credentials.portalId);
   const record = task.data.deleted
     ? {
         id: task.data.id,
@@ -137,7 +147,8 @@ export async function receiveHubspot(request: Request) {
     return Response.json({ code, correlation_id: correlation }, { status });
   };
   try {
-    if (!serverEnv.HUBSPOT_WEBHOOK_SECRET || !serverEnv.HUBSPOT_PORTAL_ID)
+    const { credentials } = await resolveHubspotWebhookCredentials();
+    if (!credentials)
       return Response.json({ code: "NOT_CONFIGURED" }, { status: 503 });
     let raw: Buffer;
     try {
@@ -154,12 +165,7 @@ export async function receiveHubspot(request: Request) {
     const canonical = new URL(url.pathname + url.search, serverEnv.APP_BASE_URL)
       .href;
     if (
-      !verifyHubspot(
-        request.headers,
-        raw,
-        canonical,
-        serverEnv.HUBSPOT_WEBHOOK_SECRET,
-      )
+      !verifyHubspot(request.headers, raw, canonical, credentials.webhookSecret)
     )
       return await reject("UNAUTHENTICATED", 401);
     let payload: unknown;
@@ -173,11 +179,7 @@ export async function receiveHubspot(request: Request) {
     const parsed = webhookSchema.safeParse(payload);
     if (!parsed.success)
       return await reject("VALIDATION_FAILED", 400, payload as Json);
-    if (
-      parsed.data.some(
-        (e) => String(e.portalId) !== serverEnv.HUBSPOT_PORTAL_ID,
-      )
-    )
+    if (parsed.data.some((e) => String(e.portalId) !== credentials.portalId))
       return await reject("FORBIDDEN", 403);
     const ids: string[] = [];
     for (const [index, e] of parsed.data.entries()) {
@@ -253,10 +255,14 @@ const cursorSchema = z.object({
   complete: z.boolean().default(false),
 });
 export async function reconcileHubspot(deadline: number, max: number) {
-  const config = await repo.configuration(true);
+  const [config, provider] = await Promise.all([
+    repo.configuration(true),
+    resolveHubspotCredentials(),
+  ]);
   if (
     !config.mapping ||
-    config.mapping.portal_id !== serverEnv.HUBSPOT_PORTAL_ID
+    !provider.credentials ||
+    config.mapping.portal_id !== provider.credentials.portalId
   ) {
     await repo.saveState(
       "configuration",
@@ -414,7 +420,7 @@ export async function processHubspotRange(
   await repo.commit({ changes: [], events: [], warnings: [] }, event);
 }
 export async function queueWriteback(leadId: string, revision: string) {
-  if (!serverEnv.HUBSPOT_ACCESS_TOKEN) return;
+  if (!(await resolveHubspotCredentials()).credentials) return;
   await queue.accept({
     id: randomUUID(),
     source: "hubspot_writeback",
@@ -447,12 +453,16 @@ async function performWriteback(
   deadline: number,
 ) {
   const { leadId } = z.object({ leadId: z.uuid() }).parse(payload);
-  const detail = await readLead(leadId, 0, true),
-    config = await repo.configuration(true);
+  const [detail, config, provider] = await Promise.all([
+    readLead(leadId, 0, true),
+    repo.configuration(true),
+    resolveHubspotCredentials(),
+  ]);
   if (!detail?.contact) throw new Error("NOT_FOUND");
   if (
     !config.mapping ||
-    config.mapping.portal_id !== serverEnv.HUBSPOT_PORTAL_ID
+    !provider.credentials ||
+    config.mapping.portal_id !== provider.credentials.portalId
   )
     throw new Error("MAPPING_INVALID");
   await hubspot.validatePortal(config.mapping.portal_id, deadline);

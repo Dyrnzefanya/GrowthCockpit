@@ -32,6 +32,7 @@ execFileSync(
       "meta",
       "decisions",
       "reports",
+      "integration_credentials",
       "hardening",
     ]
       .map((name) => readFileSync(`supabase/tests/${name}.sql`, "utf8"))

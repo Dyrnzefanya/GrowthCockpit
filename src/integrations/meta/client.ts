@@ -1,7 +1,6 @@
 import "server-only";
 import { z } from "zod";
-import { serverEnv } from "@/lib/env.server";
-import { metaApi } from "@/config/integrations";
+import type { MetaCredentials } from "@/services/provider-credentials";
 import { accountSchema, type MetaAccount } from "./transform";
 
 export interface AdMetricsProvider {
@@ -30,14 +29,18 @@ const pageSchema = z.object({
     })
     .optional(),
 });
-export function metaClient(deadline: number, transport: typeof fetch = fetch) {
-  const token = serverEnv.META_ACCESS_TOKEN,
-    accountId = serverEnv.META_AD_ACCOUNT_ID;
-  if (!token || !accountId) throw new MetaError("META_NOT_CONFIGURED", false);
+export function metaClient(
+  credentials: MetaCredentials,
+  deadline: number,
+  transport: typeof fetch = fetch,
+) {
+  const {
+    accessToken: token,
+    adAccountId: accountId,
+    apiVersion,
+  } = credentials;
   async function get(path: string, params: Record<string, string>) {
-    const url = new URL(
-      `https://graph.facebook.com/${metaApi.version}/${path}`,
-    );
+    const url = new URL(`https://graph.facebook.com/${apiVersion}/${path}`);
     for (const [key, value] of Object.entries(params))
       url.searchParams.set(key, value);
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -110,7 +113,7 @@ export function metaClient(deadline: number, transport: typeof fetch = fetch) {
             scopes: z.array(z.string()),
           }),
         })
-        .parse(await get("debug_token", { input_token: token! }));
+        .parse(await get("debug_token", { input_token: token }));
       if (
         !value.data.is_valid ||
         !value.data.scopes.includes("ads_read") ||

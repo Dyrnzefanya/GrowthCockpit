@@ -1,5 +1,15 @@
 # Architecture
 
+## Phase 13.1 Integration Center
+
+`/settings/integrations` is an authenticated settings surface driven by the typed static registry in `domain/integration-providers.ts`. The registry describes provider identity, availability, secret and non-secret fields, and capabilities. Meta Ads and HubSpot are available. GA4, Google Search Console, and Google Ads are `COMING_SOON`; they have no fields, connection test, sync action, or provider call. Adding an implemented provider later extends this registry and supplies its adapter/resolver behavior; it does not require a runtime plugin system.
+
+Credentials follow one server-only path: provider adapter → `services/provider-credentials.ts` → `repositories/integration-credentials.ts` → service-role RPC → Supabase Vault. Migration 0033 stores encrypted secret values in Vault and only Vault UUID references plus non-secret configuration, safe provider identity, timestamps, error codes, and audit metadata in `public`. Browser roles have no table or RPC privilege. Migration 0034 corrects Vault UUID decoding without editing the applied migration. No custom cryptography or dependency is introduced.
+
+A complete Settings-managed credential wins over server environment fallback. Removal deletes its Vault records and exposes the existing environment fallback when one is configured; environment values are never copied into Vault. The resolver tolerates a credential-store read outage by retaining a valid environment fallback. Adapters receive resolved credentials in server memory only. Server Actions validate input, re-check the existing owner-only `integration:write` capability, return safe status/correlation data, and never serialize stored secrets.
+
+Meta Test Connection reuses its fixed-origin GET-only client and enforces `ads_read` while rejecting `ads_management`. HubSpot Test Connection reuses account/property metadata GETs and performs no CRM mutation. Verification records only allowlisted identity metadata and sanitized error codes. The existing `/integrations` route remains the operational run/sync view; Slack and landing ingest configuration are unchanged.
+
 ## Phase 13 production hardening
 
 Production hardening preserves the two-managed-service runtime and the existing application boundaries. Forward migration `0032_retention.sql` adds one service-only, repeatable retention function; `JOB-RETENTION` runs it through the existing registry, lease, runner, run history and authenticated manual control. No table, queue, endpoint or dependency was added. `/integrations` merges the static registry with `sync_state` so every job exposes its schedule/SLA, last run/success, failure streak, redacted error and recovery action without per-job queries.

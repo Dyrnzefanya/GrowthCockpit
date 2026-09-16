@@ -23,6 +23,10 @@ import * as repository from "@/repositories/alerts";
 import { machineSettings } from "@/repositories/integrations";
 import { sendSlack } from "@/integrations/slack/client";
 import { serverEnv } from "@/lib/env.server";
+import {
+  resolveHubspotCredentials,
+  resolveMetaCredentials,
+} from "@/services/provider-credentials";
 
 const staleCursor = z.object({
   after: z.uuid().nullable(),
@@ -215,18 +219,14 @@ export async function runDataHealth(
   for (const run of facts.runs)
     if (run.job_key && !latestRuns.has(run.job_key))
       latestRuns.set(run.job_key, run.started_at);
+  const [meta, hubspot] = await Promise.all([
+    resolveMetaCredentials(),
+    resolveHubspotCredentials(),
+  ]);
   if (serverEnv.JOBS_ENABLED === "true")
     for (const job of jobs) {
-      if (
-        job.key === "JOB-META-INGEST" &&
-        (!serverEnv.META_ACCESS_TOKEN || !serverEnv.META_AD_ACCOUNT_ID)
-      )
-        continue;
-      if (
-        job.key === "JOB-HUBSPOT-RECONCILE" &&
-        !serverEnv.HUBSPOT_ACCESS_TOKEN
-      )
-        continue;
+      if (job.key === "JOB-META-INGEST" && !meta.credentials) continue;
+      if (job.key === "JOB-HUBSPOT-RECONCILE" && !hubspot.credentials) continue;
       const overdue =
         job.cadenceMinutes === null
           ? weekdayJobOverdue(latestRuns.get(job.key) ?? null, now)

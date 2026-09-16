@@ -32,6 +32,18 @@ vi.mock("@/repositories/integrations", () => ({
   }),
 }));
 vi.mock("@/integrations/slack/client", () => ({ sendSlack: mocks.send }));
+vi.mock("@/services/provider-credentials", () => ({
+  resolveMetaCredentials: async () => ({
+    source: "none",
+    credentials: null,
+    environmentFallbackAvailable: false,
+  }),
+  resolveHubspotCredentials: async () => ({
+    source: "none",
+    credentials: null,
+    environmentFallbackAvailable: false,
+  }),
+}));
 vi.mock("@/lib/env.server", () => ({
   serverEnv: {
     APP_BASE_URL: "https://app.example.test",

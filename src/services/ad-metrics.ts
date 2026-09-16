@@ -6,6 +6,7 @@ import { normalizeInsight } from "@/integrations/meta/transform";
 import * as repository from "@/repositories/ad-metrics";
 import { machineSettings } from "@/repositories/integrations";
 import { raiseAlert } from "@/services/alerts";
+import { resolveMetaCredentials } from "@/services/provider-credentials";
 
 export const ingestRange = z
   .object({ from: z.iso.date(), to: z.iso.date() })
@@ -35,7 +36,9 @@ export async function ingestMeta(
   let read = 0,
     written = 0;
   try {
-    const client = metaClient(deadline);
+    const { credentials } = await resolveMetaCredentials();
+    if (!credentials) throw new MetaError("META_NOT_CONFIGURED", false);
+    const client = metaClient(credentials, deadline);
     const account = await client.account();
     const token = await client.tokenInfo();
     await repository.saveTokenMetadata(token);

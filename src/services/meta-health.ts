@@ -1,7 +1,6 @@
 import "server-only";
 import { z } from "zod";
 import { metaHealthData } from "@/repositories/ad-metrics";
-import { serverEnv } from "@/lib/env.server";
 import { parseCampaignName } from "@/domain/attribution/naming";
 import { ratio } from "@/domain/metrics/formulas";
 import { readSettings } from "@/repositories/settings";
@@ -11,14 +10,16 @@ import { resolveMissing } from "@/repositories/alerts";
 import { alertKey } from "@/domain/alerts/keys";
 import type { AlertCandidate } from "@/services/alerts";
 import { integrationHealth } from "@/domain/integrations";
+import { resolveMetaCredentials } from "@/services/provider-credentials";
 const healthFacts = z.object({
   names: z.array(z.object({ campaign_name: z.string() })),
   currencies: z.array(z.object({ currency: z.string() })),
 });
 export async function metaHealthModel(machine = false) {
-  const [data, { values }] = await Promise.all([
+  const [data, { values }, provider] = await Promise.all([
     metaHealthData(machine),
     machine ? machineSettings() : readSettings(),
+    resolveMetaCredentials(),
   ]);
   const facts = healthFacts.parse(data.facts);
   const metadata = z
@@ -41,9 +42,7 @@ export async function metaHealthModel(machine = false) {
       .safeParse(JSON.parse(data.state.cursor));
     if (parsed.success) progress = parsed.data;
   }
-  const configured = Boolean(
-    serverEnv.META_ACCESS_TOKEN && serverEnv.META_AD_ACCOUNT_ID,
-  );
+  const configured = Boolean(provider.credentials);
   const slaHours = values["meta.freshness_hours"];
   return {
     accounts: data.accounts.map((account) => ({

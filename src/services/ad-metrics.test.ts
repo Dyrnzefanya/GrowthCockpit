@@ -24,6 +24,17 @@ vi.mock("@/repositories/integrations", () => ({
 }));
 vi.mock("@/services/alerts", () => ({ raiseAlert: m.raiseAlert }));
 vi.mock("@/services/meta-health", () => ({ evaluateMetaHealth: vi.fn() }));
+vi.mock("@/services/provider-credentials", () => ({
+  resolveMetaCredentials: vi.fn().mockResolvedValue({
+    source: "environment",
+    credentials: {
+      accessToken: "synthetic-meta-token-value",
+      adAccountId: "123",
+      apiVersion: "v26.0",
+    },
+    environmentFallbackAvailable: true,
+  }),
+}));
 import { ingestMeta, accountToday } from "./ad-metrics";
 let state: string | null;
 beforeEach(() => {

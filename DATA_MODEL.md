@@ -1,5 +1,13 @@
 # Data Model
 
+## Phase 13.1 integration credentials
+
+- `integration_provider_configs`: one server-only row per implemented configurable provider (`meta`, `hubspot`). `config` contains non-secret provider settings; `secret_refs` contains Vault UUIDs only; `provider_identity` is safe account metadata from the last successful connection test. Verification/error, configuration, credential-update, disconnect, actor, and update timestamps support the Integration Center read model. RLS is enabled and only `service_role` has table/RPC access.
+- `integration_credential_audit`: append-only safe credential lifecycle evidence: provider, configured/replaced/removed/verification action, operator, success, sanitized error code, correlation ID, and timestamp. It has no payload or free-text field in which a credential can be stored. RLS is enabled; only `service_role` may select/insert.
+- Supabase Vault owns encrypted secret material. Meta stores `access_token`; HubSpot stores `access_token` and `webhook_secret`. The application tables retain UUID references and cannot decrypt through browser roles. Replacement updates the referenced Vault secret in place; removal deletes it and clears all Settings-managed provider metadata.
+
+Classification: Meta Ad Account ID/API version and HubSpot Portal ID are non-secret provider configuration. Meta Access Token, HubSpot Private App Access Token, and HubSpot Webhook Signing Secret are secrets. Supabase keys, application URL/timezone, machine signing keys, job controls, and provider environment fallbacks remain environment/bootstrap configuration.
+
 ## Phase 13 retention
 
 Forward migration `0032_retention.sql` adds no table or index. Its service-role-only `run_retention` function nulls `webhook_events.payload` after 90 days and deletes `integration_runs` after 12 months using a supplied/effective clock. Repeated execution returns zero additional changes. Event identity, status, result and correlation evidence remain after payload removal. The existing `sync_state` rows retain the latest bounded operational status after old run history is pruned.
